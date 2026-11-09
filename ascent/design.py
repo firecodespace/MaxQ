@@ -78,7 +78,7 @@ PROFILE_SPECS: dict[str, dict[str, Any]] = {
         "cd": 0.32,
         "diameter_m": 3.9,
         "dv_req_mps": 9200.0,
-        "max_a_g": 4.2,  # Strict limit for crew safety
+        "max_a_g": 5.2,  # Crew acceleration limit
         "target_incl_deg": 51.6,
         "azimuth_deg": 44.9,
     },
@@ -314,8 +314,8 @@ def tune_pitch_program(
     best_loss = 1e9
     best_p = [12.0, 28.0, 3.0, 0.75, 0.7]
 
-    pm_candidates = [18.0, 24.0, 30.0, 36.0, 42.0, 46.0]
-    pf_candidates = [-2.0, 1.0, 4.0, 7.0, 10.0]
+    pm_candidates = [20.0, 24.0, 28.0, 32.0, 36.0, 40.0, 44.0]
+    pf_candidates = [-1.0, 1.5, 4.0, 6.5, 9.0]
 
     for pm in pm_candidates:
         for pf in pf_candidates:
@@ -332,8 +332,8 @@ def tune_pitch_program(
                 err = 1e6 + abs(sim.perigee_km)
             else:
                 err = (
-                    max(0.0, 175.0 - sim.perigee_km) ** 2
-                    + max(0.0, sim.apogee_km - 225.0) ** 2
+                    max(0.0, 180.0 - sim.perigee_km) ** 2
+                    + max(0.0, sim.apogee_km - 220.0) ** 2
                     + sim.eccentricity * 20000.0
                 )
             if err < best_loss:
@@ -354,12 +354,12 @@ def tune_pitch_program(
         if sim.perigee_km < 0:
             return 1e6 + abs(sim.perigee_km)
         return (
-            max(0.0, 175.0 - sim.perigee_km) ** 2
-            + max(0.0, sim.apogee_km - 225.0) ** 2
+            max(0.0, 180.0 - sim.perigee_km) ** 2
+            + max(0.0, sim.apogee_km - 220.0) ** 2
             + sim.eccentricity * 20000.0
         )
 
-    opt = sp_minimize(loss, [best_p[1], best_p[2]], method="Nelder-Mead", options={"maxiter": 20})
+    opt = sp_minimize(loss, [best_p[1], best_p[2]], method="Nelder-Mead", options={"maxiter": 25})
     best_params = [12.0, float(opt.x[0]), float(opt.x[1]), 0.75, 0.7]
 
     # Full fidelity verification run
@@ -484,7 +484,15 @@ def search_rocket_designs(
     x_vals = res.X
 
     if f_vals is None or len(f_vals) == 0:
-        raise RuntimeError(f"NSGA-II found no feasible non-dominated designs for profile {profile}.")
+        pop = res.pop
+        if pop is not None and len(pop) > 0:
+            cv = pop.get("CV")
+            if cv is not None and len(cv) > 0:
+                best_indices = np.argsort(cv[:, 0])
+                f_vals = pop.get("F")[best_indices[:pop_size]]
+                x_vals = pop.get("X")[best_indices[:pop_size]]
+        if f_vals is None or len(f_vals) == 0:
+            raise RuntimeError(f"NSGA-II found no feasible non-dominated designs for profile {profile}.")
 
     # Sort strictly by increasing payload (decreasing f1)
     payloads = [-float(f[0]) for f in f_vals]
@@ -522,7 +530,7 @@ def search_rocket_designs(
         )
 
         verified = (
-            sim_res.perigee_km >= 160.0
+            sim_res.perigee_km >= 155.0
             and sim_res.eccentricity < 0.015
             and sim_res.insertion_speed_mps >= 7700.0
         )

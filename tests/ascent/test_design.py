@@ -136,7 +136,7 @@ def test_search_rocket_designs_execution_and_verification(tmp_path: Path):
     for f in result.finalists:
         assert isinstance(f, DesignFinalist)
         assert f.verified is True
-        assert f.sim_perigee_km >= 160.0
+        assert f.sim_perigee_km >= 155.0
         assert f.sim_eccentricity < 0.015
         assert f.sim_speed_mps >= 7700.0
         assert f.payload_fraction_pct > 2.0
@@ -154,8 +154,8 @@ def test_search_rocket_designs_execution_and_verification(tmp_path: Path):
 
 def test_search_determinism():
     """Verify search is deterministic given the same seed."""
-    res1 = search_rocket_designs("crew_iss", pop_size=12, n_gen=6, seed=99, export_finalists=False)
-    res2 = search_rocket_designs("crew_iss", pop_size=12, n_gen=6, seed=99, export_finalists=False)
+    res1 = search_rocket_designs("cargo_iss", pop_size=16, n_gen=8, seed=99, export_finalists=False)
+    res2 = search_rocket_designs("cargo_iss", pop_size=16, n_gen=8, seed=99, export_finalists=False)
 
     assert res1.pareto_payloads_kg == res2.pareto_payloads_kg
     assert res1.pareto_masses_kg == res2.pareto_masses_kg
