@@ -14,11 +14,11 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | 07 | Rocket design search | Shiva | - | P1 | done (NSGA-II design search) | - |
 | 08 | Collision screening | Yash | claude-code | P1 | done (ascent + 2 h coast; all go; 6-digit catalog gap noted) | - |
 | 09 | Catalog clustering and congestion | Yash | claude-code | P1 | done (DBSCAN, 24 clusters, Sky tab; live) | - |
-| 10 | Manifest scheduler | Shiva | - | P1 | done; reviewed: claim-level fixes requested (docs/reviews/shiva-wp10-11-14.md) | - |
-| 11 | QAOA benchmark | Shiva | - | P2 | done; reviewed: add random-sampling control + p=3, see review | - |
+code fixes verified; committed instances/results/plots must be regenerated (see status/shiva.md 05:50) | - |
+control + paragraph in code; committed qaoa_benchmark.png still lacks the control: regenerate | - |
 | 12 | Profiles UI, README, demo | Yash | - | P1 | DEFERRED to last stage (Yash decision 03:35); README/demo/Risk+Manifest tabs after the 06:30 freeze | - |
 | 13 | LLM mission interface | Yash | - | P2 | not started | - |
-| 14 | Scheduler warm-start model | Shiva | - | P2 | done; reviewed: use instance-level split, state baseline, see review | - |
+done; fixes verified (instance-level AUC 0.872, baseline 0.800) | - |
 | 15 | SGP4 residual correction | first one free | - | P2 | not started | Space-Track account |
 | 16 | Space-weather overlay | Yash | claude-code | P2 | done (NOAA Kp chip + Sky panel, display only) | - |
 
