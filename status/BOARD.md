@@ -12,7 +12,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | 05 | Ascent simulator | Shiva | - | P0 | not started | contracts (done) |
 | 06 | Pitch/staging optimizer | Shiva | - | P1 | not started | WP-05 |
 | 07 | Rocket design search | Shiva | - | P1 | not started | WP-05 |
-| 08 | Collision screening | Yash | - | P1 | not started | WP-01, WP-05 |
+| 08 | Collision screening | Yash | claude-code | P1 | done (ascent-only; coast blocked on trajectory frame question, see status/shiva.md) | Shiva: trajectory frame |
 | 09 | Catalog clustering and congestion | Yash | - | P1 | not started | WP-01 |
 | 10 | Manifest scheduler | Shiva | - | P1 | not started | WP-02 |
 | 11 | QAOA benchmark | Shiva | - | P2 | not started | WP-10 |

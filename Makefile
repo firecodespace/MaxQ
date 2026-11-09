@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup test lint data data-offline windows ascent manifest web web-export
+.PHONY: setup test lint data data-offline windows risk ascent manifest web web-export
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -26,6 +26,10 @@ data-offline:  ## WP-01: same, but no network (raw cache, else committed data/sa
 
 windows:  ## WP-02: 7 days of launch windows, all profiles, Cape Canaveral -> data/results/windows_*.json
 	$(PY) -m mission.windows --profile all --site cape_canaveral --days 7
+
+risk:  ## WP-08: screen the ascent trajectories against the catalog -> data/results/risk_*.json (ascent only)
+	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json
+	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_optimized_medlift_a.json --out data/results/risk_cargo_iss_cape_canaveral_optimized.json
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 	@echo "ascent: not implemented yet (WP-05, Shiva's lane)"
