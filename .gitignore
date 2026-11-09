@@ -31,6 +31,7 @@ data/processed/*
 
 # CMA-ES run output (Shiva)
 outcmaes/
+.cache/
 
 # Vercel CLI link state and local env files
 .vercel/
