@@ -5,10 +5,10 @@
   "calibration_days": 2.0,
   "rms_uncorrected_km": 103.81,
   "max_uncorrected_km": 193.44,
-  "rms_corrected_km": 111.13,
-  "max_corrected_km": 278.75,
-  "error_reduction_pct": -7.0,
+  "rms_corrected_km": 13.56,
+  "max_corrected_km": 31.8,
+  "error_reduction_pct": 86.9,
   "intrack_rms_uncorrected_km": 102.83,
-  "intrack_rms_corrected_km": 107.65,
+  "intrack_rms_corrected_km": 3.9,
   "plot_path": "C:\\MaxQ\\data\\results\\sgp4_residuals_benchmark.png"
 }

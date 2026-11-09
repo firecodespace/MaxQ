@@ -81,7 +81,7 @@ def ric_to_teme(delta_r_ric: np.ndarray, r_teme: np.ndarray, v_teme: np.ndarray)
 class Sgp4ResidualModel:
     """Physics-informed regression model for SGP4 orbital propagation residuals."""
 
-    def __init__(self, t0_unix: float, orbital_period_s: float = 5560.0, alpha: float = 1e-3):
+    def __init__(self, t0_unix: float, orbital_period_s: float = 5560.0, alpha: float = 1e-2):
         self.t0_unix = float(t0_unix)
         self.period_s = float(orbital_period_s)
         self.omega = 2.0 * np.pi / self.period_s
@@ -98,7 +98,6 @@ class Sgp4ResidualModel:
         feats = np.column_stack([
             dt_days,
             dt_days**2,
-            dt_days**3,
             np.cos(phase),
             np.sin(phase),
             np.cos(2.0 * phase),
