@@ -18,3 +18,5 @@
 /Makefile
 /*.ini
 /*.toml
+/.env*
+/.vercel

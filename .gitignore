@@ -29,4 +29,9 @@ web/dist/
 data/processed/*
 !data/processed/.gitkeep
 
+# CMA-ES run output (Shiva)
 outcmaes/
+
+# Vercel CLI link state and local env files
+.vercel/
+.env.local

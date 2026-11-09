@@ -26,3 +26,9 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Run: `python scripts/export_web_data.py && python -m http.server 8765 --directory web` (or `make web`).
 - Real trajectory: Shiva's `trajectory_cargo_iss_w0.json` (WP-05, now on main) is exported and shown first in the replay selector (badge "SIM - reduced fidelity", no DUMMY banner); verified in the browser. The dummy trajectory is still selectable and bannered.
 - Next: WP-04 deploy (clean-profile + mobile check, URL into this file). Deploy settings are RED if they touch other people's accounts/domains: need Yash's decision on host (Vercel vs GitHub Pages).
+
+## 03:05 IST - claude-code (on behalf of yash) - WP-04 deploy v1: LIVE
+- **URL: https://maxq-nu.vercel.app** (alias also https://maxq-firecodespaces.vercel.app). Vercel project `firecodespaces/maxq`, hobby plan, account `firecodespace`; static, no build (`vercel.json` -> `web/`).
+- Verified on the live URL in the in-app browser (fresh storage, no prior state): desktop 1200x900 and mobile 375x812, no console errors, no horizontal overflow, worker + 6,815 satellites + 14 windows + real trajectory replay all load; all assets 200 with correct content types, nosniff and cache headers present, public without login.
+- Not verified: the user's own Chrome profile/other real devices; deploy was via CLI, so pushes to `main` do NOT auto-deploy (no Git integration). Re-deploy: `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes` from the repo root (needs `vercel login`; `.vercel/` link state is git-ignored).
+- Contracts/shared files: only `vercel.json`, `.vercelignore` added.
