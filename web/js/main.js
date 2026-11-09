@@ -3,6 +3,7 @@ import { getJSON, PROFILES, probeManifest, trajectorySources, windowsSource } fr
 import { GROUP_COLORS, MapView } from "./map.js";
 import { Plot } from "./plots.js";
 import { SkyView } from "./sky.js";
+import { drawKpChart, loadSpaceWeather, renderKp } from "./spaceweather.js";
 
 // ---------------------------------------------------------------------------------------------- state
 const clock = { baseSim: Date.now(), baseReal: performance.now(), warp: 1, paused: false, locked: false };
@@ -427,6 +428,12 @@ async function boot() {
   S.manifest = (await getJSON("manifest.json")) || (await probeManifest());
   sky = new SkyView({ manifest: S.manifest, nameOf: (id) => nameIndex.get(id) });
   if (S.manifest._probed) banner("manifest.json not found; probing for known data files.", "warn");
+
+  // Space weather (context only): never blocks the page and never shows stale data on failure
+  const refreshKp = () => loadSpaceWeather().then((pts) => renderKp(pts)).catch((e) => renderKp(null, e));
+  refreshKp();
+  setInterval(refreshKp, 10 * 60e3);
+  new ResizeObserver(() => drawKpChart($("sw-chart"), window.__kpPoints || null)).observe($("sw-chart"));
 
   // Windows panel
   buildTabs();

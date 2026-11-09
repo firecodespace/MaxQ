@@ -14,6 +14,7 @@
     <div class="clock">
       <span class="label">Sim time</span> <span id="utc" class="mono">--</span>
       <span id="clock-note" class="chip"></span>
+      <span id="kp-chip" class="chip" title="NOAA planetary Kp index (space weather), loading...">Kp ...</span>
     </div>
     <div class="controls">
       <button id="btn-pause" type="button" aria-label="Pause or resume the simulation clock">Pause</button>
@@ -128,6 +129,15 @@
       <canvas id="sky-cong" aria-label="Objects per altitude shell"></canvas>
       <div id="sky-cong-tip" class="note">Hover a bar for details.</div>
       <div id="sky-hotspots" class="hotspots"></div>
+    </section>
+    <section class="panel skysw" aria-label="Space weather, context only">
+      <div class="panel-head">
+        <h2>Space weather</h2>
+        <span class="badge real">REAL (NOAA SWPC)</span>
+        <span id="sw-status" class="note">Loading...</span>
+      </div>
+      <canvas id="sw-chart" aria-label="Planetary Kp index: last three days observed, next days forecast"></canvas>
+      <div id="sw-summary" class="note"></div>
     </section>
   </main>
 

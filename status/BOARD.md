@@ -20,7 +20,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | 13 | LLM mission interface | Yash | - | P2 | not started | - |
 | 14 | Scheduler warm-start model | Shiva | - | P2 | done; reviewed: use instance-level split, state baseline, see review | - |
 | 15 | SGP4 residual correction | first one free | - | P2 | not started | Space-Track account |
-| 16 | Space-weather overlay | Yash | - | P2 | not started | - |
+| 16 | Space-weather overlay | Yash | claude-code | P2 | done (NOAA Kp chip + Sky panel, display only) | - |
 
 ## Notes
 - Contracts landed on `main` at 01:2x IST (commit `contract: add schemas and validator`). Consumers: use `from contracts.validate import validate`.

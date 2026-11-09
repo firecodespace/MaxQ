@@ -66,3 +66,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Reviewed WP-10/11/14: engineering OK, claim-level issues found (details `docs/reviews/shiva-wp10-11-14.md`, action list in `status/shiva.md`). Biggest: QAOA 100% is matched by random sampling with the same shots (90.6% mean, 24% optimal); CP-SAT beats SA on speed and quality; the 1000-task instance is 85% synthetic and unlabelled; reruns are not reproducible. Evidence script: `scripts/review_manifest_claims.py`.
 - During the review I accidentally re-ran `manifest.bench` (it has no CLI and ignores --help); it overwrote Shiva's committed results; restored from git immediately, nothing was committed.
 - My side: risk files carry `windows_profile`; BOARD brought up to date (WP-12 deferred to last stage by Yash's decision).
+
+## 05:15 IST - claude-code (on behalf of yash) - WP-16 space-weather overlay: done
+- Done: `web/js/spaceweather.js` (parse/validate NOAA rows, G scale, activity class, current/peak, cached fetch), header Kp chip, Sky-tab panel with chart, 9 Node unit tests wired into pytest. Verified in the browser with live NOAA data (Kp 3.7 quiet; a real G1 storm period on Nov 7-8 is visible), failure path ("Kp n/a" + message, recovers), mobile 375px (no overflow).
+- Display only, labelled "Context only": no calculation uses it.
+- Next: redeploy (Sky tab + WP-16), then re-check Shiva's fixes when they push; WP-12 last.

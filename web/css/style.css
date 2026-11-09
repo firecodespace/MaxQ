@@ -129,3 +129,10 @@ td.no { color: var(--bad); }
   #sky-map { height: 80vw; }
   .legend { max-height: 300px; }
 }
+
+.chip.kp-quiet { border-color: var(--ok); color: var(--ok); }
+.chip.kp-active { border-color: var(--warn); color: var(--warn); }
+.chip.kp-storm { border-color: #ff9f1c; color: #ff9f1c; }
+.chip.kp-severe { border-color: var(--bad); color: var(--bad); font-weight: 700; }
+.skysw { grid-column: 1 / -1; }
+#sw-chart { width: 100%; height: 170px; display: block; background: #0e1630; border: 1px solid var(--line); border-radius: 6px; }
