@@ -4,18 +4,17 @@
   "instance": "manifest_50_tasks",
   "solver": "sa",
   "selected": [
-    0,
-    3,
+    1,
+    8,
+    9,
     17,
-    19,
-    22,
-    28,
-    31,
-    36,
+    23,
+    29,
+    35,
     42,
     49
   ],
-  "score": 87.54,
-  "runtime_s": 0.112893,
+  "score": 91.88,
+  "runtime_s": 0.311957,
   "seed": 42
 }

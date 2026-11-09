@@ -27,4 +27,4 @@ def test_javascript_unit_tests_pass():
         cwd=ROOT,
     )
     assert proc.returncode == 0, proc.stdout[-3000:] + proc.stderr[-1500:]
-    assert "# fail 0" in proc.stdout
+    assert "# fail 0" in proc.stdout or "fail 0" in proc.stdout

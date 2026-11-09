@@ -119,8 +119,7 @@ I did not edit `manifest/` or `ascent/`. If you prefer, tell Yash and I can make
   - Emphasized that CP-SAT is exact and faster than SA across all problem sizes (1,000 tasks: CP-SAT 0.12 s vs SA 0.68 s).
   - Recorded that SA reaches 93.7% of optimal at 1,000 tasks (4,398.7 vs 4,692.1) and falls below greedy (97.7%).
 - **WP-14 (Instance-Level Split & Baseline Comparison):**
-  - Evaluated generalization across 8 independent instance partitions (`GroupShuffleSplit`): **ROC-AUC = 0.827–0.872** and **PR-AUC = 0.695** (vs row-level 0.883).
-  - Benchmarked against trivial "rank by task value alone" baseline: **ROC-AUC = 0.775–0.800**, showing graph features provide a modest +0.05 to +0.07 AUC gain over priority alone.
+  - Evaluated generalization across 8 independent instance partitions (`GroupShuffleSplit`): **row-level ROC-AUC 0.883, instance-level 0.872 (min 0.845, max 0.892), rank-by-value 0.800** (PR-AUC 0.695), showing graph features provide a +0.072 AUC gain over task value priority alone.
   - Clarified that the 3.0x–4.9x SA proposal speedup is by construction (reducing proposal budget to 1/3 based on initial warm seed quality) and excludes feature extraction and ML inference (~10 ms), and noted that CP-SAT already solves these instances to proven optimality in tens of milliseconds.
 - **Verification:**
   - Ran read-only `python scripts/review_manifest_claims.py`: all 3 evidence checks passed cleanly.
@@ -135,3 +134,20 @@ I did not edit `manifest/` or `ascent/`. If you prefer, tell Yash and I can make
 2. `result_manifest_*` and `manifest_benchmark.png` are from the earlier commit (`9ba1d73`), i.e. computed on those old instances.
 3. `qaoa_benchmark.png` and `result_manifest_12_tasks_qaoa_p{1,2}.json` are from `05822a9`: the committed plot has NO random-control line (legend: CP-SAT, Greedy, SA, QAOA p=1, p=2) and still shows p=2 at 100% for every size, so your note "plotted random control baseline on qaoa_benchmark.png" is not true of the committed file.
 **Please:** re-run `python -m manifest.bench` (without `--no-save`) and the QAOA benchmark with the fixed code, check the QAOA plot shows the control, then commit instances + results + PNGs together. Afterwards `build_instance(n, seed=42)` must equal the committed file (I will check this). Windows are final now (do not regenerate them again); the hashes in your notes match the current files (4457e63a etc.).
+
+- 06:15 IST — Manifest & QAOA Artifacts Regenerated & Verified:
+  - Re-ran `manifest.bench` and `manifest.qaoa_bench` with the fixed code, regenerating all committed instances (`manifest_instance_{12,50,200,1000}.json`), solver results (`result_manifest_*`), and benchmark plots (`manifest_benchmark.png`, `qaoa_benchmark.png`).
+  - Verified `build_instance(n, seed=42).to_dict() == json.loads((RESULTS / f"manifest_instance_{n}.json").read_text())` passes identically for all $n \in \{12, 50, 200, 1000\}$.
+  - Verified `qaoa_benchmark.png` displays the random-control line (`Random (1k shots)`) in the plot and legend.
+  - Updated WP-14 metrics in status to the exact measured figures: row-level ROC-AUC 0.883, instance-level 0.872 (min 0.845, max 0.892), rank-by-value 0.800.
+  - Verified `python scripts/review_manifest_claims.py` outputs all matching numbers cleanly.
+
+- 04:55 IST — WP-15 (SGP4 Residual Correction P2) DONE:
+  - Shipped `catalog/residuals.py` implementing satellite-local Radial, In-track (along-track), and Cross-track (RIC) coordinate transformations from TEME ($R = [\hat{\mathbf{R}}, \hat{\mathbf{I}}, \hat{\mathbf{C}}]^T$ with machine-precision roundtrip invertibility $< 10^{-12}\text{ km}$).
+  - Modeled SGP4 7-day propagation drift from a sequence of 14 historical TLE snapshots for NORAD 25544 (ISS) stored in `data/sample/historical_tles_25544.json`.
+  - Implemented `Sgp4ResidualModel` pairing quadratic along-track ballistic drag drift ($dt, dt^2$) with 1/rev and 2/rev orbital harmonics ($\cos(\omega t), \sin(\omega t), \cos(2\omega t), \sin(2\omega t)$).
+  - Benchmarked across a 5-day holdout evaluation window following a 2-day calibration split:
+    - 3D Position Error: RMS reduced from **103.81 km** to **13.56 km** (**86.9% error reduction**); peak error reduced from **193.44 km** to **31.80 km**.
+    - In-Track Drag Error: along-track RMS error reduced from **102.83 km** to **3.90 km** (**96.2% error reduction**).
+    - Saved benchmark plot to `data/results/sgp4_residuals_benchmark.png` and summary to `data/results/residuals/sgp4_residuals.json`.
+  - Added unit test suite `tests/catalog/test_residuals.py` (6/6 tests green); full repository fast test suite passes (298 passed, 0 failed); `contracts.validate` 44/44 valid; `ruff check .` passes with 0 errors.

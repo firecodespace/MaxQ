@@ -4,16 +4,17 @@
   "instance": "manifest_50_tasks",
   "solver": "greedy",
   "selected": [
-    0,
-    3,
-    14,
-    21,
-    30,
-    35,
-    38,
+    1,
+    8,
+    9,
+    23,
+    24,
+    29,
+    42,
+    45,
     49
   ],
-  "score": 83.03,
-  "runtime_s": 8.8e-05,
+  "score": 91.08,
+  "runtime_s": 0.000328,
   "seed": 42
 }

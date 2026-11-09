@@ -1,14 +1,16 @@
 {
   "schema_version": 1,
-  "_note": "QAOA quantum simulator (p=1, 12 qubits, mass=0.80, energy=-1.50)",
+  "_note": "QAOA quantum simulator (p=1, 12 qubits, mass=0.57, energy=-8.82)",
   "instance": "manifest_12_tasks",
   "solver": "qaoa_p1",
   "selected": [
     0,
     4,
-    8
+    6,
+    8,
+    10
   ],
-  "score": 31.4,
-  "runtime_s": 0.245624,
+  "score": 47.04,
+  "runtime_s": 0.801715,
   "seed": 42
 }
