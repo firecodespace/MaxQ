@@ -1,5 +1,5 @@
 {
-  "generated_utc": "2026-11-09T20:49:32Z",
+  "generated_utc": "2026-11-09T21:13:09Z",
   "files": [
     {
       "name": "clusters_dummy.json",
@@ -35,7 +35,7 @@
       "name": "trajectory_dummy.json",
       "kind": "trajectory",
       "dummy": true,
-      "bytes": 42326
+      "bytes": 42846
     },
     {
       "name": "windows_dummy.json",
@@ -47,25 +47,79 @@
       "name": "risk_cargo_iss_cape_canaveral.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 4693
+      "bytes": 4947
     },
     {
       "name": "risk_cargo_iss_cape_canaveral_optimized.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 4751
+      "bytes": 5004
+    },
+    {
+      "name": "rocket_search_cargo_iss_balanced.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 515
+    },
+    {
+      "name": "rocket_search_cargo_iss_heavyweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 522
+    },
+    {
+      "name": "rocket_search_cargo_iss_lightweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 520
+    },
+    {
+      "name": "rocket_search_crew_iss_balanced.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 513
+    },
+    {
+      "name": "rocket_search_crew_iss_heavyweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 519
+    },
+    {
+      "name": "rocket_search_crew_iss_lightweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 519
+    },
+    {
+      "name": "rocket_search_geo_comm_balanced.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 516
+    },
+    {
+      "name": "rocket_search_geo_comm_heavyweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 523
+    },
+    {
+      "name": "rocket_search_geo_comm_lightweight.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 520
     },
     {
       "name": "trajectory_cargo_iss_w0.json",
       "kind": "trajectory",
       "dummy": false,
-      "bytes": 42300
+      "bytes": 42810
     },
     {
       "name": "trajectory_optimized_medlift_a.json",
       "kind": "trajectory",
       "dummy": false,
-      "bytes": 42242
+      "bytes": 42830
     },
     {
       "name": "windows_cargo_iss_cape_canaveral.json",

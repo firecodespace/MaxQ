@@ -38,3 +38,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Budget: 30,000 objects x 2 h at 10 s unfiltered = 21.6 M samples in 7.7 s (2.8 M samples/s) vs ~60 s budget. Accuracy: engine matches a dense 0.1 s brute force within 0.25 km on injected conjunctions (3/15/40 km flagged no-go/review/go).
 - Needs/decisions: (1) Shiva's trajectory frame/orbit inconsistency (see status/shiva.md) blocks coast screening; (2) the TLE-only catalog misses 6-digit objects, so results lean to `go` - revisit the OMM extension; (3) results are stated as illustrative in `_note`/metadata.
 - Next: WP-09 clustering/congestion (P1) or WP-12 profiles/README. Resume: `make risk` (or the two `python -m catalog.screen ...` lines in the Makefile).
+
+## 04:05 IST - claude-code (on behalf of yash) - WP-08 follow-up: coast screening enabled after Shiva's frame fix
+- Verified Shiva's fix (6418b01) on the real files: implied insertion orbits match `final_orbit` within a few km. `python -m catalog.screen ... --coast-hours 2` now works; `make risk` regenerated `data/results/risk_cargo_iss_cape_canaveral{,_optimized}.json` with ascent + 2 h parking-orbit coast (7 flyable windows, 0.6 s each): all `go`; closest object 27-315 km (baseline; w0 STARLINK-1274 at 26.98 km is 2 km above the 25 km threshold) and 42-474 km (optimized). Web data re-exported.
+- Added regression test over every committed trajectory. `python -m pytest` -> 204 passed (~107 s, WP-07 design tests dominate).
+- Caveat unchanged: TLE-only catalog misses 6-digit objects, so results lean to `go`; coast is a parking-orbit coast with no phasing maneuvers (stays near 200 km, so ISS-altitude objects are not approached).

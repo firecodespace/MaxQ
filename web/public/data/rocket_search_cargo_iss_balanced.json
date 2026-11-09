@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_cargo_iss_balanced",
+  "name": "Balanced Design (CARGO_ISS Archetype)",
+  "profile": "cargo_iss",
+  "payload_kg": 13475.0,
+  "stages": [
+    {
+      "dry_kg": 17112.0,
+      "prop_kg": 308753.3,
+      "thrust_n": 6178556.0,
+      "isp_s": 292.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    },
+    {
+      "dry_kg": 7489.5,
+      "prop_kg": 93034.4,
+      "thrust_n": 841894.0,
+      "isp_s": 348.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    }
+  ]
+}

@@ -27,9 +27,9 @@ data-offline:  ## WP-01: same, but no network (raw cache, else committed data/sa
 windows:  ## WP-02: 7 days of launch windows, all profiles, Cape Canaveral -> data/results/windows_*.json
 	$(PY) -m mission.windows --profile all --site cape_canaveral --days 7
 
-risk:  ## WP-08: screen the ascent trajectories against the catalog -> data/results/risk_*.json (ascent only)
-	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json
-	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_optimized_medlift_a.json --out data/results/risk_cargo_iss_cape_canaveral_optimized.json
+risk:  ## WP-08: screen ascent + 2 h parking-orbit coast against the catalog -> data/results/risk_*.json
+	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json --coast-hours 2
+	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_optimized_medlift_a.json --coast-hours 2 --out data/results/risk_cargo_iss_cape_canaveral_optimized.json
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 	@echo "ascent: not implemented yet (WP-05, Shiva's lane)"

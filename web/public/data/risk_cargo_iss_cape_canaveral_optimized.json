@@ -9,141 +9,149 @@
     "min_miss_km_note": "closest object found per window; values far above threshold are indicative only (only the closest few coarse candidates are refined)",
     "trajectory_reuse": "trajectory traj_medlift_kerolox_a_optimized (rocket medlift_kerolox_a) is time-shifted to each flyable window; descending (non-flyable) windows are not screened",
     "target_excluded_norad": 25544,
-    "screened_span": "ascent only (451 s)",
-    "coast": {},
+    "screened_span": "ascent 457 s + 2 h parking-orbit coast (SGP4 from the fitted insertion state)",
+    "coast": {
+      "coast_hours": 2.0,
+      "implied_orbit_at_insertion_km": [
+        174.7,
+        179.7
+      ],
+      "insertion_speed_inertial_kms": 7.799,
+      "insertion_altitude_km": 176.3
+    },
     "catalog_mode": "full-catalog",
     "catalog_objects": 18555,
     "latest_tle_epoch_utc": "2026-11-10T19:43:23.687616Z",
     "closest_object_tle_age_days_at_closest_approach": [
       0.7,
-      2.6,
-      3.5,
-      3.9,
-      4.9,
-      5.8,
-      7.5
+      1.7,
+      2.9,
+      3.7,
+      4.6,
+      6.0,
+      7.2
     ],
     "per_window": [
       {
         "window_id": "w0",
-        "after_prefilter": 24,
+        "after_prefilter": 32,
         "candidates": 25
       },
       {
         "window_id": "w2",
-        "after_prefilter": 24,
+        "after_prefilter": 32,
         "candidates": 25
       },
       {
         "window_id": "w4",
-        "after_prefilter": 24,
-        "candidates": 24
+        "after_prefilter": 32,
+        "candidates": 25
       },
       {
         "window_id": "w6",
-        "after_prefilter": 24,
-        "candidates": 24
+        "after_prefilter": 32,
+        "candidates": 25
       },
       {
         "window_id": "w8",
-        "after_prefilter": 24,
-        "candidates": 24
+        "after_prefilter": 32,
+        "candidates": 25
       },
       {
         "window_id": "w10",
-        "after_prefilter": 24,
-        "candidates": 24
+        "after_prefilter": 32,
+        "candidates": 25
       },
       {
         "window_id": "w12",
-        "after_prefilter": 24,
-        "candidates": 24
+        "after_prefilter": 32,
+        "candidates": 25
       }
     ],
-    "runtime_s": 0.06
+    "runtime_s": 0.55
   },
   "results": [
     {
       "window_id": "w0",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 1578.56,
+      "min_miss_km": 41.83,
       "object": {
         "norad_id": 45387,
         "name": "STARLINK-1274"
       },
-      "t_closest_utc": "2026-11-09T23:49:01Z",
-      "risk_score": 0.0,
+      "t_closest_utc": "2026-11-09T23:59:43Z",
+      "risk_score": 0.0002,
       "status": "go"
     },
     {
       "window_id": "w2",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 1596.12,
+      "min_miss_km": 105.77,
       "object": {
-        "norad_id": 45206,
-        "name": "STARLINK-1209"
+        "norad_id": 53665,
+        "name": "STARLINK-4334"
       },
-      "t_closest_utc": "2026-11-10T23:18:01Z",
+      "t_closest_utc": "2026-11-11T00:20:59Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w4",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 1992.47,
+      "min_miss_km": 473.94,
       "object": {
-        "norad_id": 45206,
-        "name": "STARLINK-1209"
+        "norad_id": 69095,
+        "name": "ZHUQUE-2E R/B"
       },
-      "t_closest_utc": "2026-11-11T22:54:46Z",
+      "t_closest_utc": "2026-11-12T00:34:36Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w6",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 1521.61,
+      "min_miss_km": 433.48,
       "object": {
-        "norad_id": 53630,
-        "name": "STARLINK-4598"
+        "norad_id": 45390,
+        "name": "STARLINK-1284"
       },
-      "t_closest_utc": "2026-11-12T22:36:17Z",
+      "t_closest_utc": "2026-11-13T00:19:58Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w8",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 602.94,
+      "min_miss_km": 42.27,
       "object": {
-        "norad_id": 53630,
-        "name": "STARLINK-4598"
+        "norad_id": 53475,
+        "name": "STARLINK-4389"
       },
-      "t_closest_utc": "2026-11-13T22:08:03Z",
-      "risk_score": 0.0,
+      "t_closest_utc": "2026-11-13T22:42:54Z",
+      "risk_score": 0.0002,
       "status": "go"
     },
     {
       "window_id": "w10",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 2206.48,
+      "min_miss_km": 240.14,
       "object": {
-        "norad_id": 45700,
-        "name": "STARLINK-1400"
+        "norad_id": 61642,
+        "name": "STARLINK-32264"
       },
-      "t_closest_utc": "2026-11-14T21:52:04Z",
+      "t_closest_utc": "2026-11-14T22:24:39Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w12",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 1451.46,
+      "min_miss_km": 381.23,
       "object": {
-        "norad_id": 45206,
-        "name": "STARLINK-1209"
+        "norad_id": 57422,
+        "name": "QIANKUN-1"
       },
-      "t_closest_utc": "2026-11-15T21:21:19Z",
+      "t_closest_utc": "2026-11-15T23:03:38Z",
       "risk_score": 0.0,
       "status": "go"
     }

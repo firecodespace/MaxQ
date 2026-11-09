@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_geo_comm_heavyweight",
+  "name": "Heavyweight Design (GEO_COMM Archetype)",
+  "profile": "geo_comm",
+  "payload_kg": 27840.1,
+  "stages": [
+    {
+      "dry_kg": 19506.2,
+      "prop_kg": 350730.5,
+      "thrust_n": 7488420.0,
+      "isp_s": 305.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    },
+    {
+      "dry_kg": 14400.9,
+      "prop_kg": 174655.6,
+      "thrust_n": 1881280.0,
+      "isp_s": 445.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    }
+  ]
+}

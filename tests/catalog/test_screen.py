@@ -6,9 +6,11 @@ sample for the background population (no network).
 
 from __future__ import annotations
 
+import json
 import math
 import time
 from datetime import UTC, datetime
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -257,3 +259,19 @@ def test_teme_ecef_consistency_between_path_and_objects(track):
     k = 100
     r_teme = ecef_to_teme(track.r_km[k], track.t_unix[k])
     np.testing.assert_allclose(teme_to_ecef(r_teme, track.t_unix[k]), track.r_km[k], atol=1e-9)
+
+
+# ---------------------------------------------------------- guard: committed trajectories are frame-consistent
+
+REAL_TRAJECTORIES = sorted((Path(__file__).resolve().parents[2] / "data" / "results").glob("trajectory_*.json"))
+
+
+@pytest.mark.parametrize("path", REAL_TRAJECTORIES, ids=lambda p: p.name)
+def test_committed_trajectory_positions_match_declared_final_orbit(path):
+    """Regression guard for the WP-05 frame bug: lat/lon/alt must be Earth-fixed WGS-84 geodetic, so the orbit
+    implied by the last positions must agree with the trajectory's own final_orbit (what with_coast enforces)."""
+    traj = json.loads(path.read_text(encoding="utf-8"))
+    track = path_from_trajectory(traj)
+    longer, info = with_coast(track, 0.1, final_orbit=traj["final_orbit"])  # raises ValueError if inconsistent
+    assert info["implied_orbit_at_insertion_km"][0] > 100 and len(longer.t_unix) > len(track.t_unix)
+    assert 7.6 < info["insertion_speed_inertial_kms"] < 7.95  # LEO circular speed, not circular + Earth rotation

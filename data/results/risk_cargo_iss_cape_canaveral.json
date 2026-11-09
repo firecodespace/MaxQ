@@ -7,151 +7,151 @@
     "method": "SGP4 (sgp4.SatrecArray) -> TEME->ECEF (GMST) vs trajectory geodetic->ECEF; prefilter by altitude shell and latitude reach; coarse 10 s pass, 1 Hz pass on candidates, 0.1 s refinement of the closest",
     "status_rule": "no-go if min_miss < threshold/4; review if < threshold; else go. risk_score = exp(-3 (d/threshold)^2)",
     "min_miss_km_note": "closest object found per window; values far above threshold are indicative only (only the closest few coarse candidates are refined)",
-    "trajectory_reuse": "trajectory traj_medlift_kerolox_a_optimized (rocket medlift_kerolox_a) is time-shifted to each flyable window; descending (non-flyable) windows are not screened",
+    "trajectory_reuse": "trajectory traj_medlift_kerolox_a_w0 (rocket medlift_kerolox_a) is time-shifted to each flyable window; descending (non-flyable) windows are not screened",
     "target_excluded_norad": 25544,
-    "screened_span": "ascent 457 s + 2 h parking-orbit coast (SGP4 from the fitted insertion state)",
+    "screened_span": "ascent 458 s + 2 h parking-orbit coast (SGP4 from the fitted insertion state)",
     "coast": {
       "coast_hours": 2.0,
       "implied_orbit_at_insertion_km": [
-        174.7,
-        179.7
+        196.2,
+        200.3
       ],
-      "insertion_speed_inertial_kms": 7.799,
-      "insertion_altitude_km": 176.3
+      "insertion_speed_inertial_kms": 7.783,
+      "insertion_altitude_km": 199.9
     },
-    "catalog_mode": "offline-sample",
-    "catalog_objects": 65,
-    "latest_tle_epoch_utc": "2026-11-09T07:46:55.936992Z",
+    "catalog_mode": "full-catalog",
+    "catalog_objects": 18555,
+    "latest_tle_epoch_utc": "2026-11-10T19:43:23.687616Z",
     "closest_object_tle_age_days_at_closest_approach": [
-      0.8,
-      1.8,
+      0.7,
+      1.9,
       2.8,
-      3.8,
-      4.8,
-      5.9,
-      6.6
+      3.9,
+      4.6,
+      6.0,
+      6.8
     ],
     "per_window": [
       {
         "window_id": "w0",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w2",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w4",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w6",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w8",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w10",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       },
       {
         "window_id": "w12",
-        "after_prefilter": 0,
+        "after_prefilter": 63,
         "candidates": 25
       }
     ],
-    "runtime_s": 0.48
+    "runtime_s": 0.67
   },
   "results": [
     {
       "window_id": "w0",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 247.82,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 26.98,
       "object": {
-        "norad_id": 36086,
-        "name": "POISK"
+        "norad_id": 45387,
+        "name": "STARLINK-1274"
       },
-      "t_closest_utc": "2026-11-10T00:31:40Z",
-      "risk_score": 0.0,
+      "t_closest_utc": "2026-11-09T23:59:46Z",
+      "risk_score": 0.0304,
       "status": "go"
     },
     {
       "window_id": "w2",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 665.05,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 58.55,
       "object": {
-        "norad_id": 25730,
-        "name": "FENGYUN 1C"
+        "norad_id": 45589,
+        "name": "STARLINK-1364"
       },
-      "t_closest_utc": "2026-11-11T00:17:55Z",
+      "t_closest_utc": "2026-11-11T01:04:15Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w4",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 716.42,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 202.66,
       "object": {
-        "norad_id": 25730,
-        "name": "FENGYUN 1C"
+        "norad_id": 53509,
+        "name": "STARLINK-4402"
       },
-      "t_closest_utc": "2026-11-12T00:40:30Z",
+      "t_closest_utc": "2026-11-12T00:54:34Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w6",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 657.56,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 110.06,
       "object": {
-        "norad_id": 22825,
-        "name": "EYESAT A (AO-27)"
+        "norad_id": 59907,
+        "name": "STARLINK-31920"
       },
-      "t_closest_utc": "2026-11-12T23:32:27Z",
+      "t_closest_utc": "2026-11-13T00:31:07Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w8",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 246.55,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 69.9,
       "object": {
-        "norad_id": 36086,
-        "name": "POISK"
+        "norad_id": 53475,
+        "name": "STARLINK-4389"
       },
-      "t_closest_utc": "2026-11-13T23:10:39Z",
+      "t_closest_utc": "2026-11-13T22:43:00Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w10",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 570.88,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 314.68,
       "object": {
-        "norad_id": 33775,
-        "name": "IRIDIUM 33 DEB"
+        "norad_id": 61642,
+        "name": "STARLINK-32264"
       },
-      "t_closest_utc": "2026-11-14T23:47:57Z",
+      "t_closest_utc": "2026-11-14T22:24:46Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w12",
-      "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 824.74,
+      "trajectory_id": "traj_medlift_kerolox_a_w0",
+      "min_miss_km": 103.14,
       "object": {
-        "norad_id": 33758,
-        "name": "COSMOS 2251 DEB"
+        "norad_id": 66515,
+        "name": "SZ-21 MODULE"
       },
-      "t_closest_utc": "2026-11-15T22:13:32Z",
+      "t_closest_utc": "2026-11-15T22:41:36Z",
       "risk_score": 0.0,
       "status": "go"
     }

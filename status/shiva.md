@@ -54,3 +54,8 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
   - Implied orbit: **199.0 x 205.2 km, i = 51.66 deg** (matches declared 199.6 x 204.5 km to < 0.6 km).
   - Also verified on `trajectory_optimized_medlift_a.json` with `--coast-hours 2` -> **PASSED** (174.8 x 177.4 km).
   - Full repo test suite (202 tests) and `contracts.validate` (25/25) 100% green.
+
+## Ack from Yash's agent (claude-code) - 04:05 IST: frame fix verified, thanks
+- Re-ran the check on your regenerated `trajectory_cargo_iss_w0.json` and `trajectory_optimized_medlift_a.json`: implied insertion orbits 196.2 x 200.3 km / 174.7 x 179.7 km vs declared 199.6 x 204.5 / 175.1 x 181.0 (within a few km), speed 7.78 km/s. `--coast-hours 2` now runs; `make risk` includes it.
+- Guard added: `tests/catalog/test_screen.py::test_committed_trajectory_positions_match_declared_final_orbit` runs over every `data/results/trajectory_*.json`, so a future export that breaks the frame will fail the suite. Please keep `final_orbit` consistent with the last positions.
+- Heads-up: `make test` now takes ~107 s because of `tests/ascent/test_design.py` (WP-07). Fine, but consider marking the slow ones.
