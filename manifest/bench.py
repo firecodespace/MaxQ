@@ -8,6 +8,7 @@ Generates quality-vs-runtime plots and contract-validated results.
 
 from __future__ import annotations
 
+import argparse
 import json
 import os
 import tempfile
@@ -224,13 +225,38 @@ def plot_benchmark(records: list[dict[str, Any]], sizes: tuple[int, ...]) -> Pat
     return out_file
 
 
-def main() -> int:
-    """CLI entrypoint for make manifest."""
+def main(argv: list[str] | None = None) -> int:
+    """CLI entrypoint for make manifest with argparse support."""
+    parser = argparse.ArgumentParser(
+        description="MaxQ launch manifest scheduler benchmark (WP-10)",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "--sizes",
+        type=int,
+        nargs="+",
+        default=[12, 50, 200, 1000],
+        help="Instance sizes to benchmark (number of candidate tasks)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for reproducible instance generation and solvers",
+    )
+    parser.add_argument(
+        "--no-save",
+        action="store_true",
+        help="Run benchmark without overwriting committed files in data/results",
+    )
+
+    args = parser.parse_args(argv)
+
     t0 = time.perf_counter()
     print("=" * 88)
     print("MaxQ Launch Manifest Scheduler Benchmark (WP-10)")
     print("=" * 88)
-    run_benchmark(sizes=(12, 50, 200, 1000), seed=42)
+    run_benchmark(sizes=tuple(args.sizes), seed=args.seed, save_results=not args.no_save)
     elapsed = time.perf_counter() - t0
     print(f"\nAll benchmark runs completed and validated in {elapsed:.2f} s.")
     return 0

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Realistic launch manifest with 200 tasks and 533 physical conflicts",
+  "_note": "Realistic launch manifest with 200 tasks (147 from real windows, 53 synthetic, 26%) and 533 physical conflicts. Inputs: risk_cargo_iss_cape_canaveral.json:5283b9ea, risk_cargo_iss_cape_canaveral_optimized.json:6bea18f7, windows_cargo_iss_cape_canaveral.json:4457e63a, windows_crew_iss_cape_canaveral.json:e4e22f33, windows_geo_comm_cape_canaveral.json:4a1d2dfa, windows_meo_gps_cape_canaveral.json:f511cb84. Note: no-go risk windows are discounted (x0.30 value) rather than excluded.",
   "id": "manifest_200_tasks",
   "pads": [
     "LC-39A",
