@@ -11,24 +11,24 @@ from __future__ import annotations
 
 import json
 import os
-from pathlib import Path
 import tempfile
 import time
+from pathlib import Path
 from typing import Any
 
 os.environ.setdefault("MPLCONFIGDIR", tempfile.gettempdir())
 import matplotlib.pyplot as plt
 import numpy as np
-from sgp4.api import Satrec
 from sgp4 import omm as sgp4_omm
+from sgp4.api import Satrec
 from sklearn.linear_model import Ridge
 
-from catalog.omm import satrec_from_row
 from catalog.propagate import propagate_teme, sat_epoch_unix
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 SAMPLE_HISTORICAL_PATH = REPO_ROOT / "data" / "sample" / "historical_tles_25544.json"
 RESULTS_DIR = REPO_ROOT / "data" / "results"
+RESIDUALS_OUT_DIR = RESULTS_DIR / "residuals"
 
 
 def teme_to_ric_matrix(r_teme: np.ndarray, v_teme: np.ndarray) -> np.ndarray:
@@ -252,7 +252,8 @@ def run_residuals_benchmark(
         "plot_path": str(plot_file),
     }
 
-    with open(RESULTS_DIR / "sgp4_residuals.json", "w", encoding="utf-8") as f:
+    RESIDUALS_OUT_DIR.mkdir(parents=True, exist_ok=True)
+    with open(RESIDUALS_OUT_DIR / "sgp4_residuals.json", "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
     return metrics
@@ -318,7 +319,10 @@ def plot_residuals_results(
             spine.set_color("#374151")
         ax.grid(True, linestyle="--", alpha=0.3, color="#4b5563")
 
-    plt.suptitle("MaxQ SGP4 Orbital Residual Correction Benchmark (WP-15)", color="#f9fafb", fontsize=14, y=1.02, fontweight="bold")
+    plt.suptitle(
+        "MaxQ SGP4 Orbital Residual Correction Benchmark (WP-15)",
+        color="#f9fafb", fontsize=14, y=1.02, fontweight="bold",
+    )
     plt.tight_layout()
 
     out_file = RESULTS_DIR / "sgp4_residuals_benchmark.png"
@@ -334,12 +338,16 @@ def main() -> int:
     print("=" * 88)
     res = run_residuals_benchmark()
 
+    holdout_days = res["horizon_days"] - res["calibration_days"]
     print(f"Target: {res['object_name']} (NORAD {res['norad_id']})")
-    print(f"Calibration Window: {res['calibration_days']:.1f} days | Holdout Evaluation: {res['horizon_days'] - res['calibration_days']:.1f} days")
+    print(f"Calibration Window: {res['calibration_days']:.1f} days | Holdout Evaluation: {holdout_days:.1f} days")
     print(f"Uncorrected SGP4 Error: RMS = {res['rms_uncorrected_km']:.2f} km, Max = {res['max_uncorrected_km']:.2f} km")
     print(f"Corrected SGP4 Error:   RMS = {res['rms_corrected_km']:.2f} km, Max = {res['max_corrected_km']:.2f} km")
     print(f"Position Error Reduction: {res['error_reduction_pct']:.1f}%")
-    print(f"In-Track Drag Error: {res['intrack_rms_uncorrected_km']:.2f} km -> {res['intrack_rms_corrected_km']:.2f} km")
+    print(
+        f"In-Track Drag Error: {res['intrack_rms_uncorrected_km']:.2f} km -> "
+        f"{res['intrack_rms_corrected_km']:.2f} km"
+    )
     print(f"Benchmark plot saved to: {res['plot_path']}")
     print(f"Completed in {time.perf_counter() - t0:.2f} s.")
     return 0
