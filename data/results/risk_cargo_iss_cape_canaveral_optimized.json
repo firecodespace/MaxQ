@@ -6,7 +6,7 @@
     "tle_accuracy_note": "TLE-based positions carry kilometre-level error that grows with element-set age (typically a few km per day along track). Thresholds and the risk score are illustrative; real launch collision avoidance uses larger, agency-specific keep-out volumes and covariance data. Objects with catalog numbers >= 100000 are not in the TLE catalog and are not screened.",
     "method": "SGP4 (sgp4.SatrecArray) -> TEME->ECEF (GMST) vs trajectory geodetic->ECEF; prefilter by altitude shell and latitude reach; coarse 10 s pass, 1 Hz pass on candidates, 0.1 s refinement of the closest",
     "status_rule": "no-go if min_miss < threshold/4; review if < threshold; else go. risk_score = exp(-3 (d/threshold)^2)",
-    "min_miss_km_note": "closest object found per window; values far above threshold are indicative only (only the closest few coarse candidates are refined)",
+    "min_miss_km_note": "closest object found per window; values far above threshold are indicative only (guaranteed accurate for objects within 2x threshold; beyond that only the 100 closest coarse candidates are refined, and objects more than ~threshold+60 km away in altitude are prefiltered out)",
     "trajectory_reuse": "trajectory traj_medlift_kerolox_a_optimized (rocket medlift_kerolox_a) is time-shifted to each flyable window; descending (non-flyable) windows are not screened",
     "target_excluded_norad": 25544,
     "screened_span": "ascent 457 s + 2 h parking-orbit coast (SGP4 from the fitted insertion state)",
@@ -20,138 +20,155 @@
       "insertion_altitude_km": 176.3
     },
     "catalog_mode": "full-catalog",
-    "catalog_objects": 18555,
-    "latest_tle_epoch_utc": "2026-11-10T19:43:23.687616Z",
+    "catalog_objects": 19565,
+    "latest_tle_epoch_utc": "2026-11-10T22:53:33.336384Z",
     "closest_object_tle_age_days_at_closest_approach": [
-      0.7,
-      1.7,
-      2.9,
-      3.7,
-      4.6,
-      6.0,
+      0.5,
+      1.4,
+      2.7,
+      3.6,
+      4.8,
+      5.3,
+      6.4,
       7.2
     ],
     "per_window": [
       {
         "window_id": "w0",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 100
       },
       {
         "window_id": "w2",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
       },
       {
         "window_id": "w4",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
       },
       {
         "window_id": "w6",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
       },
       {
         "window_id": "w8",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
       },
       {
         "window_id": "w10",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
       },
       {
         "window_id": "w12",
-        "after_prefilter": 32,
-        "candidates": 25
+        "after_prefilter": 33,
+        "candidates": 99
+      },
+      {
+        "window_id": "w14",
+        "after_prefilter": 33,
+        "candidates": 99
       }
-    ],
-    "runtime_s": 0.55
+    ]
   },
   "results": [
     {
       "window_id": "w0",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 41.83,
+      "min_miss_km": 7.08,
       "object": {
         "norad_id": 45387,
         "name": "STARLINK-1274"
       },
-      "t_closest_utc": "2026-11-09T23:59:43Z",
-      "risk_score": 0.0002,
-      "status": "go"
+      "t_closest_utc": "2026-11-10T01:27:40Z",
+      "risk_score": 0.7861,
+      "status": "review"
     },
     {
       "window_id": "w2",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 105.77,
+      "min_miss_km": 85.8,
       "object": {
         "norad_id": 53665,
         "name": "STARLINK-4334"
       },
-      "t_closest_utc": "2026-11-11T00:20:59Z",
+      "t_closest_utc": "2026-11-11T00:21:01Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w4",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 473.94,
+      "min_miss_km": 100.35,
       "object": {
-        "norad_id": 69095,
-        "name": "ZHUQUE-2E R/B"
+        "norad_id": 53509,
+        "name": "STARLINK-4402"
       },
-      "t_closest_utc": "2026-11-12T00:34:36Z",
+      "t_closest_utc": "2026-11-12T00:54:29Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w6",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 433.48,
+      "min_miss_km": 92.94,
       "object": {
-        "norad_id": 45390,
-        "name": "STARLINK-1284"
+        "norad_id": 59907,
+        "name": "STARLINK-31920"
       },
-      "t_closest_utc": "2026-11-13T00:19:58Z",
+      "t_closest_utc": "2026-11-13T00:30:35Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w8",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 42.27,
+      "min_miss_km": 102.1,
       "object": {
-        "norad_id": 53475,
-        "name": "STARLINK-4389"
+        "norad_id": 44927,
+        "name": "STARLINK-1114"
       },
-      "t_closest_utc": "2026-11-13T22:42:54Z",
-      "risk_score": 0.0002,
+      "t_closest_utc": "2026-11-13T23:43:29Z",
+      "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w10",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 240.14,
+      "min_miss_km": 84.33,
       "object": {
-        "norad_id": 61642,
-        "name": "STARLINK-32264"
+        "norad_id": 45710,
+        "name": "STARLINK-1423"
       },
-      "t_closest_utc": "2026-11-14T22:24:39Z",
+      "t_closest_utc": "2026-11-14T23:25:14Z",
       "risk_score": 0.0,
       "status": "go"
     },
     {
       "window_id": "w12",
       "trajectory_id": "traj_medlift_kerolox_a_optimized",
-      "min_miss_km": 381.23,
+      "min_miss_km": 71.01,
       "object": {
-        "norad_id": 57422,
-        "name": "QIANKUN-1"
+        "norad_id": 53166,
+        "name": "STARLINK-4110"
       },
-      "t_closest_utc": "2026-11-15T23:03:38Z",
+      "t_closest_utc": "2026-11-15T22:37:45Z",
+      "risk_score": 0.0,
+      "status": "go"
+    },
+    {
+      "window_id": "w14",
+      "trajectory_id": "traj_medlift_kerolox_a_optimized",
+      "min_miss_km": 69.88,
+      "object": {
+        "norad_id": 45710,
+        "name": "STARLINK-1423"
+      },
+      "t_closest_utc": "2026-11-16T21:10:25Z",
       "risk_score": 0.0,
       "status": "go"
     }

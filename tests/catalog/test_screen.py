@@ -15,9 +15,9 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import pytest
-from sgp4.api import Satrec
 
 from catalog.fetch import build_catalog, get_tle, sources_from_sample
+from catalog.omm import satrec_from_row
 from catalog.propagate import propagate_teme, satrec_from_tle
 from catalog.screen import (
     R_E_KM,
@@ -243,7 +243,7 @@ def test_build_risk_time_shifts_trajectory_to_each_window(df):
 
 def test_sgp4_core_meets_budget_scaled(df):
     """HANDOFF: ~30k objects x 2 h at <= 10 s steps in ~60 s. Check 3k x 2 h here, at 1/10 of the budget x 3 safety."""
-    sats = [Satrec.twoline2rv(a, b) for a, b in zip(df["tle1"], df["tle2"], strict=True)]
+    sats = [satrec_from_row(r) for r in df.to_dict("records")]
     sats = (sats * (3000 // len(sats) + 1))[:3000]
     t = T0 + np.arange(0.0, 7200.0, 10.0)
     r_path = np.tile([R_E_KM + 400.0, 0.0, 0.0], (len(t), 1))

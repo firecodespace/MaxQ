@@ -209,11 +209,18 @@ def _check_clusters(obj: dict) -> list[str]:
 def _check_catalog(obj: dict) -> list[str]:
     errs = []
     for i, r in enumerate(obj["rows"]):
-        if r["norad_id"] >= 100000:  # 6-digit ids do not fit classic TLE columns
-            continue
-        want = f"{r['norad_id']:05d}"
+        six = r["norad_id"] >= 100000  # 6-digit ids do not fit classic TLE columns
         for line in ("tle1", "tle2"):
-            if r[line][2:7] != want:
+            if r[line] is None:
+                if not six:
+                    errs.append(
+                        f"rows[{i}].{line}: null, but norad_id {r['norad_id']} has a 5-digit TLE (null only >= 100000)"
+                    )
+                elif "argp_deg" not in r:
+                    errs.append(
+                        f"rows[{i}].{line}: null requires the OMM columns (argp_deg, ...) to propagate the object"
+                    )
+            elif not six and r[line][2:7] != f"{r['norad_id']:05d}":
                 errs.append(f"rows[{i}].{line}: catalog number {r[line][2:7]!r} != norad_id {r['norad_id']}")
     return errs
 
@@ -252,7 +259,8 @@ def _catalog_from_table(obj: Any) -> dict:
     df = obj
     errs = []
     want = [c["name"] for c in spec]
-    missing = [c for c in want if c not in df.columns]
+    required = [c["name"] for c in spec if not c.get("optional")]
+    missing = [c for c in required if c not in df.columns]
     extra = [c for c in df.columns if c not in want]
     errs += [f"{c}: required column is missing" for c in missing]
     errs += [f"{c}: unexpected column (not in catalog.schema.json)" for c in extra]
@@ -267,6 +275,8 @@ def _catalog_from_table(obj: Any) -> dict:
         }[c["dtype"]](s)
         if not ok:
             errs.append(f"{c['name']}: dtype {s.dtype} is not {c['dtype']}")
+        elif c.get("nullable"):
+            continue  # nulls allowed (value rules, e.g. "null only for norad_id >= 100000", are semantic checks)
         elif c["dtype"] == "float" and not np.isfinite(s.to_numpy(dtype=float)).all():
             bad = int(np.flatnonzero(~np.isfinite(s.to_numpy(dtype=float)))[0])
             errs.append(f"{c['name']}: non-finite value at row {bad}")
@@ -274,7 +284,14 @@ def _catalog_from_table(obj: Any) -> dict:
             errs.append(f"{c['name']}: null value at row {int(np.flatnonzero(s.isna().to_numpy())[0])}")
     if errs:
         raise ContractError(kind, errs)
-    return {"schema_version": SCHEMA_VERSION, "rows": df[want].to_dict("records")}
+    present = [c["name"] for c in spec if c["name"] in df.columns]
+    nullable = {c["name"] for c in spec if c.get("nullable")}
+    records = df[present].to_dict("records")
+    for r in records:  # pandas gives NaN for missing strings: normalise to None so the schema sees a real null
+        for k in nullable:
+            if k in r and r[k] is not None and r[k] != r[k]:
+                r[k] = None
+    return {"schema_version": SCHEMA_VERSION, "rows": records}
 
 
 # --------------------------------------------------------------------------- public API

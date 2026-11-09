@@ -64,8 +64,10 @@ def main(argv: list[str] | None = None) -> int:
     missing, mismatched = check()
     if not missing and not mismatched:
         if not args.quiet:
-            print(f"environment OK: {len(read_pins())} pinned packages match requirements.txt "
-                  f"(Python {sys.version_info.major}.{sys.version_info.minor})")
+            print(
+                f"environment OK: {len(read_pins())} pinned packages match requirements.txt "
+                f"(Python {sys.version_info.major}.{sys.version_info.minor})"
+            )
         return 0
     for m in missing:
         print(f"MISSING    {m}")

@@ -43,3 +43,9 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Verified Shiva's fix (6418b01) on the real files: implied insertion orbits match `final_orbit` within a few km. `python -m catalog.screen ... --coast-hours 2` now works; `make risk` regenerated `data/results/risk_cargo_iss_cape_canaveral{,_optimized}.json` with ascent + 2 h parking-orbit coast (7 flyable windows, 0.6 s each): all `go`; closest object 27-315 km (baseline; w0 STARLINK-1274 at 26.98 km is 2 km above the 25 km threshold) and 42-474 km (optimized). Web data re-exported.
 - Added regression test over every committed trajectory. `python -m pytest` -> 204 passed (~107 s, WP-07 design tests dominate).
 - Caveat unchanged: TLE-only catalog misses 6-digit objects, so results lean to `go`; coast is a parking-orbit coast with no phasing maneuvers (stays near 200 km, so ISS-altitude objects are not approached).
+
+## 04:40 IST - claude-code (on behalf of yash) - the three recurring caveats, fixed
+1. Incomplete catalog -> FIXED: OMM JSON pipeline; 19,565 objects incl. 1,010 numbered >= 100000 (ISS visiting vehicles were among the missing). Contract extended additively; TLE renderer validated against CelesTrak's own text (4,423/4,424 exact). Completeness changed no window verdict today, but the screen can now say it covers the whole catalog. New real results: 2 `review` (baseline w14 10.2 km, optimized w0 7.1 km).
+2. Slow suite -> FIXED: `make test` fast tier 19 s (was ~107 s); `make test-all` runs everything.
+3. Rebase/venv -> FIXED: `make doctor` + pytest header flag stale venvs (my venv really was missing ortools/pennylane; now matches pins); union merges for shared logs; volatile fields removed from generated outputs; rules in docs/workflow.md.
+- Not redeployed: the Vercel site still serves the previous export. Redeploy: `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`.

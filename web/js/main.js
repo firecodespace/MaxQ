@@ -438,8 +438,8 @@ async function boot() {
     $("catalog-note").textContent =
       `${cat.shown_objects.toLocaleString()} of ${cat.total_objects.toLocaleString()} catalog objects shown (` +
       `${cat.catalog_mode}); latest TLE epoch ${String(cat.latest_tle_epoch_utc).slice(0, 16)}Z. ` +
-      "Real CelesTrak TLEs propagated with SGP4 in your browser; position error is kilometre-level and grows with TLE age. " +
-      "Objects with 6-digit catalog numbers are not in the TLE format and are missing.";
+      "Real CelesTrak elements propagated with SGP4 in your browser; position error is kilometre-level and grows with element age. " +
+      `Includes ${(cat.omm_only_objects || 0).toLocaleString()} objects numbered 100000+ (no TLE exists; propagated from OMM elements).`;
     if (cat.catalog_mode !== "full-catalog") banner("Using the small offline catalog sample, not the full live catalog.", "warn");
     startWorker();
     pump();

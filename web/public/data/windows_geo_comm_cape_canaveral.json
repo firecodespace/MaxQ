@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Computed by mission/windows.py from the TLE of NORAD 44457 (epoch 2026-11-08T17:51:36.623232Z); search 2026-11-09T20:11:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan. PLACEHOLDER profile: one nominal due-east opportunity per day at local hour 0; GEO transfer timing is not modelled; plane_error_deg is the inclination that must still be removed at GEO (= site latitude).",
+  "_note": "Computed by mission/windows.py from the TLE of NORAD 44457 (epoch 2026-11-08T17:51:36.623232Z); search 2026-11-09T21:34:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan. PLACEHOLDER profile: one nominal due-east opportunity per day at local hour 0; GEO transfer timing is not modelled; plane_error_deg is the inclination that must still be removed at GEO (= site latitude).",
   "profile": "geo_comm",
   "site": {
     "name": "Cape Canaveral",
@@ -11,7 +11,7 @@
     "norad_id": 44457,
     "tle_epoch_utc": "2026-11-08T17:51:36.623232Z"
   },
-  "generated_utc": "2026-11-09T20:11:02Z",
+  "generated_utc": "2026-11-09T21:34:59Z",
   "windows": [
     {
       "id": "w0",

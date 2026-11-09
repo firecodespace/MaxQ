@@ -5,7 +5,7 @@ Pipeline (all vectorised with sgp4's SatrecArray, chunked to bound memory):
                   threshold + margin of the path (cheap, from catalog columns only);
   2. coarse     - propagate the survivors on a coarse grid (default 10 s), distance to the path in ECEF;
   3. fine       - objects whose coarse minimum is below threshold + slack (slack = max relative speed x dt/2),
-                  plus the K closest by coarse minimum, are re-propagated at the path's own 1 Hz grid;
+                  plus the K (100) closest by coarse minimum, are re-propagated at the path's own 1 Hz grid;
   4. refine     - the closest few are re-propagated at 0.1 s around the minimum (path linearly interpolated).
 
 Frames: SGP4 gives TEME (km); it is rotated to ECEF with core.frames (GMST) and compared with the
@@ -39,6 +39,7 @@ from sgp4.api import WGS72, Satrec, SatrecArray
 
 from catalog.fetch import OUT_PATH as CATALOG_PATH
 from catalog.fetch import build_catalog, load_catalog, sources_from_sample
+from catalog.omm import satrec_from_row
 from contracts.validate import validate
 from core.constants import MU_M3_S2, R_E_M
 from core.frames import ecef_to_teme, geodetic_to_ecef, teme_to_ecef
@@ -281,14 +282,17 @@ class Screener:
     def __init__(self, df, threshold_km: float = 25.0, exclude_norad: tuple[int, ...] = ()):
         self.df = df[~df["norad_id"].isin(exclude_norad)].reset_index(drop=True)
         self.threshold_km = threshold_km
+        self._records = self.df.to_dict("records")
         self._sat: dict[int, Satrec] = {}
 
     def _sats(self, idx) -> list[Satrec]:
+        """Satellites for df positions ``idx``, built from the OMM columns (works for catalog numbers >= 100000)."""
         out = []
         for i in idx:
-            nid = int(self.df.at[i, "norad_id"])
+            row = self._records[i]
+            nid = int(row["norad_id"])
             if nid not in self._sat:
-                self._sat[nid] = Satrec.twoline2rv(self.df.at[i, "tle1"], self.df.at[i, "tle2"])
+                self._sat[nid] = satrec_from_row(row)
             out.append(self._sat[nid])
         return out
 
@@ -297,7 +301,7 @@ class Screener:
         path: Track,
         coarse_dt_s: float = 10.0,
         report_km: float | None = None,
-        top_k: int = 25,
+        top_k: int = 100,
         refine_n: int = 5,
         use_prefilter: bool = True,
     ) -> ScreenResult:
@@ -417,7 +421,8 @@ def build_risk(
             "status_rule": "no-go if min_miss < threshold/4; review if < threshold; else go. "
             "risk_score = exp(-3 (d/threshold)^2)",
             "min_miss_km_note": "closest object found per window; values far above threshold are indicative only "
-            "(only the closest few coarse candidates are refined)",
+            "(guaranteed accurate for objects within 2x threshold; beyond that only the 100 closest coarse "
+            "candidates are refined, and objects more than ~threshold+60 km away in altitude are prefiltered out)",
             "trajectory_reuse": f"trajectory {traj['id']} (rocket {traj['rocket_id']}) is time-shifted to each flyable "
             "window; descending (non-flyable) windows are not screened",
             "target_excluded_norad": int(windows["target"]["norad_id"]),
@@ -452,9 +457,9 @@ def benchmark(n_objects: int = 30_000, hours: float = 2.0, step_s: float = 10.0,
     except FileNotFoundError:
         df = build_catalog(sources_from_sample()[0])[0]
     reps = int(math.ceil(n_objects / len(df)))
-    tle = list(zip(df["tle1"], df["tle2"], strict=True)) * reps
+    records = df.to_dict("records") * reps
     t0 = time.perf_counter()
-    sats = [Satrec.twoline2rv(a, b) for a, b in tle[:n_objects]]
+    sats = [satrec_from_row(r) for r in records[:n_objects]]
     t_init = time.perf_counter() - t0
     t = df["epoch_utc"].map(lambda s: datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()).max() + np.arange(
         0.0, hours * 3600.0, step_s
@@ -471,7 +476,7 @@ def benchmark(n_objects: int = 30_000, hours: float = 2.0, step_s: float = 10.0,
         "objects": len(sats),
         "steps": len(t),
         "samples": len(sats) * len(t),
-        "twoline2rv_s": round(t_init, 2),
+        "satrec_init_s": round(t_init, 2),
         "propagate_and_distance_s": round(t_prop, 2),
         "samples_per_s": int(len(sats) * len(t) / t_prop),
         "finite_fraction": round(n_ok / (len(sats) * len(t)), 4),

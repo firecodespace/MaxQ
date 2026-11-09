@@ -54,3 +54,15 @@ def test_invalid_file_fails_loudly(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(E, "DATA_DIRS", (bad_dir,))
     assert E.main(["--out", str(tmp_path / "out")]) == 1
     assert "azimuth_deg" in capsys.readouterr().err
+
+
+def test_catalog_web_includes_six_digit_objects_with_placeholder_tle(exported):
+    from catalog.omm import tle_checksum_ok
+
+    c = json.loads((exported / "catalog_web.json").read_text())
+    six = [o for o in c["objects"] if o[0] >= 100000]
+    assert c["omm_only_objects"] == len(six) >= 4
+    assert any(o[1] == "SOYUZ-MS 29" for o in six)
+    for nid, _name, gi, l1, l2 in six:
+        assert l1.startswith("1 ") and tle_checksum_ok(l1) and tle_checksum_ok(l2)
+        assert l1[2:7] == f"{nid % 100000:05d}" and 0 <= gi < len(c["groups"])

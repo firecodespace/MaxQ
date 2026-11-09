@@ -130,6 +130,7 @@ Schemas live in `contracts/*.schema.json`; `contracts/validate.py` exposes `vali
 
 ### 5.1 `catalog.parquet` — producer: WP-01
 Columns: `norad_id:int`, `name:str`, `group:str` (`stations|starlink|gps-ops|geo|debris|active|…`), `tle1`, `tle2`, `epoch_utc` (ISO-8601), `incl_deg`, `ecc`, `mean_motion_rev_day`, `raan_deg`, `alt_km_approx`.
+**Additive extension (2026-11-10, schema_version still 1):** `tle1`/`tle2` are null only for `norad_id >= 100000` (no TLE exists); optional OMM columns `intl_designator, classification, ephemeris_type, elset_no, rev_at_epoch, argp_deg, mean_anomaly_deg, bstar, mean_motion_dot, mean_motion_ddot` carry the full SGP4 element set (propagate with `catalog.omm.satrec_from_row`, never assume a TLE exists).
 
 ### 5.2 `windows.json` — producer: WP-02 → consumers: WP-05, 08, 10, web
 ```json

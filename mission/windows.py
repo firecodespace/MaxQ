@@ -29,7 +29,7 @@ from scipy.optimize import brentq
 
 from catalog.fetch import OUT_PATH as CATALOG_PATH
 from catalog.fetch import build_catalog, load_catalog, sources_from_sample
-from catalog.propagate import propagate_teme, sat_epoch_unix, satrec_from_tle
+from catalog.propagate import propagate_teme, sat_epoch_unix, satrec_from_row
 from contracts.validate import validate
 from core.frames import ecef_to_teme, site_teme_m
 from mission.phasing import (
@@ -184,7 +184,7 @@ def compute_windows(
     profile = get_profile(profile_id)
     site = get_site(site) if isinstance(site, str) else site
     target = pick_target(df, profile)
-    sat = satrec_from_tle(target["tle1"], target["tle2"])
+    sat = satrec_from_row(target)
     age_d = (t_start_unix - sat_epoch_unix(sat)) / 86400.0
     if age_d > MAX_TLE_AGE_DAYS:
         raise ValueError(

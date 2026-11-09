@@ -8,6 +8,7 @@ from __future__ import annotations
 import numpy as np
 from sgp4.api import WGS72, Satrec, jday
 
+from catalog.omm import satrec_from_row
 from core.frames import teme_km_to_geodetic
 
 
@@ -46,4 +47,12 @@ def geodetic_track(sat: Satrec, t_unix) -> tuple[np.ndarray, np.ndarray, np.ndar
     return teme_km_to_geodetic(r, t)
 
 
-__all__ = ["PropagationError", "geodetic_track", "jday", "propagate_teme", "sat_epoch_unix", "satrec_from_tle"]
+__all__ = [
+    "PropagationError",
+    "geodetic_track",
+    "jday",
+    "propagate_teme",
+    "sat_epoch_unix",
+    "satrec_from_row",
+    "satrec_from_tle",
+]

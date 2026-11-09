@@ -27,6 +27,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
 from catalog.fetch import OUT_PATH, build_catalog, load_catalog, sources_from_sample  # noqa: E402
+from catalog.omm import is_missing, row_to_tle  # noqa: E402
 from contracts.validate import ContractError, kind_for_path, validate_file  # noqa: E402
 
 DEFAULT_OUT = REPO_ROOT / "web" / "public" / "data"
@@ -80,14 +81,21 @@ def export_catalog(out: Path, keep_all: bool) -> dict:
     objects = []
     for g, part in zip(GROUP_ORDER, parts, strict=True):
         gi = GROUP_ORDER.index(g)
-        objects += [[int(r.norad_id), r.name, gi, r.tle1, r.tle2] for r in part.itertuples()]
+        # Objects numbered >= 100000 have no TLE; row_to_tle renders their OMM elements under a placeholder catalog
+        # number (propagation only: the true NORAD id is the first field).
+        objects += [[int(r["norad_id"]), r["name"], gi, *row_to_tle(r)] for r in part.to_dict("records")]
+    omm_only = sum(1 for part in parts for v in part["tle1"] if is_missing(v))
     fetched = max(df["epoch_utc"])  # latest TLE epoch in the export
     payload = {
-        "_note": "REAL CelesTrak TLEs (or the committed offline sample if catalog_mode says so); subsampled per group.",
+        "_note": (
+            "REAL CelesTrak elements (or the committed offline sample if catalog_mode says so); subsampled per group. "
+            "Objects numbered >= 100000 carry a propagation TLE with a placeholder catalog number."
+        ),
         "catalog_mode": mode,
         "groups": GROUP_ORDER,
         "total_objects": int(total),
         "shown_objects": int(shown),
+        "omm_only_objects": int(omm_only),
         "latest_tle_epoch_utc": fetched,
         "objects": objects,
     }

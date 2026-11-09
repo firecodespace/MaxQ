@@ -121,14 +121,8 @@ def _checksum(line: str) -> str:
 
 
 def make_tle(norad, intl, incl, raan, ecc, argp, m_anom, mm, epoch_yy, epoch_doy):
-    l1 = (
-        f"1 {norad:05d}U {intl:<8s} {epoch_yy:02d}{epoch_doy:012.8f}"
-        f" {' .00000000'} {' 00000-0'} {' 00000-0'} 0 {1:4d}"
-    )
-    l2 = (
-        f"2 {norad:05d} {incl:8.4f} {raan:8.4f} {round(ecc * 1e7):07d} "
-        f"{argp:8.4f} {m_anom:8.4f} {mm:11.8f}{1:5d}"
-    )
+    l1 = f"1 {norad:05d}U {intl:<8s} {epoch_yy:02d}{epoch_doy:012.8f} {' .00000000'} {' 00000-0'} {' 00000-0'} 0 {1:4d}"
+    l2 = f"2 {norad:05d} {incl:8.4f} {raan:8.4f} {round(ecc * 1e7):07d} {argp:8.4f} {m_anom:8.4f} {mm:11.8f}{1:5d}"
     assert len(l1) == 68 and len(l2) == 68, (len(l1), len(l2))
     return l1 + _checksum(l1), l2 + _checksum(l2)
 

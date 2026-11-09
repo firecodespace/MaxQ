@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Computed by mission/windows.py from the TLE of NORAD 25544 (epoch 2026-11-09T04:58:46.240896Z); search 2026-11-09T20:11:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan. Phasing assumes 520 s ascent, 17 deg in-plane arc, 200 km parking orbit; rendezvous hours are impulsive estimates excluding proximity operations; fast = null means no <= 2-rev solution.",
+  "_note": "Computed by mission/windows.py from the TLE of NORAD 25544 (epoch 2026-11-09T11:10:18.771456Z); search 2026-11-09T21:34:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan. Phasing assumes 520 s ascent, 17 deg in-plane arc, 200 km parking orbit; rendezvous hours are impulsive estimates excluding proximity operations; fast = null means no <= 2-rev solution.",
   "profile": "crew_iss",
   "site": {
     "name": "Cape Canaveral",
@@ -9,9 +9,9 @@
   },
   "target": {
     "norad_id": 25544,
-    "tle_epoch_utc": "2026-11-09T04:58:46.240896Z"
+    "tle_epoch_utc": "2026-11-09T11:10:18.771456Z"
   },
-  "generated_utc": "2026-11-09T20:11:02Z",
+  "generated_utc": "2026-11-09T21:34:59Z",
   "windows": [
     {
       "id": "w0",
@@ -20,7 +20,7 @@
       "azimuth_deg": 44.87,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 10.75,
+      "phase_angle_deg": 10.76,
       "rendezvous_hours_fast": 1.75,
       "rendezvous_hours_slow": 24.99,
       "flyable": true
@@ -32,7 +32,7 @@
       "azimuth_deg": 135.14,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 77.85,
+      "phase_angle_deg": 77.86,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.7,
       "flyable": false
@@ -44,7 +44,7 @@
       "azimuth_deg": 44.89,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 101.03,
+      "phase_angle_deg": 101.04,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.6,
       "flyable": true
@@ -56,7 +56,7 @@
       "azimuth_deg": 135.1,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 167.38,
+      "phase_angle_deg": 167.39,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.32,
       "flyable": false
@@ -68,7 +68,7 @@
       "azimuth_deg": 44.87,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 191.94,
+      "phase_angle_deg": 191.96,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.21,
       "flyable": true
@@ -80,7 +80,7 @@
       "azimuth_deg": 135.13,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 259.13,
+      "phase_angle_deg": 259.15,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 23.92,
       "flyable": false
@@ -92,7 +92,7 @@
       "azimuth_deg": 44.89,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 282.07,
+      "phase_angle_deg": 282.1,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 25.37,
       "flyable": true
@@ -104,7 +104,7 @@
       "azimuth_deg": 135.1,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 349.05,
+      "phase_angle_deg": 349.09,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 31.28,
       "flyable": false
@@ -116,7 +116,7 @@
       "azimuth_deg": 44.87,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 13.46,
+      "phase_angle_deg": 13.51,
       "rendezvous_hours_fast": 1.74,
       "rendezvous_hours_slow": 24.98,
       "flyable": true
@@ -128,7 +128,7 @@
       "azimuth_deg": 135.13,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 80.62,
+      "phase_angle_deg": 80.67,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.69,
       "flyable": false
@@ -140,7 +140,7 @@
       "azimuth_deg": 44.89,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 103.92,
+      "phase_angle_deg": 103.97,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.59,
       "flyable": true
@@ -152,7 +152,7 @@
       "azimuth_deg": 135.1,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 170.36,
+      "phase_angle_deg": 170.43,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.3,
       "flyable": false
@@ -164,7 +164,7 @@
       "azimuth_deg": 44.87,
       "plane_error_deg": 0.0,
       "pass": "ascending",
-      "phase_angle_deg": 195.14,
+      "phase_angle_deg": 195.22,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 24.2,
       "flyable": true
@@ -176,10 +176,22 @@
       "azimuth_deg": 135.13,
       "plane_error_deg": 0.0,
       "pass": "descending",
-      "phase_angle_deg": 262.35,
+      "phase_angle_deg": 262.44,
       "rendezvous_hours_fast": null,
       "rendezvous_hours_slow": 23.91,
       "flyable": false
+    },
+    {
+      "id": "w14",
+      "t_launch_unix": 1794862668,
+      "t_launch_utc": "2026-11-16T20:57:48Z",
+      "azimuth_deg": 44.89,
+      "plane_error_deg": 0.0,
+      "pass": "ascending",
+      "phase_angle_deg": 285.49,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": 25.36,
+      "flyable": true
     }
   ]
 }

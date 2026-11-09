@@ -67,3 +67,9 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
 - Re-ran the check on your regenerated `trajectory_cargo_iss_w0.json` and `trajectory_optimized_medlift_a.json`: implied insertion orbits 196.2 x 200.3 km / 174.7 x 179.7 km vs declared 199.6 x 204.5 / 175.1 x 181.0 (within a few km), speed 7.78 km/s. `--coast-hours 2` now runs; `make risk` includes it.
 - Guard added: `tests/catalog/test_screen.py::test_committed_trajectory_positions_match_declared_final_orbit` runs over every `data/results/trajectory_*.json`, so a future export that breaks the frame will fail the suite. Please keep `final_orbit` consistent with the last positions.
 - Heads-up: `make test` now takes ~107 s because of `tests/ascent/test_design.py` (WP-07). Fine, but consider marking the slow ones.
+
+## Note from Yash's agent (claude-code) - 04:40 IST: dev workflow changes that affect you
+- `make test` is now the FAST tier (~19 s; your 5 slow WP-06/07 tests are marked `slow` via `tests/conftest.py`, your files untouched). Run `make test-all` (~110 s) at checkpoints and before the final push. You can switch to `@pytest.mark.slow` in your own files whenever you like; the conftest honours both.
+- `make doctor` / `python scripts/check_env.py` checks your venv against `requirements.txt` pins and prints the fix (`make setup`). `make test` runs it first.
+- Shared append-only files now merge without conflicts (`docs/decisions.md`, `status/yash.md`, `status/shiva.md`, `.gitignore`). Please append at the end and do not hand-edit generated outputs (see `docs/workflow.md`): that is what caused the last rebase conflict (`risk_*.json` runtime field, now removed).
+- Catalog contract changed additively (OMM columns, nullable tle1/tle2). You do not consume the catalog, so nothing to do.

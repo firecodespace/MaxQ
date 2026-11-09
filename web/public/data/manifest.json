@@ -1,5 +1,4 @@
 {
-  "generated_utc": "2026-11-09T21:13:09Z",
   "files": [
     {
       "name": "clusters_dummy.json",
@@ -47,13 +46,13 @@
       "name": "risk_cargo_iss_cape_canaveral.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 4947
+      "bytes": 5499
     },
     {
       "name": "risk_cargo_iss_cape_canaveral_optimized.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 5004
+      "bytes": 5557
     },
     {
       "name": "rocket_search_cargo_iss_balanced.json",
@@ -125,13 +124,13 @@
       "name": "windows_cargo_iss_cape_canaveral.json",
       "kind": "windows",
       "dummy": false,
-      "bytes": 5530
+      "bytes": 5869
     },
     {
       "name": "windows_crew_iss_cape_canaveral.json",
       "kind": "windows",
       "dummy": false,
-      "bytes": 5529
+      "bytes": 5868
     },
     {
       "name": "windows_geo_comm_cape_canaveral.json",
@@ -148,7 +147,7 @@
   ],
   "catalog": {
     "name": "catalog_web.json",
-    "_note": "REAL CelesTrak TLEs (or the committed offline sample if catalog_mode says so); subsampled per group.",
+    "_note": "REAL CelesTrak elements (or the committed offline sample if catalog_mode says so); subsampled per group. Objects numbered >= 100000 carry a propagation TLE with a placeholder catalog number.",
     "catalog_mode": "full-catalog",
     "groups": [
       "stations",
@@ -158,8 +157,9 @@
       "starlink",
       "debris"
     ],
-    "total_objects": 18555,
-    "shown_objects": 6815,
-    "latest_tle_epoch_utc": "2026-11-10T19:43:23.687616Z"
+    "total_objects": 19565,
+    "shown_objects": 6819,
+    "omm_only_objects": 328,
+    "latest_tle_epoch_utc": "2026-11-10T22:53:33.336384Z"
   }
 }

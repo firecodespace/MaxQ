@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Computed by mission/windows.py from the TLE of NORAD 28474 (epoch 2026-11-08T15:40:10.545312Z); search 2026-11-09T20:11:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan.",
+  "_note": "Computed by mission/windows.py from the TLE of NORAD 28474 (epoch 2026-11-09T12:18:34.318080Z); search 2026-11-09T21:34:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan.",
   "profile": "meo_gps",
   "site": {
     "name": "Cape Canaveral",
@@ -9,9 +9,9 @@
   },
   "target": {
     "norad_id": 28474,
-    "tle_epoch_utc": "2026-11-08T15:40:10.545312Z"
+    "tle_epoch_utc": "2026-11-09T12:18:34.318080Z"
   },
-  "generated_utc": "2026-11-09T20:11:02Z",
+  "generated_utc": "2026-11-09T21:34:59Z",
   "windows": [
     {
       "id": "w0",

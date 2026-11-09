@@ -29,7 +29,7 @@ def iss():
 
 def test_iss_is_in_offline_sample():
     s = json.loads(SAMPLE_PATH.read_text(encoding="utf-8"))
-    assert "25544U" in s["groups"]["stations"]
+    assert any(r["NORAD_CAT_ID"] == 25544 for r in s["groups"]["stations"])
 
 
 def test_iss_propagates_at_epoch(iss):
