@@ -65,3 +65,4 @@ def dynamic_pressure(speed_mps: float, alt_m: float) -> float:
     """
     rho = density(alt_m)
     return 0.5 * rho * speed_mps * speed_mps
+
