@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup doctor test test-all lint data data-offline windows risk ascent manifest web web-export
+.PHONY: setup doctor test test-all lint data data-offline windows risk cluster ascent manifest web web-export
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -36,6 +36,9 @@ windows:  ## WP-02: 7 days of launch windows, all profiles, Cape Canaveral -> da
 risk:  ## WP-08: screen ascent + 2 h parking-orbit coast against the catalog -> data/results/risk_*.json
 	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json --coast-hours 2
 	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_optimized_medlift_a.json --coast-hours 2 --out data/results/risk_cargo_iss_cape_canaveral_optimized.json
+
+cluster:  ## WP-09: cluster the catalog + altitude congestion -> data/results/clusters.json
+	$(PY) -m catalog.cluster
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 	$(PY) -m ascent.sim --rocket medlift_kerolox_a --out data/results/trajectory_cargo_iss_w0.json

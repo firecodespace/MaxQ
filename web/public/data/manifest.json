@@ -43,6 +43,12 @@
       "bytes": 2155
     },
     {
+      "name": "clusters.json",
+      "kind": "clusters",
+      "dummy": false,
+      "bytes": 1002668
+    },
+    {
       "name": "manifest_instance_1000.json",
       "kind": "manifest_instance",
       "dummy": false,
@@ -95,6 +101,18 @@
       "kind": "result",
       "dummy": false,
       "bytes": 241
+    },
+    {
+      "name": "result_manifest_12_tasks_qaoa_p1.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 272
+    },
+    {
+      "name": "result_manifest_12_tasks_qaoa_p2.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 282
     },
     {
       "name": "result_manifest_12_tasks_sa.json",

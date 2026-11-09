@@ -203,6 +203,20 @@ def _check_clusters(obj: dict) -> list[str]:
     for i, pt in enumerate(obj["points"]):
         if pt["cluster"] not in labels:
             errs.append(f"points[{i}].cluster: label {pt['cluster']} not defined in clusters")
+    cg = obj.get("congestion")
+    if cg:
+        n = len(cg["counts"])
+        if len(cg["altitude_edges_km"]) != n + 1:
+            errs.append(
+                f"congestion.altitude_edges_km: need len(counts)+1 = {n + 1} edges, got {len(cg['altitude_edges_km'])}"
+            )
+        if len(cg["density_per_million_km3"]) != n:
+            errs.append(
+                f"congestion.density_per_million_km3: need {n} values, got {len(cg['density_per_million_km3'])}"
+            )
+        e = cg["altitude_edges_km"]
+        if any(b <= a for a, b in zip(e, e[1:], strict=False)):
+            errs.append("congestion.altitude_edges_km: must be strictly increasing")
     return errs
 
 

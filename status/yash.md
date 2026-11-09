@@ -54,3 +54,10 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Production redeploy (CLI, deployment `maxq-mi93rxtez-firecodespaces.vercel.app`, READY) with the complete catalog (6,819 of 19,565 shown, 328 numbered 100000+), regenerated windows/risk and Shiva's WP-10 scheduler files exported to web/public/data.
 - Verified on the live URL: assets 200; desktop 1200x900 and mobile 375x812 with no console errors and no horizontal overflow; replay scrubbing and clock lock work; no banners. The deployed content equals the repo's web/public/data at this commit.
 - Reminder: deploys are manual (no Git integration): `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`.
+
+## 05:05 IST - claude-code (on behalf of yash) - WP-09 catalog clustering and congestion: done
+- Done: `catalog/cluster.py` (`make cluster`), `data/results/clusters.json` (19,565 objects -> 24 clusters, 1.9 % noise, ~10 s), additive contract fields (embedding, metrics, congestion, per-cluster stats), Sky tab in the web UI (orbit map by cluster with legend/isolate/hover, congestion chart with density/count toggle and hotspot list), 22 tests. `python -m pytest -m "not slow"` -> 288 passed.
+- Verified in the browser (desktop 1200x900, mobile 375x812): no console errors, no overflow, hover/legend/isolate/tab switching work.
+- Result worth knowing: the most congested shell is 450-500 km (10,098 objects, Starlink); GEO belt, GPS-like MEO ring and the debris clouds separate cleanly; Starlink spans several shells so a single "starlink" label is not one cluster.
+- Real ML piece: unsupervised DBSCAN (scikit-learn 1.9.1 pinned). Not redeployed: the Vercel site still has the previous export.
+- Next: WP-12 (profiles UI, Risk + Manifest tabs, README, demo GIF), then redeploy.

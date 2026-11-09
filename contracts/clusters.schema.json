@@ -4,22 +4,77 @@
   "title": "clusters.json - catalog clustering and 2D embedding (producer WP-09)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version", "features", "clusters", "points"],
+  "required": [
+    "schema_version",
+    "features",
+    "clusters",
+    "points"
+  ],
   "properties": {
-    "schema_version": {"const": 1},
-    "_note": {"type": "string"},
-    "features": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "features": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
     "clusters": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["label", "name", "count", "centroid"],
+        "required": [
+          "label",
+          "name",
+          "count",
+          "centroid"
+        ],
         "properties": {
-          "label": {"type": "integer", "minimum": -1, "description": "-1 = noise (e.g. DBSCAN)"},
-          "name": {"type": "string", "minLength": 1},
-          "count": {"type": "integer", "minimum": 0},
-          "centroid": {"type": "object", "additionalProperties": {"type": "number"}}
+          "label": {
+            "type": "integer",
+            "minimum": -1,
+            "description": "-1 = noise (e.g. DBSCAN)"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "centroid": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          },
+          "alt_km_min": {
+            "type": "number"
+          },
+          "alt_km_median": {
+            "type": "number"
+          },
+          "alt_km_max": {
+            "type": "number"
+          },
+          "incl_deg_median": {
+            "type": "number"
+          },
+          "dominant_group": {
+            "type": "string"
+          },
+          "dominant_share": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
         }
       }
     },
@@ -28,14 +83,90 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["norad_id", "cluster", "x", "y"],
+        "required": [
+          "norad_id",
+          "cluster",
+          "x",
+          "y"
+        ],
         "properties": {
-          "norad_id": {"type": "integer", "minimum": 1},
-          "cluster": {"type": "integer", "minimum": -1},
-          "x": {"type": "number"},
-          "y": {"type": "number"}
+          "norad_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "cluster": {
+            "type": "integer",
+            "minimum": -1
+          },
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          }
         }
       }
+    },
+    "embedding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "x",
+        "y"
+      ],
+      "properties": {
+        "x": {
+          "type": "string"
+        },
+        "y": {
+          "type": "string"
+        },
+        "method": {
+          "type": "string"
+        }
+      },
+      "description": "What the 2D x/y of each point mean, for axis labels"
+    },
+    "metrics": {
+      "type": "object",
+      "description": "Free-form: parameters and agreement with the catalog's known groups"
+    },
+    "congestion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "altitude_edges_km",
+        "counts",
+        "density_per_million_km3"
+      ],
+      "properties": {
+        "altitude_edges_km": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "number"
+          }
+        },
+        "counts": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "density_per_million_km3": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "note": {
+          "type": "string"
+        }
+      },
+      "description": "Objects per altitude shell: len(edges) = len(counts)+1 = len(density)+1"
     }
-  }
+  },
+  "description": "Catalog clustering (WP-09). Additive optional fields (schema_version stays 1): top-level embedding (axis meaning), metrics (free-form numbers vs known groups) and congestion (object density by altitude shell); per-cluster alt/incl statistics and dominant group."
 }

@@ -13,7 +13,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | 06 | Pitch/staging optimizer | Shiva | - | P1 | not started | WP-05 |
 | 07 | Rocket design search | Shiva | - | P1 | not started | WP-05 |
 | 08 | Collision screening | Yash | claude-code | P1 | done (ascent + 2 h coast; all go; 6-digit catalog gap noted) | - |
-| 09 | Catalog clustering and congestion | Yash | - | P1 | not started | WP-01 |
+| 09 | Catalog clustering and congestion | Yash | claude-code | P1 | done (DBSCAN, 24 clusters, Sky tab; not yet redeployed) | - |
 | 10 | Manifest scheduler | Shiva | - | P1 | not started | WP-02 |
 | 11 | QAOA benchmark | Shiva | - | P2 | not started | WP-10 |
 | 12 | Profiles UI, README, demo | Yash | - | P1 | not started | WP-03 |

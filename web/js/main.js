@@ -2,6 +2,7 @@ import { $, badge, clamp, el, fmtRel, fmtUtc, interp, interpLon } from "./util.j
 import { getJSON, PROFILES, probeManifest, trajectorySources, windowsSource } from "./data.js";
 import { GROUP_COLORS, MapView } from "./map.js";
 import { Plot } from "./plots.js";
+import { SkyView } from "./sky.js";
 
 // ---------------------------------------------------------------------------------------------- state
 const clock = { baseSim: Date.now(), baseReal: performance.now(), warp: 1, paused: false, locked: false };
@@ -402,6 +403,18 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 
+// ---------------------------------------------------------------------------------------------- views (tabs)
+let sky = null;
+const nameIndex = new Map();
+function showView(view) {
+  for (const b of document.querySelectorAll(".viewtabs button")) b.setAttribute("aria-selected", String(b.dataset.view === view));
+  $("view-mission").hidden = view !== "mission";
+  $("view-sky").hidden = view !== "sky";
+  if (view === "sky" && sky) sky.ensureLoaded();
+  if (view === "mission") window.dispatchEvent(new Event("resize"));
+}
+for (const b of document.querySelectorAll(".viewtabs button")) b.addEventListener("click", () => showView(b.dataset.view));
+
 // ---------------------------------------------------------------------------------------------- boot
 async function boot() {
   syncClockUi();
@@ -412,6 +425,7 @@ async function boot() {
   else banner("Coastline data missing; showing the graticule only.", "warn");
 
   S.manifest = (await getJSON("manifest.json")) || (await probeManifest());
+  sky = new SkyView({ manifest: S.manifest, nameOf: (id) => nameIndex.get(id) });
   if (S.manifest._probed) banner("manifest.json not found; probing for known data files.", "warn");
 
   // Windows panel
@@ -432,6 +446,7 @@ async function boot() {
   const cat = await getJSON("catalog_web.json");
   if (cat && Array.isArray(cat.objects) && cat.objects.length) {
     S.catalog = cat;
+    for (const o of cat.objects) nameIndex.set(o[0], o[1]);
     S.groupIdx = Uint8Array.from(cat.objects, (o) => o[2]);
     S.issIdx = cat.objects.findIndex((o) => o[0] === 25544);
     buildChips();

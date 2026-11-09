@@ -29,7 +29,12 @@
 
   <div id="banners" class="banners" role="status"></div>
 
-  <main class="grid">
+  <nav class="viewtabs" role="tablist" aria-label="Views">
+    <button type="button" role="tab" id="tab-mission" data-view="mission" aria-selected="true">Mission</button>
+    <button type="button" role="tab" id="tab-sky" data-view="sky" aria-selected="false">Sky</button>
+  </nav>
+
+  <main class="grid" id="view-mission">
     <section class="panel mapwrap" aria-label="World map with live satellites">
       <div class="panel-head">
         <h2>Live satellites</h2>
@@ -91,6 +96,38 @@
         <canvas id="plot-speed" aria-label="Speed versus time"></canvas>
         <canvas id="plot-q" aria-label="Dynamic pressure versus time"></canvas>
       </div>
+    </section>
+  </main>
+
+  <main class="sky" id="view-sky" hidden>
+    <section class="panel skymap-panel" aria-label="Orbit map of the catalog by cluster">
+      <div class="panel-head">
+        <h2>Sky: orbits by cluster</h2>
+        <div id="sky-badges" class="badges"></div>
+        <span id="sky-file" class="note"></span>
+      </div>
+      <div class="canvaswrap"><canvas id="sky-map" aria-label="Scatter of every catalog object by altitude and inclination, coloured by cluster"></canvas></div>
+      <div id="sky-tip" class="note">Hover a point for details.</div>
+      <div id="sky-summary" class="note">Loading clusters...</div>
+    </section>
+    <aside class="panel skylegend" aria-label="Clusters">
+      <div class="panel-head"><h2>Clusters</h2></div>
+      <div class="legend-actions">
+        <button type="button" id="sky-all">All</button>
+        <button type="button" id="sky-none">None</button>
+        <label class="chk"><input type="checkbox" id="sky-labels" checked> Labels</label>
+      </div>
+      <div id="sky-legend" class="legend"></div>
+    </aside>
+    <section class="panel skycong" aria-label="Congestion by altitude">
+      <div class="panel-head">
+        <h2>Congestion by altitude</h2>
+        <label class="chk"><input type="radio" name="sky-metric" value="density" checked> Density</label>
+        <label class="chk"><input type="radio" name="sky-metric" value="count"> Count</label>
+      </div>
+      <canvas id="sky-cong" aria-label="Objects per altitude shell"></canvas>
+      <div id="sky-cong-tip" class="note">Hover a bar for details.</div>
+      <div id="sky-hotspots" class="hotspots"></div>
     </section>
   </main>
 
