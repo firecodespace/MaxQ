@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/catalog.schema.json",
+  "title": "catalog - column spec for data/processed/catalog.parquet (producer WP-01)",
+  "description": "The real catalog is a parquet table. x-columns is the column spec (name, pandas/arrow dtype kind); 'rows' is the row-oriented JSON form used for the dummy sample. validate('catalog', obj) accepts that JSON form, a pandas DataFrame, or a pyarrow Table. Parquet files must carry file metadata key 'maxq_schema_version' = '1'.",
+  "x-columns": [
+    {"name": "norad_id", "dtype": "int"},
+    {"name": "name", "dtype": "str"},
+    {"name": "group", "dtype": "str"},
+    {"name": "tle1", "dtype": "str"},
+    {"name": "tle2", "dtype": "str"},
+    {"name": "epoch_utc", "dtype": "str"},
+    {"name": "incl_deg", "dtype": "float"},
+    {"name": "ecc", "dtype": "float"},
+    {"name": "mean_motion_rev_day", "dtype": "float"},
+    {"name": "raan_deg", "dtype": "float"},
+    {"name": "alt_km_approx", "dtype": "float"}
+  ],
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "rows"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "rows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["norad_id", "name", "group", "tle1", "tle2", "epoch_utc", "incl_deg", "ecc", "mean_motion_rev_day", "raan_deg", "alt_km_approx"],
+        "properties": {
+          "norad_id": {"type": "integer", "minimum": 1},
+          "name": {"type": "string"},
+          "group": {"type": "string", "minLength": 1, "description": "stations|starlink|gps-ops|geo|debris|active|..."},
+          "tle1": {"type": "string", "pattern": "^1 .{67}$", "description": "TLE line 1, 69 chars"},
+          "tle2": {"type": "string", "pattern": "^2 .{67}$", "description": "TLE line 2, 69 chars"},
+          "epoch_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"},
+          "incl_deg": {"type": "number", "minimum": 0, "maximum": 180},
+          "ecc": {"type": "number", "minimum": 0, "exclusiveMaximum": 1},
+          "mean_motion_rev_day": {"type": "number", "exclusiveMinimum": 0},
+          "raan_deg": {"type": "number", "minimum": 0, "maximum": 360},
+          "alt_km_approx": {"type": "number"}
+        }
+      }
+    }
+  }
+}

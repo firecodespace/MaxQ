@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+*.egg-info/
+
+# Data: raw fetches are cached locally, never committed
+data/raw/*
+!data/raw/.gitkeep
+
+# Notebooks with outputs, secrets, OS junk
+*.ipynb_checkpoints/
+.env
+.env.*
+.DS_Store
+Thumbs.db
+
+# Node / web
+node_modules/
+web/dist/
+
+# Claude worktrees
+.claude/worktrees/

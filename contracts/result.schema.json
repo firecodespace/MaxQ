@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/result.schema.json",
+  "title": "result.json - one solver run on one manifest instance (producer WP-10)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "instance", "solver", "selected", "score", "runtime_s", "seed"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "instance": {"type": "string", "minLength": 1},
+    "solver": {"type": "string", "minLength": 1, "description": "e.g. greedy | sa | cpsat | qaoa"},
+    "selected": {"type": "array", "items": {"type": "integer", "minimum": 0}, "uniqueItems": true},
+    "score": {"type": "number"},
+    "runtime_s": {"type": "number", "minimum": 0},
+    "seed": {"type": "integer"}
+  }
+}

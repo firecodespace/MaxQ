@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/trajectory.schema.json",
+  "title": "trajectory.json - 1 Hz ascent trajectory, geodetic (producer WP-05/06)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "id", "rocket_id", "window_id", "t0_unix", "seed", "t_s", "lat_deg", "lon_deg", "alt_m", "speed_mps", "q_pa", "mass_kg", "events", "final_orbit", "params"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "id": {"type": "string", "minLength": 1},
+    "rocket_id": {"type": "string", "minLength": 1},
+    "window_id": {"type": "string", "minLength": 1},
+    "t0_unix": {"type": "integer"},
+    "seed": {"type": "integer"},
+    "t_s": {"type": "array", "minItems": 1, "items": {"type": "number"}, "description": "1 Hz, strictly increasing"},
+    "lat_deg": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": -90, "maximum": 90}},
+    "lon_deg": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": -180, "maximum": 180}},
+    "alt_m": {"type": "array", "minItems": 1, "items": {"type": "number"}},
+    "speed_mps": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+    "q_pa": {"type": "array", "minItems": 1, "items": {"type": "number", "minimum": 0}},
+    "mass_kg": {"type": "array", "minItems": 1, "items": {"type": "number", "exclusiveMinimum": 0}},
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["t_s", "name"],
+        "properties": {
+          "t_s": {"type": "number", "minimum": 0},
+          "name": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "final_orbit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["perigee_km", "apogee_km", "incl_deg", "ecc"],
+      "properties": {
+        "perigee_km": {"type": "number"},
+        "apogee_km": {"type": "number"},
+        "incl_deg": {"type": "number", "minimum": 0, "maximum": 180},
+        "ecc": {"type": "number", "minimum": 0, "exclusiveMaximum": 1}
+      }
+    },
+    "params": {"type": "object", "description": "Free-form producer parameters (e.g. pitch_program)"}
+  }
+}

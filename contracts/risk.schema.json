@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/risk.schema.json",
+  "title": "risk.json - collision-screening result per window (producer WP-08)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "threshold_km", "results"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "threshold_km": {"type": "number", "exclusiveMinimum": 0},
+    "metadata": {"type": "object", "description": "Optional; WP-08 puts the TLE accuracy caveat here"},
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["window_id", "trajectory_id", "min_miss_km", "object", "t_closest_utc", "risk_score", "status"],
+        "properties": {
+          "window_id": {"type": "string", "minLength": 1},
+          "trajectory_id": {"type": "string", "minLength": 1},
+          "min_miss_km": {"type": "number", "minimum": 0},
+          "object": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["norad_id", "name"],
+            "properties": {
+              "norad_id": {"type": "integer", "minimum": 1},
+              "name": {"type": "string"}
+            }
+          },
+          "t_closest_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"},
+          "risk_score": {"type": "number", "minimum": 0, "maximum": 1},
+          "status": {"enum": ["go", "review", "no-go"]}
+        }
+      }
+    }
+  }
+}

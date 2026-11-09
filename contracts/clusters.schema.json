@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/clusters.schema.json",
+  "title": "clusters.json - catalog clustering and 2D embedding (producer WP-09)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "features", "clusters", "points"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "features": {"type": "array", "minItems": 1, "items": {"type": "string"}},
+    "clusters": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "name", "count", "centroid"],
+        "properties": {
+          "label": {"type": "integer", "minimum": -1, "description": "-1 = noise (e.g. DBSCAN)"},
+          "name": {"type": "string", "minLength": 1},
+          "count": {"type": "integer", "minimum": 0},
+          "centroid": {"type": "object", "additionalProperties": {"type": "number"}}
+        }
+      }
+    },
+    "points": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["norad_id", "cluster", "x", "y"],
+        "properties": {
+          "norad_id": {"type": "integer", "minimum": 1},
+          "cluster": {"type": "integer", "minimum": -1},
+          "x": {"type": "number"},
+          "y": {"type": "number"}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/windows.schema.json",
+  "title": "windows.json - launch windows for one site and profile (producer WP-02)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "profile", "site", "target", "generated_utc", "windows"],
+  "properties": {
+    "schema_version": {"const": 1},
+    "_note": {"type": "string"},
+    "profile": {"enum": ["crew_iss", "cargo_iss", "geo_comm", "meo_gps"]},
+    "site": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "lat_deg", "lon_deg"],
+      "properties": {
+        "name": {"type": "string", "minLength": 1},
+        "lat_deg": {"type": "number", "minimum": -90, "maximum": 90},
+        "lon_deg": {"type": "number", "minimum": -180, "maximum": 180}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["norad_id", "tle_epoch_utc"],
+      "properties": {
+        "norad_id": {"type": "integer", "minimum": 1},
+        "tle_epoch_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"}
+      }
+    },
+    "generated_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"},
+    "windows": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "t_launch_unix", "t_launch_utc", "azimuth_deg", "plane_error_deg", "pass", "flyable"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "t_launch_unix": {"type": "integer", "description": "UTC unix seconds; must equal t_launch_utc"},
+          "t_launch_utc": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d+)?Z$"},
+          "azimuth_deg": {"type": "number", "minimum": 0, "exclusiveMaximum": 360},
+          "plane_error_deg": {"type": "number", "minimum": 0},
+          "pass": {"enum": ["ascending", "descending"]},
+          "phase_angle_deg": {"type": ["number", "null"], "description": "ISS profiles only; null for GEO/MEO"},
+          "rendezvous_hours_fast": {"type": ["number", "null"], "minimum": 0},
+          "rendezvous_hours_slow": {"type": ["number", "null"], "minimum": 0},
+          "flyable": {"type": "boolean"}
+        }
+      }
+    }
+  }
+}
