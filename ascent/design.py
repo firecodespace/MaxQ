@@ -1,3 +1,4 @@
+# ruff: noqa: E402
 """Multi-objective rocket design search using NSGA-II (pymoo).
 
 Discovers Pareto fronts of launch vehicle architectures for specific mission profiles.
@@ -17,6 +18,7 @@ import math
 import os
 import sys
 import time
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any

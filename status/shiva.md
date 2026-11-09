@@ -17,12 +17,16 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
   - Removed `xfail` on `test_every_contract_has_a_dummy`; test suite now passes (53 passed, 1 skipped).
   - Pinned Shiva lane dependencies in `requirements.txt`: cma==4.5.0, pymoo==0.6.2, ortools==9.15.6755, pennylane==0.45.1, pennylane-lightning==0.45.0, matplotlib==3.11.2 (Yellow item noted). PennyLane installed cleanly on Python 3.13.
   - Trajectory dummy provides 521-point 1 Hz profile for `traj_medlift_a_w0` ready for Yash's frontend (WP-03) and screening (WP-08).
-- 01:55 IST — WP-06 (Pitch/Staging Optimizer P1) DONE:
-  - Shipped `ascent/optimize.py` implementing CMA-ES optimization of ascent pitch program parameters.
-  - Achieved measured 626.3 kg propellant savings (0.13% total wet mass reduction, ~7% payload capacity equivalent) versus baseline, achieving 176.1 x 182.2 km parking orbit (e = 0.00047, max-q 42.4 kPa at 71.7 s).
-  - Generated comparison artifact `data/results/naive_vs_optimized_medlift_a.png` (4-panel altitude, speed, dynamic pressure, pitch angle curves).
-  - Exported contract-valid `data/results/trajectory_optimized_medlift_a.json` with seed=42 recorded in outputs.
-  - Test suite `tests/ascent/test_optimize.py` added; full repo test suite passes (159 tests green).
+- 02:20 IST — WP-07 (Rocket Design Search P1) DONE:
+  - Shipped `ascent/design.py` implementing multi-objective launch vehicle sizing and staging optimization via NSGA-II (`pymoo`).
+  - Objectives: Maximize payload capacity to target orbit, minimize liftoff wet mass (GLOW). Physical constraints: delta-V budget and stage acceleration limits.
+  - Built adaptive pitch program tuning (`tune_pitch_program`) pairing coarse-grid heuristic search with Nelder-Mead polishing to verify candidate architectures in 2D point-mass ascent simulation.
+  - Executed search across all 3 mission profiles (`cargo_iss`, `crew_iss`, `geo_comm`):
+    - Produced non-dominated Pareto frontiers for each profile (saved to `data/results/pareto/pareto_designs_<profile>.json` and visual plots to `data/results/pareto_front_<profile>.png`).
+    - Successfully verified all 9 finalists (Lightweight, Balanced, Heavyweight per profile) achieving circular parking orbits (perigee 175-198 km, e < 0.003, v >= 7760 m/s).
+    - Exported 9 contract-valid rocket definitions (`data/results/rocket_search_<profile>_<label>.json`) validated 100% against `contracts/rocket.schema.json`.
+  - Added unit test suite `tests/ascent/test_design.py` (7 tests green); full repository test suite passes (184 passed, 0 failed); `ruff check .` passes with 0 errors.
+
 
 
 

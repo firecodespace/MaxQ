@@ -12,12 +12,11 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Any
 
 import numpy as np
-import pytest
 
 from ascent.design import (
-    PROFILE_SPECS,
     DesignFinalist,
     RocketDesignProblem,
     convert_vector_to_rocket,
@@ -42,7 +41,6 @@ def test_problem_initialization():
 def test_problem_evaluation_physics():
     """Verify objective and constraint computation conforms to rocket equation and physics."""
     prob = RocketDesignProblem("cargo_iss")
-    specs = PROFILE_SPECS["cargo_iss"]
 
     # Midpoint test vector
     x_mid = 0.5 * (prob.xl + prob.xu)
