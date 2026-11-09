@@ -25,6 +25,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import numpy as np
+
 from ascent.atmosphere import density
 from ascent.geo import (
     MU_EARTH,
@@ -34,6 +36,7 @@ from ascent.geo import (
     spherical_forward,
 )
 from ascent.rockets import Rocket, get_rocket
+from core.frames import ecef_to_geodetic
 
 # Default tuned pitch program parameters [t_start_s, p_meco_deg, p_final_deg, alpha1, alpha2]
 DEFAULT_PITCH_PARAMS: dict[str, list[float]] = {
@@ -195,6 +198,12 @@ def simulate_ascent(
 
     next_record_t = 0.0
     t_insertion = 0.0
+    insertion_reached = False
+    v_ins_speed = 0.0
+    h_ins_alt = 0.0
+    perigee_km = 0.0
+    apogee_km = 0.0
+    ecc_final = 0.0
     stage1_separated = False
 
     while t <= t_max_sim:
@@ -205,7 +214,19 @@ def simulate_ascent(
         # Record at 1 Hz
         if t >= next_record_t - 1e-6:
             downrange_m = R_EARTH * theta
-            lat_pt, lon_pt = spherical_forward(site_lat_deg, site_lon_deg, azimuth_deg, downrange_m)
+            lat_iner, lon_iner = spherical_forward(site_lat_deg, site_lon_deg, azimuth_deg, downrange_m)
+
+            # Earth-fixed longitude: subtract Earth rotation accumulated since launch
+            lon_ecef = lon_iner - math.degrees(OMEGA_EARTH * t)
+            lon_ecef = (lon_ecef + 180.0) % 360.0 - 180.0
+
+            # Convert spherical geocentric coordinates (lat_iner, lon_ecef, r) to WGS-84 geodetic
+            phi_rad = math.radians(lat_iner)
+            lam_rad = math.radians(lon_ecef)
+            x_ecef = r * math.cos(phi_rad) * math.cos(lam_rad)
+            y_ecef = r * math.cos(phi_rad) * math.sin(lam_rad)
+            z_ecef = r * math.sin(phi_rad)
+            lat_wgs, lon_wgs, alt_wgs = ecef_to_geodetic(np.array([x_ecef, y_ecef, z_ecef]))
 
             rho_rec = density(h)
             v_air_d_rec = vd - OMEGA_EARTH * r * math.cos(math.radians(site_lat_deg))
@@ -214,9 +235,9 @@ def simulate_ascent(
 
             sec = int(round(next_record_t))
             t_s_list.append(sec)
-            lat_deg_list.append(round(lat_pt, 4))
-            lon_deg_list.append(round(lon_pt, 4))
-            alt_m_list.append(round(max(0.0, h), 1))
+            lat_deg_list.append(round(float(lat_wgs), 4))
+            lon_deg_list.append(round(float(lon_wgs), 4))
+            alt_m_list.append(round(float(alt_wgs), 1))
             speed_mps_list.append(round(speed, 1))
             q_pa_list.append(round(q_rec, 1))
             mass_kg_list.append(round(m, 1))
@@ -239,12 +260,34 @@ def simulate_ascent(
             t > t_ign2
             and h >= 160000.0
             and (a_semi >= (R_EARTH + target_parking_alt_m) or speed >= v_circ)
+            and not insertion_reached
         ):
+            insertion_reached = True
             t_insertion = t
+            v_ins_speed = speed
+            h_ins_alt = h
+            eps_final = eps_current
+            a_final = a_semi
+            h_ang_final = r * vd
+            ecc_sq = 1.0 + 2.0 * eps_final * (h_ang_final**2) / (MU_EARTH**2)
+            ecc_final = math.sqrt(max(0.0, ecc_sq))
+            r_peri = a_final * (1.0 - ecc_final)
+            r_apo = a_final * (1.0 + ecc_final)
+            perigee_km = (r_peri - R_EARTH) / 1000.0
+            apogee_km = (r_apo - R_EARTH) / 1000.0
+
+        # After insertion, coast 5 seconds in parking orbit to allow central-difference
+        # velocity reconstruction in downstream collision screening
+        if insertion_reached and t >= t_insertion + 5.0:
             break
 
         # Stage parameters
-        if t <= t_meco:
+        if insertion_reached:
+            thrust = 0.0
+            cd = 0.0
+            area = 0.0
+            mdot = 0.0
+        elif t <= t_meco:
             thrust = s1.thrust_n
             cd = s1.cd
             area = s1.area_m2
@@ -263,6 +306,7 @@ def simulate_ascent(
         # Stage separation drop of dry mass
         if t >= t_meco and not stage1_separated:
             m -= s1.dry_kg
+            stage1_separated = True
             stage1_separated = True
 
         # Dynamics derivatives function
@@ -336,41 +380,25 @@ def simulate_ascent(
 
         t += dt_substep
 
-    if t_insertion == 0.0:
+    if not insertion_reached:
         t_insertion = t
-
-    # Ensure last insertion point is recorded in the discrete arrays
-    last_sec = int(round(t_insertion))
-    if not t_s_list or t_s_list[-1] != last_sec:
-        downrange_m = R_EARTH * theta
-        lat_pt, lon_pt = spherical_forward(site_lat_deg, site_lon_deg, azimuth_deg, downrange_m)
         v_ins_speed = math.sqrt(vr**2 + vd**2)
-        t_s_list.append(last_sec)
-        lat_deg_list.append(round(lat_pt, 4))
-        lon_deg_list.append(round(lon_pt, 4))
-        alt_m_list.append(round(r - R_EARTH, 1))
-        speed_mps_list.append(round(v_ins_speed, 1))
-        q_pa_list.append(0.0)
-        mass_kg_list.append(round(m, 1))
-
-    # Compute Keplerian elements of final parking orbit
-    v_final = math.sqrt(vr**2 + vd**2)
-    alt_final = r - R_EARTH
-    eps_final = 0.5 * v_final**2 - MU_EARTH / r
-    a_final = -MU_EARTH / (2.0 * eps_final)
-    h_ang_final = r * vd
-    ecc_sq = 1.0 + 2.0 * eps_final * (h_ang_final**2) / (MU_EARTH**2)
-    ecc_final = math.sqrt(max(0.0, ecc_sq))
-    r_peri = a_final * (1.0 - ecc_final)
-    r_apo = a_final * (1.0 + ecc_final)
-    perigee_km = (r_peri - R_EARTH) / 1000.0
-    apogee_km = (r_apo - R_EARTH) / 1000.0
+        h_ins_alt = r - R_EARTH
+        eps_final = 0.5 * v_ins_speed**2 - MU_EARTH / r
+        a_final = -MU_EARTH / (2.0 * eps_final) if eps_final < 0 else 1e9
+        h_ang_final = r * vd
+        ecc_sq = 1.0 + 2.0 * eps_final * (h_ang_final**2) / (MU_EARTH**2)
+        ecc_final = math.sqrt(max(0.0, ecc_sq))
+        r_peri = a_final * (1.0 - ecc_final)
+        r_apo = a_final * (1.0 + ecc_final)
+        perigee_km = (r_peri - R_EARTH) / 1000.0
+        apogee_km = (r_apo - R_EARTH) / 1000.0
 
     # Ensure events timestamps are integers within the discrete 1 Hz series
     sec_max_q = min(max(0, int(round(t_max_q))), t_s_list[-1])
     sec_meco = min(max(0, int(round(t_meco))), t_s_list[-1])
     sec_sep = min(max(sec_meco, int(round(t_sep))), t_s_list[-1])
-    sec_ins = t_s_list[-1]
+    sec_ins = min(max(sec_sep, int(round(t_insertion))), t_s_list[-1])
 
     events = [
         {"t_s": sec_max_q, "name": "max_q"},
@@ -414,8 +442,8 @@ def simulate_ascent(
         perigee_km=perigee_km,
         apogee_km=apogee_km,
         eccentricity=ecc_final,
-        insertion_speed_mps=v_final,
-        insertion_alt_m=alt_final,
+        insertion_speed_mps=v_ins_speed,
+        insertion_alt_m=h_ins_alt,
         max_q_pa=max_q,
         t_max_q_s=t_max_q,
         gravity_loss_mps=dv_grav,

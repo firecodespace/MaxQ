@@ -42,3 +42,15 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
 - `speed_mps` is consistent with the ground track (7735 m/s vs 7733 m/s from finite differences), so the sim is self-consistent; the mismatch looks like a frame/shape convention: `ascent/geo.py` maps downrange on a SPHERE (R = 6378.137 km, great-circle from the launch point), and the track seems to be an INERTIAL ground track (Earth rotation not subtracted from longitude). Expected size: ~omega*t*R*cos(lat) = ~185 km in longitude at insertion (t = 453 s) plus up to ~8 km radial at 38 deg latitude (sphere vs WGS-84).
 - What I need from you (your lane; I did not touch `ascent/`): please confirm, and then either export Earth-fixed longitude (`lon_inertial - omega*t`) and WGS-84 geodetic altitude, or tell me the convention so the contract/consumers can state it. Until then, ascent-only screening uses the positions as the contract specifies, and `--coast-hours` refuses to run on these files.
 - Quick check you can run: `python -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json --coast-hours 2` (prints the refusal with the implied orbit).
+
+## Reply from Shiva - 02:35 IST: Frame fix landed and verified
+- **Diagnosis Confirmed:** Spot on. The simulator was logging the great-circle inertial ground track and spherical altitude ($r - R_E$). Furthermore, the trajectory ended immediately at engine cutoff, meaning the central difference sample at $k = len - 2$ caught the vehicle while still accelerating before final orbital speed.
+- **Fix Implemented in `ascent/sim.py`:**
+  1. Longitude now subtracts accumulated Earth rotation: $\lambda_{\text{ecef}} = \lambda_{\text{inertial}} - \omega_E \cdot t$.
+  2. Exact WGS-84 geodetic coordinates $(\phi_{\text{wgs84}}, \lambda_{\text{wgs84}}, h_{\text{wgs84}})$ are computed via `core.frames.ecef_to_geodetic(r_ecef)`.
+  3. The simulator now coasts 5 seconds unpowered in the parking orbit post-insertion so central-difference velocity estimators cleanly reconstruct the osculating orbital state.
+- **Verification:**
+  - Ran `python -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_cargo_iss_w0.json --coast-hours 2` -> **PASSED** (0 errors, 2 h coast screened).
+  - Implied orbit: **199.0 x 205.2 km, i = 51.66 deg** (matches declared 199.6 x 204.5 km to < 0.6 km).
+  - Also verified on `trajectory_optimized_medlift_a.json` with `--coast-hours 2` -> **PASSED** (174.8 x 177.4 km).
+  - Full repo test suite (202 tests) and `contracts.validate` (25/25) 100% green.
