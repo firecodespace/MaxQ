@@ -9,6 +9,8 @@
     "min_miss_km_note": "closest object found per window; values far above threshold are indicative only (guaranteed accurate for objects within 2x threshold; beyond that only the 100 closest coarse candidates are refined, and objects more than ~threshold+60 km away in altitude are prefiltered out)",
     "trajectory_reuse": "trajectory traj_medlift_kerolox_a_optimized (rocket medlift_kerolox_a) is time-shifted to each flyable window; descending (non-flyable) windows are not screened",
     "target_excluded_norad": 25544,
+    "windows_profile": "cargo_iss",
+    "windows_site": "Cape Canaveral",
     "screened_span": "ascent 457 s + 2 h parking-orbit coast (SGP4 from the fitted insertion state)",
     "coast": {
       "coast_hours": 2.0,

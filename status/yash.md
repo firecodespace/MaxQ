@@ -61,3 +61,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Result worth knowing: the most congested shell is 450-500 km (10,098 objects, Starlink); GEO belt, GPS-like MEO ring and the debris clouds separate cleanly; Starlink spans several shells so a single "starlink" label is not one cluster.
 - Real ML piece: unsupervised DBSCAN (scikit-learn 1.9.1 pinned). Not redeployed: the Vercel site still has the previous export.
 - Next: WP-12 (profiles UI, Risk + Manifest tabs, README, demo GIF), then redeploy.
+
+## 04:20 IST - claude-code (on behalf of yash) - Shiva review done; board refreshed
+- Reviewed WP-10/11/14: engineering OK, claim-level issues found (details `docs/reviews/shiva-wp10-11-14.md`, action list in `status/shiva.md`). Biggest: QAOA 100% is matched by random sampling with the same shots (90.6% mean, 24% optimal); CP-SAT beats SA on speed and quality; the 1000-task instance is 85% synthetic and unlabelled; reruns are not reproducible. Evidence script: `scripts/review_manifest_claims.py`.
+- During the review I accidentally re-ran `manifest.bench` (it has no CLI and ignores --help); it overwrote Shiva's committed results; restored from git immediately, nothing was committed.
+- My side: risk files carry `windows_profile`; BOARD brought up to date (WP-12 deferred to last stage by Yash's decision).

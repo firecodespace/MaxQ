@@ -160,13 +160,13 @@
       "name": "risk_cargo_iss_cape_canaveral.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 5499
+      "bytes": 5575
     },
     {
       "name": "risk_cargo_iss_cape_canaveral_optimized.json",
       "kind": "risk",
       "dummy": false,
-      "bytes": 5557
+      "bytes": 5633
     },
     {
       "name": "rocket_search_cargo_iss_balanced.json",

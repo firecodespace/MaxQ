@@ -426,6 +426,8 @@ def build_risk(
             "trajectory_reuse": f"trajectory {traj['id']} (rocket {traj['rocket_id']}) is time-shifted to each flyable "
             "window; descending (non-flyable) windows are not screened",
             "target_excluded_norad": int(windows["target"]["norad_id"]),
+            "windows_profile": windows["profile"],  # join key for consumers: (profile, window_id)
+            "windows_site": windows["site"]["name"],
             "screened_span": (
                 f"ascent {traj['t_s'][-1]:g} s + {coast_hours:g} h parking-orbit coast "
                 "(SGP4 from the fitted insertion state)"

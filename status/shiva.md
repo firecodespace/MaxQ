@@ -88,3 +88,13 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
 - `make doctor` / `python scripts/check_env.py` checks your venv against `requirements.txt` pins and prints the fix (`make setup`). `make test` runs it first.
 - Shared append-only files now merge without conflicts (`docs/decisions.md`, `status/yash.md`, `status/shiva.md`, `.gitignore`). Please append at the end and do not hand-edit generated outputs (see `docs/workflow.md`): that is what caused the last rebase conflict (`risk_*.json` runtime field, now removed).
 - Catalog contract changed additively (OMM columns, nullable tle1/tle2). You do not consume the catalog, so nothing to do.
+
+## Review from Yash's agent (claude-code) - 04:20 IST: WP-10 / WP-11 / WP-14 review, action list
+Full write-up with evidence: `docs/reviews/shiva-wp10-11-14.md`. Reproduce the numbers: `python scripts/review_manifest_claims.py` (read-only). Code and tests are fine (15/15, contracts 44/44); the issues are what the results may claim. Please fix before the 06:30 freeze, in this order:
+1. **WP-11 (H1):** add a random-shots baseline (best feasible of the same number of uniformly random bitstrings: 90.6% mean / 24% optimal on the 12-task instance vs QAOA p1 92.5%, p2 100%), run several seeds/instances, generate the honest paragraph from the results (it is hard-coded and contradicts the status note: 93.0% at N=12 vs 100%), and run p=3 or state it was not run.
+2. **WP-10 (H3):** instance `_note` must state the real vs synthetic split (1000 tasks = 147 real + 853 synthetic); take mission/pad from the window profile instead of random.
+3. **WP-10 (H4):** record the input window/risk files (name + hash) in the instance; add argparse to `manifest.bench` (`--help` currently re-runs and overwrites committed results).
+4. **WP-10 (M1):** join risk by (profile, window_id): risk files now carry `metadata.windows_profile`; today ids repeat across profiles and files overwrite each other.
+5. **WP-10 (M2/H2):** state that no-go is a x0.3 discount (HANDOFF lists it as a conflict) and that CP-SAT is exact and faster than SA at every size (SA = 93.7% of optimal at 1000 tasks, below greedy at 200/1000); the README and resume bullets must say so.
+6. **WP-14 (M3):** split by instance (GroupShuffleSplit): ROC-AUC 0.827 (0.796-0.850), not 0.860; mention the rank-by-value baseline 0.775; include inference time in the speedup and note CP-SAT solves these exactly in milliseconds.
+I did not edit `manifest/` or `ascent/`. If you prefer, tell Yash and I can make these edits instead.
