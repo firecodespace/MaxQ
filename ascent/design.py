@@ -27,7 +27,9 @@ if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
 # Avoid font cache write permissions warning on Windows sandbox
-os.environ.setdefault("MPLCONFIGDIR", str(REPO_ROOT / ".cache" / "matplotlib"))
+_cache_dir = REPO_ROOT / ".cache" / "matplotlib"
+_cache_dir.mkdir(parents=True, exist_ok=True)
+os.environ["MPLCONFIGDIR"] = str(_cache_dir)
 
 import matplotlib
 
