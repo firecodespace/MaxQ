@@ -1,7 +1,7 @@
 {
   "profile": "cargo_iss",
   "seed": 42,
-  "runtime_s": 0.08,
+  "runtime_s": 0.09,
   "n_pareto_designs": 35,
   "pareto_front": [
     {
