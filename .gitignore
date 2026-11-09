@@ -23,7 +23,7 @@ node_modules/
 web/dist/
 
 # Claude worktrees
-.claude/worktrees/
+.claude/
 
 # Generated: rebuild with `make data` / `make data-offline`
 data/processed/*

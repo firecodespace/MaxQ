@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup test lint data data-offline windows ascent manifest web
+.PHONY: setup test lint data data-offline windows ascent manifest web web-export
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -33,5 +33,8 @@ ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 manifest:  ## WP-10: manifest scheduler benchmark (Shiva)
 	@echo "manifest: not implemented yet (WP-10, Shiva's lane)"
 
-web:  ## WP-03: build/serve the static site
-	@echo "web: not implemented yet (WP-03)"
+web-export:  ## WP-03: validate + export data for the static site -> web/public/data/
+	$(PY) scripts/export_web_data.py
+
+web: web-export  ## WP-03: export data, then serve web/ at http://localhost:8765
+	$(PY) -m http.server 8765 --directory web

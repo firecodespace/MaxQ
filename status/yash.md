@@ -19,3 +19,10 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Tests: all HANDOFF section 7 WP-02 known values + independent closed-form J2 cross-check of crossing times (agree < 90 s); descending passes flyable=false by default; stale-TLE and unreachable-inclination fail loudly.
 - Caveats: azimuth is INERTIAL (see decisions); phasing assumes 520 s / 17 deg ascent; geo_comm is a placeholder. Launch Library 2 informational comparison not done (not pass/fail).
 - Next: WP-03 frontend v0 (works on dummy data first). Resume: `.venv/Scripts/python.exe -m pytest`; `make windows` equivalent: `python -m mission.windows --profile all`.
+
+## 02:50 IST - claude-code (on behalf of yash) - WP-03 frontend v0: done (local preview verified)
+- Done: `web/` (index.html, css, js modules, worker, vendored satellite.js 5.0.0 + land data), `scripts/export_web_data.py` (+ tests). Map with 6,815 live objects (SGP4 in a Web Worker), group toggles, ISS track, day/night, click-to-inspect, zoom/pan; windows panel (4 profiles, click a row to jump the clock to the launch time, DUMMY/PLACEHOLDER/REAL badges); replay (play/scrub, event markers, alt/speed/q plots, follow vehicle, clock sync).
+- Verified in the in-app browser at 1200x900 and 375x812: no console errors on a normal load, no horizontal overflow at 375; with land/catalog/trajectory files removed the page shows banners and keeps working. `python -m pytest` all green.
+- Run: `python scripts/export_web_data.py && python -m http.server 8765 --directory web` (or `make web`).
+- Real trajectory: Shiva's `trajectory_cargo_iss_w0.json` (WP-05, now on main) is exported and shown first in the replay selector (badge "SIM - reduced fidelity", no DUMMY banner); verified in the browser. The dummy trajectory is still selectable and bannered.
+- Next: WP-04 deploy (clean-profile + mobile check, URL into this file). Deploy settings are RED if they touch other people's accounts/domains: need Yash's decision on host (Vercel vs GitHub Pages).

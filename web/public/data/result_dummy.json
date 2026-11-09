@@ -1,0 +1,14 @@
+{
+  "_note": "dummy",
+  "schema_version": 1,
+  "instance": "manifest_12_seed1",
+  "solver": "sa",
+  "selected": [
+    0,
+    4,
+    9
+  ],
+  "score": 25.2,
+  "runtime_s": 0.8,
+  "seed": 1
+}
