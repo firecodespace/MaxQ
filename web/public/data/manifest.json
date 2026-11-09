@@ -43,6 +43,102 @@
       "bytes": 2155
     },
     {
+      "name": "manifest_instance_1000.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 259421
+    },
+    {
+      "name": "manifest_instance_12.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 3497
+    },
+    {
+      "name": "manifest_instance_200.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 60591
+    },
+    {
+      "name": "manifest_instance_50.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 18099
+    },
+    {
+      "name": "result_manifest_1000_tasks_cpsat.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 5211
+    },
+    {
+      "name": "result_manifest_1000_tasks_greedy.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 5127
+    },
+    {
+      "name": "result_manifest_1000_tasks_sa.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 5063
+    },
+    {
+      "name": "result_manifest_12_tasks_cpsat.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 246
+    },
+    {
+      "name": "result_manifest_12_tasks_greedy.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 241
+    },
+    {
+      "name": "result_manifest_12_tasks_sa.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 246
+    },
+    {
+      "name": "result_manifest_200_tasks_cpsat.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 869
+    },
+    {
+      "name": "result_manifest_200_tasks_greedy.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 835
+    },
+    {
+      "name": "result_manifest_200_tasks_sa.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 859
+    },
+    {
+      "name": "result_manifest_50_tasks_cpsat.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 292
+    },
+    {
+      "name": "result_manifest_50_tasks_greedy.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 278
+    },
+    {
+      "name": "result_manifest_50_tasks_sa.json",
+      "kind": "result",
+      "dummy": false,
+      "bytes": 301
+    },
+    {
       "name": "risk_cargo_iss_cape_canaveral.json",
       "kind": "risk",
       "dummy": false,

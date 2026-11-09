@@ -1,0 +1,219 @@
+{
+  "schema_version": 1,
+  "_note": "Realistic launch manifest with 12 tasks and 23 physical conflicts",
+  "id": "manifest_12_tasks",
+  "pads": [
+    "LC-39A",
+    "SLC-40"
+  ],
+  "missions": [
+    "crew_iss",
+    "cargo_iss",
+    "geo_comm",
+    "meo_gps"
+  ],
+  "tasks": [
+    {
+      "id": 0,
+      "mission": "crew_iss",
+      "pad": "LC-39A",
+      "start_unix": 1794267690,
+      "end_unix": 1794271743,
+      "value": 13.8,
+      "window_id": "w0_t0"
+    },
+    {
+      "id": 1,
+      "mission": "cargo_iss",
+      "pad": "LC-39A",
+      "start_unix": 1794298225,
+      "end_unix": 1794304492,
+      "value": 1.92,
+      "window_id": "w1_t1"
+    },
+    {
+      "id": 2,
+      "mission": "meo_gps",
+      "pad": "LC-39A",
+      "start_unix": 1794352681,
+      "end_unix": 1794354725,
+      "value": 7.17,
+      "window_id": "w2_t2"
+    },
+    {
+      "id": 3,
+      "mission": "cargo_iss",
+      "pad": "LC-39A",
+      "start_unix": 1794383208,
+      "end_unix": 1794389605,
+      "value": 2.01,
+      "window_id": "w3_t3"
+    },
+    {
+      "id": 4,
+      "mission": "meo_gps",
+      "pad": "LC-39A",
+      "start_unix": 1794437686,
+      "end_unix": 1794443165,
+      "value": 7.57,
+      "window_id": "w4_t4"
+    },
+    {
+      "id": 5,
+      "mission": "crew_iss",
+      "pad": "LC-39A",
+      "start_unix": 1794468221,
+      "end_unix": 1794473483,
+      "value": 2.87,
+      "window_id": "w5_t5"
+    },
+    {
+      "id": 6,
+      "mission": "cargo_iss",
+      "pad": "LC-39A",
+      "start_unix": 1794522677,
+      "end_unix": 1794527234,
+      "value": 8.68,
+      "window_id": "w6_t6"
+    },
+    {
+      "id": 7,
+      "mission": "meo_gps",
+      "pad": "LC-39A",
+      "start_unix": 1794553204,
+      "end_unix": 1794557944,
+      "value": 2.15,
+      "window_id": "w7_t7"
+    },
+    {
+      "id": 8,
+      "mission": "geo_comm",
+      "pad": "LC-39A",
+      "start_unix": 1794607683,
+      "end_unix": 1794613246,
+      "value": 10.03,
+      "window_id": "w8_t8"
+    },
+    {
+      "id": 9,
+      "mission": "meo_gps",
+      "pad": "LC-39A",
+      "start_unix": 1794638217,
+      "end_unix": 1794644539,
+      "value": 1.71,
+      "window_id": "w9_t9"
+    },
+    {
+      "id": 10,
+      "mission": "geo_comm",
+      "pad": "LC-39A",
+      "start_unix": 1794692673,
+      "end_unix": 1794695042,
+      "value": 7.64,
+      "window_id": "w10_t10"
+    },
+    {
+      "id": 11,
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
+      "start_unix": 1794723200,
+      "end_unix": 1794725653,
+      "value": 2.53,
+      "window_id": "w11_t11"
+    }
+  ],
+  "conflicts": [
+    [
+      0,
+      1
+    ],
+    [
+      0,
+      2
+    ],
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      2
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      2,
+      4
+    ],
+    [
+      2,
+      5
+    ],
+    [
+      3,
+      4
+    ],
+    [
+      3,
+      5
+    ],
+    [
+      4,
+      5
+    ],
+    [
+      4,
+      6
+    ],
+    [
+      4,
+      7
+    ],
+    [
+      5,
+      6
+    ],
+    [
+      5,
+      7
+    ],
+    [
+      6,
+      7
+    ],
+    [
+      6,
+      8
+    ],
+    [
+      6,
+      9
+    ],
+    [
+      7,
+      8
+    ],
+    [
+      7,
+      9
+    ],
+    [
+      8,
+      9
+    ],
+    [
+      8,
+      10
+    ],
+    [
+      9,
+      10
+    ]
+  ]
+}

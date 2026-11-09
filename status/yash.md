@@ -49,3 +49,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 2. Slow suite -> FIXED: `make test` fast tier 19 s (was ~107 s); `make test-all` runs everything.
 3. Rebase/venv -> FIXED: `make doctor` + pytest header flag stale venvs (my venv really was missing ortools/pennylane; now matches pins); union merges for shared logs; volatile fields removed from generated outputs; rules in docs/workflow.md.
 - Not redeployed: the Vercel site still serves the previous export. Redeploy: `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`.
+
+## 05:10 IST - claude-code (on behalf of yash) - redeployed https://maxq-nu.vercel.app
+- Production redeploy (CLI, deployment `maxq-mi93rxtez-firecodespaces.vercel.app`, READY) with the complete catalog (6,819 of 19,565 shown, 328 numbered 100000+), regenerated windows/risk and Shiva's WP-10 scheduler files exported to web/public/data.
+- Verified on the live URL: assets 200; desktop 1200x900 and mobile 375x812 with no console errors and no horizontal overflow; replay scrubbing and clock lock work; no banners. The deployed content equals the repo's web/public/data at this commit.
+- Reminder: deploys are manual (no Git integration): `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`.

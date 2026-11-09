@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "_note": "OR-Tools CP-SAT exact solution",
+  "instance": "manifest_50_tasks",
+  "solver": "cpsat",
+  "selected": [
+    0,
+    3,
+    14,
+    21,
+    30,
+    31,
+    35,
+    42,
+    49
+  ],
+  "score": 90.99,
+  "runtime_s": 0.032201,
+  "seed": 42
+}
