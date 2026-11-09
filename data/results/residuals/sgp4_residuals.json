@@ -1,0 +1,140 @@
+{
+  "data_source": "REAL",
+  "history_file": "spacetrack_gp_history_25544.json",
+  "citation": "Source: Space-Track.org (USSPACECOM / 18th Space Defense Squadron), class gp_history, retrieved 2026-11-09T23:46:38Z. Redistributed under Space-Track's approval for basic SSA data conditioned on citation.",
+  "norad_id": 25544,
+  "snapshots": 61,
+  "history_days": 20.32,
+  "suspected_manoeuvres_epochs_unix": [],
+  "pairs_train": 338,
+  "pairs_test": 382,
+  "split_time_utc": "2026-10-31T04:14:04Z",
+  "uncorrected": {
+    "rms_km": 12.508,
+    "max_km": 45.804,
+    "intrack_rms_km": 12.489
+  },
+  "models": {
+    "full": {
+      "rms_corrected_km": 10.039,
+      "intrack_rms_corrected_km": 10.038,
+      "rms_reduction_pct": 19.7,
+      "rms_reduction_pct_90ci": [
+        16.2,
+        23.7
+      ],
+      "verdict": "improvement (90% CI above zero)",
+      "by_age": [
+        {
+          "age_days": [
+            0.0,
+            1.0
+          ],
+          "n": 76,
+          "rms_uncorrected_km": 0.741,
+          "rms_corrected_km": 0.626
+        },
+        {
+          "age_days": [
+            1.0,
+            2.0
+          ],
+          "n": 73,
+          "rms_uncorrected_km": 4.401,
+          "rms_corrected_km": 3.487
+        },
+        {
+          "age_days": [
+            2.0,
+            3.0
+          ],
+          "n": 55,
+          "rms_uncorrected_km": 5.927,
+          "rms_corrected_km": 4.39
+        },
+        {
+          "age_days": [
+            3.0,
+            5.0
+          ],
+          "n": 92,
+          "rms_uncorrected_km": 15.036,
+          "rms_corrected_km": 11.576
+        },
+        {
+          "age_days": [
+            5.0,
+            7.0
+          ],
+          "n": 86,
+          "rms_uncorrected_km": 20.34,
+          "rms_corrected_km": 16.772
+        }
+      ]
+    },
+    "drift_only": {
+      "rms_corrected_km": 13.532,
+      "intrack_rms_corrected_km": 13.514,
+      "rms_reduction_pct": -8.2,
+      "rms_reduction_pct_90ci": [
+        -13.0,
+        -2.8
+      ],
+      "verdict": "no significant improvement (90% CI includes zero)",
+      "by_age": [
+        {
+          "age_days": [
+            0.0,
+            1.0
+          ],
+          "n": 76,
+          "rms_uncorrected_km": 0.741,
+          "rms_corrected_km": 0.849
+        },
+        {
+          "age_days": [
+            1.0,
+            2.0
+          ],
+          "n": 73,
+          "rms_uncorrected_km": 4.401,
+          "rms_corrected_km": 4.691
+        },
+        {
+          "age_days": [
+            2.0,
+            3.0
+          ],
+          "n": 55,
+          "rms_uncorrected_km": 5.927,
+          "rms_corrected_km": 5.922
+        },
+        {
+          "age_days": [
+            3.0,
+            5.0
+          ],
+          "n": 92,
+          "rms_uncorrected_km": 15.036,
+          "rms_corrected_km": 15.605
+        },
+        {
+          "age_days": [
+            5.0,
+            7.0
+          ],
+          "n": 86,
+          "rms_uncorrected_km": 20.34,
+          "rms_corrected_km": 22.608
+        }
+      ]
+    }
+  },
+  "caveats": [
+    "truth proxy is a later element set at its own epoch, not ground truth (its ~1 km accuracy is a floor)",
+    "one object (as fetched); results do not transfer to other orbits",
+    "pairs spanning suspected manoeuvres are excluded; a smooth model cannot predict a burn",
+    "strict temporal split at the median epoch; bootstrap resamples whole test baselines"
+  ],
+  "plot": "data/results/sgp4_residuals_benchmark.png"
+}

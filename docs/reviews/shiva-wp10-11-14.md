@@ -91,3 +91,7 @@ Info: Shiva edited one line of Yash's `tests/web/test_node_units.py` (loosened t
 
 ## Round 2 follow-up (06:20 IST): WP-15 reworked
 Yash asked for real data and for the problem to be fixed. The synthetic file and the results computed from it were deleted; `catalog/residuals.py` was rebuilt to evaluate only on a real Space-Track history (pairs of baseline/later snapshots, strict temporal split, manoeuvre exclusion, bootstrap CI, simpler baseline) and refuses non-real input; `scripts/fetch_spacetrack_history.py` fetches the history once with credentials from environment variables only. Real data could not be obtained by the agent (Space-Track needs an account; SatNOGS offers only the current element set; CelesTrak has no history). WP-15 therefore has no result yet.
+
+
+## Round 2 closure (06:45 IST): WP-15 now backed by real data
+Real history fetched by Yash (70 element sets, 20.3 days); evaluation reproduced independently. Held-out RMS reduction 19.7 % (90 % CI 16.2-23.7 %) for the age+phase model; the drift-only model does not help (-8.2 %). The earlier 86.9 % claim stays withdrawn.
