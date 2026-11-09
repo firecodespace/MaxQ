@@ -42,6 +42,13 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
     - Exported contract-valid results `result_manifest_12_tasks_qaoa_p1.json` and `result_manifest_12_tasks_qaoa_p2.json` (43/43 valid contracts).
     - Produced publication-quality benchmark plot `data/results/qaoa_benchmark.png` and authored honest analysis on NISQ failure modes (barren plateaus and penalty-barrier trapping).
   - Added unit test suite `tests/manifest/test_qaoa.py` (4 tests green; 11 manifest tests total); full repository test suite passes; `ruff check .` passes with 0 errors.
+- 03:40 IST — WP-14 (Scheduler Warm-Start Model P2) DONE:
+  - Shipped `manifest/warm_start.py` implementing graph-theoretic feature extraction and `HistGradientBoostingClassifier` trained on exact CP-SAT labels ($1,146$ tasks across diverse manifest instances).
+  - Model achieves **0.860 ROC-AUC** and **0.708 PR-AUC** on holdout test instances, leveraging value-to-degree ratio, competitor max value, and graph degree.
+  - Seeding Simulated Annealing with model priors boosts initial feasible state quality from 0-25% to **59.5%–78.9% of global CP-SAT optimum**.
+  - Warm-started SA matches cold-start solution quality with a 3× proposal reduction, delivering an empirical **3.1× to 4.9× runtime speedup**.
+  - Visualized convergence and ROC curves in `data/results/warm_start_benchmark.png`.
+  - Added unit test suite `tests/manifest/test_warm_start.py` (4 tests green; 15 manifest tests total); `ruff check .` passes with 0 errors.
 
 
 
