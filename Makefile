@@ -38,10 +38,10 @@ risk:  ## WP-08: screen ascent + 2 h parking-orbit coast against the catalog -> 
 	$(PY) -m catalog.screen --windows data/results/windows_cargo_iss_cape_canaveral.json --trajectory data/results/trajectory_optimized_medlift_a.json --coast-hours 2 --out data/results/risk_cargo_iss_cape_canaveral_optimized.json
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
-	@echo "ascent: not implemented yet (WP-05, Shiva's lane)"
+	$(PY) -m ascent.sim --rocket medlift_kerolox_a --out data/results/trajectory_cargo_iss_w0.json
 
 manifest:  ## WP-10: manifest scheduler benchmark (Shiva)
-	@echo "manifest: not implemented yet (WP-10, Shiva's lane)"
+	$(PY) -m manifest.bench
 
 web-export:  ## WP-03: validate + export data for the static site -> web/public/data/
 	$(PY) scripts/export_web_data.py

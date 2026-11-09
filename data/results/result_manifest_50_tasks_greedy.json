@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "_note": "Greedy heuristic solution",
+  "instance": "manifest_50_tasks",
+  "solver": "greedy",
+  "selected": [
+    0,
+    3,
+    14,
+    21,
+    30,
+    35,
+    38,
+    49
+  ],
+  "score": 83.03,
+  "runtime_s": 8.8e-05,
+  "seed": 42
+}

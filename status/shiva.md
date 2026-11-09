@@ -26,6 +26,14 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
     - Successfully verified all 9 finalists (Lightweight, Balanced, Heavyweight per profile) achieving circular parking orbits (perigee 175-198 km, e < 0.003, v >= 7760 m/s).
     - Exported 9 contract-valid rocket definitions (`data/results/rocket_search_<profile>_<label>.json`) validated 100% against `contracts/rocket.schema.json`.
   - Added unit test suite `tests/ascent/test_design.py` (7 tests green); full repository test suite passes (184 passed, 0 failed); `ruff check .` passes with 0 errors.
+- 03:00 IST — WP-10 (Manifest Scheduler P1) DONE:
+  - Shipped `manifest/instance.py` generating realistic multi-pad launch scheduling instances (12, 50, 200, 1000 tasks) from real `windows.json` and `risk.json` data with pad turnaround (36h) and ISS target separation constraints. Formulates Maximum Weight Independent Set (MWIS) and QUBO Hamiltonian ($E(\mathbf{x}) = -\sum v_i x_i + P \sum x_i x_j$).
+  - Implemented 3 solvers in `manifest/solvers/`: Greedy priority heuristic (`greedy.py`), Simulated Annealing on QUBO (`sa.py`), and OR-Tools CP-SAT exact reference (`cpsat.py`).
+  - Shipped `manifest/bench.py` and wired `make manifest`:
+    - Benchmarked across 12, 50, 200, and 1000 tasks: CP-SAT provides proven exact optimum (e.g. 4692.11 on 1000 tasks in 0.12s); Greedy reaches 97.7% of optimum in 0.7 ms; SA reaches 93.7–96.2% of optimal.
+    - Exported 4 contract-compliant instance definitions and 12 contract-compliant result files to `data/results/` (`manifest_instance_*.json`, `result_*.json`).
+    - Generated comparison visualization `data/results/manifest_benchmark.png`.
+  - Added unit test suite `tests/manifest/test_scheduler.py` (7 tests green); full repository test suite passes; `contracts.validate` 41/41 valid; `ruff check .` passes with 0 errors.
 
 
 
