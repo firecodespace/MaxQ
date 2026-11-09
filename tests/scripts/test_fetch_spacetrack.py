@@ -121,7 +121,7 @@ def test_failed_login_and_bad_payloads_are_errors():
 
 
 def test_http_errors_name_the_step_show_spacetracks_message_and_never_the_password():
-    with pytest.raises(FetchError, match=r"HTTP 400 during history query: 'bad predicate'.*do not retry") as ei:
+    with pytest.raises(FetchError, match=r"HTTP 400 during history query: 'bad predicate'.*[Dd]o not retry") as ei:
         request_history(25544, 21, ("u", SECRET), opener=FakeOpener("", http_error(400, "bad predicate")))
     assert SECRET not in str(ei.value)
     with pytest.raises(FetchError, match="HTTP 500 during login") as ei:
