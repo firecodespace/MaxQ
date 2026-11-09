@@ -19,7 +19,6 @@ import argparse
 import json
 import shutil
 import sys
-from datetime import UTC, datetime
 from pathlib import Path
 
 import numpy as np
@@ -109,7 +108,6 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     cat = export_catalog(args.out, args.all)
     manifest = {
-        "generated_utc": datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "files": files,
         "catalog": {"name": "catalog_web.json", **cat},
     }

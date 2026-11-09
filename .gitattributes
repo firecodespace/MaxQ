@@ -1,3 +1,10 @@
 * text=auto
 Makefile text eol=lf
 *.sh text eol=lf
+
+# Append-only shared logs: concurrent appends by different people/agents merge cleanly (both sides kept).
+# status/BOARD.md is deliberately NOT listed: it is a table owned by Yash, and union-merging edited rows would duplicate them.
+docs/decisions.md merge=union
+status/yash.md merge=union
+status/shiva.md merge=union
+.gitignore merge=union

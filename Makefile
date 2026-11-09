@@ -6,13 +6,19 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup test lint data data-offline windows risk ascent manifest web web-export
+.PHONY: setup doctor test test-all lint data data-offline windows risk ascent manifest web web-export
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
 	$(PY) -m pip install -r requirements.txt
 
-test:  ## run all tests (contracts, catalog, frames, ...)
+doctor:  ## check installed packages against the pins in requirements.txt
+	$(PY) scripts/check_env.py
+
+test: doctor  ## fast tier: everything except tests marked slow (what you run before every merge)
+	$(PY) -m pytest -m "not slow"
+
+test-all:  ## full suite including slow tests (run before pushing to main at checkpoints / freeze)
 	$(PY) -m pytest
 
 lint:  ## ruff

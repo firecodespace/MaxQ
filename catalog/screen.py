@@ -373,7 +373,7 @@ def build_risk(
 ) -> dict:
     """risk.json for every flyable window: the ascent in ``traj`` is time-shifted to each window's launch time."""
     screener = Screener(df, threshold_km, exclude_norad=(int(windows["target"]["norad_id"]),))
-    results, per_window, t_all = [], [], time.perf_counter()
+    results, per_window = [], []
     ages, coast_info = [], {}
     for w in windows["windows"]:
         if not w["flyable"]:
@@ -433,7 +433,6 @@ def build_risk(
             "latest_tle_epoch_utc": str(epochs.max()),
             "closest_object_tle_age_days_at_closest_approach": [round(a, 1) for a in ages],
             "per_window": per_window,
-            "runtime_s": round(time.perf_counter() - t_all, 2),
         },
         "results": results,
     }
@@ -492,6 +491,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--out", type=Path, default=None)
     ap.add_argument("--benchmark", action="store_true", help="time the SGP4 core: 30k objects x 2 h at 10 s")
     args = ap.parse_args(argv)
+    t_cli = time.perf_counter()
     if args.benchmark:
         print(json.dumps(benchmark(), indent=2))
         return 0
@@ -522,7 +522,7 @@ def main(argv: list[str] | None = None) -> int:
             f"{r['window_id']:4s} {r['status']:7s} {r['min_miss_km']:8.2f} km  "
             f"{r['object']['name']} ({r['object']['norad_id']})"
         )
-    print(f"wrote {out}  ({risk['metadata']['runtime_s']} s, catalog {mode}, {len(df)} objects)")
+    print(f"wrote {out}  ({time.perf_counter() - t_cli:.2f} s, catalog {mode}, {len(df)} objects)")
     return 0
 
 
