@@ -76,3 +76,6 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Production deploy `maxq-kwlyeb0gi-firecodespaces.vercel.app` READY. Live now: complete catalog, Mission + Sky tabs (clusters, congestion), NOAA Kp chip and panel, regenerated windows/risk, Shiva's results exported.
 - Verified on the live URL: assets 200; desktop 1200x900 and mobile 375x812 with no console errors and no horizontal overflow; Kp chip loads NOAA live from the deployed origin; Sky tab loads 24 clusters and the congestion chart.
 - Still manual: `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`. Not yet on the live site: nothing pending from my side; Shiva's review fixes will need another export+deploy.
+
+## 05:50 IST - claude-code (on behalf of yash) - checked Shiva's push
+- Code fixes verified (tests 293 pass, contracts 44/44, deterministic builder, argparse, control + generated paragraph, instance-level AUC). Committed artifacts are stale: instances differ from a fresh build, results/plots predate the fix, QAOA plot has no control. Asked Shiva to regenerate and recommit (status/shiva.md). Web data/redeploy and README numbers wait for that.
