@@ -1,0 +1,20 @@
+# Only web/ is served (see vercel.json). Anchored with a leading slash so web/public/data is NOT excluded.
+/.venv
+/.claude
+/data
+/tests
+/contracts
+/catalog
+/mission
+/ascent
+/manifest
+/core
+/scripts
+/docs
+/status
+/api
+/*.md
+/*.txt
+/Makefile
+/*.ini
+/*.toml
