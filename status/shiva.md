@@ -12,4 +12,9 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
 - When your four dummies land, delete the `xfail` marker on `test_every_contract_has_a_dummy` in `tests/contracts/test_contracts.py`.
 
 ## Log
-(Shiva and Shiva's agents: append status/handoff notes below.)
+- 01:25 IST — WP-00 (Shiva half) DONE:
+  - Landed `data/dummy/{rocket,trajectory,manifest_instance,result}_dummy.json`. All 4 validate against `contracts/validate.py`.
+  - Removed `xfail` on `test_every_contract_has_a_dummy`; test suite now passes (53 passed, 1 skipped).
+  - Pinned Shiva lane dependencies in `requirements.txt`: cma==4.5.0, pymoo==0.6.2, ortools==9.15.6755, pennylane==0.45.1, pennylane-lightning==0.45.0, matplotlib==3.11.2 (Yellow item noted). PennyLane installed cleanly on Python 3.13.
+  - Trajectory dummy provides 521-point 1 Hz profile for `traj_medlift_a_w0` ready for Yash's frontend (WP-03) and screening (WP-08).
+

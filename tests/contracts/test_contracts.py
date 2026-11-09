@@ -58,7 +58,6 @@ def test_result_file_validates(path):
     validate_file(path)
 
 
-@pytest.mark.xfail(reason="rocket/trajectory/manifest_instance/result dummies are Shiva's; remove marker when landed")
 def test_every_contract_has_a_dummy():
     have = {kind_for_path(p) for p in DUMMY_FILES}
     assert have >= set(KINDS), f"missing dummy files for: {sorted(set(KINDS) - have)}"
