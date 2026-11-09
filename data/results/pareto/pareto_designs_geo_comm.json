@@ -1,0 +1,287 @@
+{
+  "profile": "geo_comm",
+  "seed": 42,
+  "runtime_s": 0.12,
+  "n_pareto_designs": 26,
+  "pareto_front": [
+    {
+      "payload_kg": 16073.9,
+      "liftoff_mass_kg": 474048.9,
+      "payload_fraction_pct": 3.39
+    },
+    {
+      "payload_kg": 19588.0,
+      "liftoff_mass_kg": 479618.7,
+      "payload_fraction_pct": 4.08
+    },
+    {
+      "payload_kg": 20112.9,
+      "liftoff_mass_kg": 480143.6,
+      "payload_fraction_pct": 4.19
+    },
+    {
+      "payload_kg": 20112.9,
+      "liftoff_mass_kg": 480143.6,
+      "payload_fraction_pct": 4.19
+    },
+    {
+      "payload_kg": 20268.5,
+      "liftoff_mass_kg": 480253.6,
+      "payload_fraction_pct": 4.22
+    },
+    {
+      "payload_kg": 20325.0,
+      "liftoff_mass_kg": 480416.2,
+      "payload_fraction_pct": 4.23
+    },
+    {
+      "payload_kg": 20362.4,
+      "liftoff_mass_kg": 480529.0,
+      "payload_fraction_pct": 4.24
+    },
+    {
+      "payload_kg": 21834.9,
+      "liftoff_mass_kg": 481050.2,
+      "payload_fraction_pct": 4.54
+    },
+    {
+      "payload_kg": 22135.2,
+      "liftoff_mass_kg": 481569.5,
+      "payload_fraction_pct": 4.6
+    },
+    {
+      "payload_kg": 23732.0,
+      "liftoff_mass_kg": 503087.1,
+      "payload_fraction_pct": 4.72
+    },
+    {
+      "payload_kg": 24305.3,
+      "liftoff_mass_kg": 505387.7,
+      "payload_fraction_pct": 4.81
+    },
+    {
+      "payload_kg": 24375.5,
+      "liftoff_mass_kg": 507342.4,
+      "payload_fraction_pct": 4.8
+    },
+    {
+      "payload_kg": 24583.6,
+      "liftoff_mass_kg": 507921.8,
+      "payload_fraction_pct": 4.84
+    },
+    {
+      "payload_kg": 24679.4,
+      "liftoff_mass_kg": 508218.6,
+      "payload_fraction_pct": 4.86
+    },
+    {
+      "payload_kg": 25287.0,
+      "liftoff_mass_kg": 530520.0,
+      "payload_fraction_pct": 4.77
+    },
+    {
+      "payload_kg": 25393.3,
+      "liftoff_mass_kg": 536681.7,
+      "payload_fraction_pct": 4.73
+    },
+    {
+      "payload_kg": 26433.2,
+      "liftoff_mass_kg": 536995.7,
+      "payload_fraction_pct": 4.92
+    },
+    {
+      "payload_kg": 26721.4,
+      "liftoff_mass_kg": 538272.1,
+      "payload_fraction_pct": 4.96
+    },
+    {
+      "payload_kg": 27065.1,
+      "liftoff_mass_kg": 573125.9,
+      "payload_fraction_pct": 4.72
+    },
+    {
+      "payload_kg": 27323.3,
+      "liftoff_mass_kg": 573817.0,
+      "payload_fraction_pct": 4.76
+    },
+    {
+      "payload_kg": 27357.1,
+      "liftoff_mass_kg": 575135.0,
+      "payload_fraction_pct": 4.76
+    },
+    {
+      "payload_kg": 27639.3,
+      "liftoff_mass_kg": 575275.5,
+      "payload_fraction_pct": 4.8
+    },
+    {
+      "payload_kg": 27670.4,
+      "liftoff_mass_kg": 575752.0,
+      "payload_fraction_pct": 4.81
+    },
+    {
+      "payload_kg": 27739.2,
+      "liftoff_mass_kg": 584427.8,
+      "payload_fraction_pct": 4.75
+    },
+    {
+      "payload_kg": 27824.0,
+      "liftoff_mass_kg": 586236.4,
+      "payload_fraction_pct": 4.75
+    },
+    {
+      "payload_kg": 27840.1,
+      "liftoff_mass_kg": 587133.2,
+      "payload_fraction_pct": 4.74
+    }
+  ],
+  "finalists": [
+    {
+      "design_id": "search_geo_comm_lightweight",
+      "name": "Lightweight Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "label": "Lightweight",
+      "payload_kg": 16073.9,
+      "liftoff_mass_kg": 474049.0,
+      "payload_fraction_pct": 3.39,
+      "pitch_params": [
+        12.0,
+        23.6001,
+        -2.0777,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 183.7,
+        "apogee_km": 216.9,
+        "eccentricity": 0.00252,
+        "speed_mps": 7766.4,
+        "losses_mps": 1900.4,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_geo_comm_lightweight",
+        "name": "Lightweight Design (GEO_COMM Archetype)",
+        "profile": "geo_comm",
+        "payload_kg": 16073.9,
+        "stages": [
+          {
+            "dry_kg": 17933.2,
+            "prop_kg": 350033.5,
+            "thrust_n": 6057402.0,
+            "isp_s": 305.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          },
+          {
+            "dry_kg": 6342.5,
+            "prop_kg": 83665.9,
+            "thrust_n": 969301.0,
+            "isp_s": 445.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_geo_comm_balanced",
+      "name": "Balanced Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "label": "Balanced",
+      "payload_kg": 24679.4,
+      "liftoff_mass_kg": 508218.6,
+      "payload_fraction_pct": 4.86,
+      "pitch_params": [
+        12.0,
+        29.0264,
+        1.0104,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 197.9,
+        "apogee_km": 204.7,
+        "eccentricity": 0.00051,
+        "speed_mps": 7785.2,
+        "losses_mps": 2058.0,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_geo_comm_balanced",
+        "name": "Balanced Design (GEO_COMM Archetype)",
+        "profile": "geo_comm",
+        "payload_kg": 24679.4,
+        "stages": [
+          {
+            "dry_kg": 18338.1,
+            "prop_kg": 350015.1,
+            "thrust_n": 6613176.0,
+            "isp_s": 305.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          },
+          {
+            "dry_kg": 8219.7,
+            "prop_kg": 106966.3,
+            "thrust_n": 1264033.0,
+            "isp_s": 445.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_geo_comm_heavyweight",
+      "name": "Heavyweight Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "label": "Heavyweight",
+      "payload_kg": 27840.1,
+      "liftoff_mass_kg": 587133.3,
+      "payload_fraction_pct": 4.74,
+      "pitch_params": [
+        12.0,
+        45.2539,
+        1.0383,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 191.9,
+        "apogee_km": 192.6,
+        "eccentricity": 6e-05,
+        "speed_mps": 7789.0,
+        "losses_mps": 2517.6,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_geo_comm_heavyweight",
+        "name": "Heavyweight Design (GEO_COMM Archetype)",
+        "profile": "geo_comm",
+        "payload_kg": 27840.1,
+        "stages": [
+          {
+            "dry_kg": 19506.2,
+            "prop_kg": 350730.5,
+            "thrust_n": 7488420.0,
+            "isp_s": 305.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          },
+          {
+            "dry_kg": 14400.9,
+            "prop_kg": 174655.6,
+            "thrust_n": 1881280.0,
+            "isp_s": 445.0,
+            "cd": 0.35,
+            "area_m2": 21.24
+          }
+        ]
+      }
+    }
+  ]
+}

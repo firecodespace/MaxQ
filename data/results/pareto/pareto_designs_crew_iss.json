@@ -1,0 +1,202 @@
+{
+  "profile": "crew_iss",
+  "seed": 42,
+  "runtime_s": 0.14,
+  "n_pareto_designs": 9,
+  "pareto_front": [
+    {
+      "payload_kg": 8732.8,
+      "liftoff_mass_kg": 292310.8,
+      "payload_fraction_pct": 2.99
+    },
+    {
+      "payload_kg": 8830.3,
+      "liftoff_mass_kg": 294046.1,
+      "payload_fraction_pct": 3.0
+    },
+    {
+      "payload_kg": 8846.6,
+      "liftoff_mass_kg": 294344.4,
+      "payload_fraction_pct": 3.01
+    },
+    {
+      "payload_kg": 8872.0,
+      "liftoff_mass_kg": 294360.8,
+      "payload_fraction_pct": 3.01
+    },
+    {
+      "payload_kg": 8968.2,
+      "liftoff_mass_kg": 300520.5,
+      "payload_fraction_pct": 2.98
+    },
+    {
+      "payload_kg": 9159.0,
+      "liftoff_mass_kg": 300619.9,
+      "payload_fraction_pct": 3.05
+    },
+    {
+      "payload_kg": 9162.2,
+      "liftoff_mass_kg": 307420.9,
+      "payload_fraction_pct": 2.98
+    },
+    {
+      "payload_kg": 9179.4,
+      "liftoff_mass_kg": 307474.7,
+      "payload_fraction_pct": 2.99
+    },
+    {
+      "payload_kg": 9275.9,
+      "liftoff_mass_kg": 307597.8,
+      "payload_fraction_pct": 3.02
+    }
+  ],
+  "finalists": [
+    {
+      "design_id": "search_crew_iss_lightweight",
+      "name": "Lightweight Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "label": "Lightweight",
+      "payload_kg": 8732.8,
+      "liftoff_mass_kg": 292310.8,
+      "payload_fraction_pct": 2.99,
+      "pitch_params": [
+        12.0,
+        34.2907,
+        4.1645,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 198.4,
+        "apogee_km": 205.1,
+        "eccentricity": 0.00051,
+        "speed_mps": 7779.2,
+        "losses_mps": 2372.8,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_crew_iss_lightweight",
+        "name": "Lightweight Design (CREW_ISS Archetype)",
+        "profile": "crew_iss",
+        "payload_kg": 8732.8,
+        "stages": [
+          {
+            "dry_kg": 11494.7,
+            "prop_kg": 202828.8,
+            "thrust_n": 3670071.0,
+            "isp_s": 295.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          },
+          {
+            "dry_kg": 5600.9,
+            "prop_kg": 63653.6,
+            "thrust_n": 573754.0,
+            "isp_s": 348.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_crew_iss_balanced",
+      "name": "Balanced Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "label": "Balanced",
+      "payload_kg": 8968.2,
+      "liftoff_mass_kg": 300520.5,
+      "payload_fraction_pct": 2.98,
+      "pitch_params": [
+        12.0,
+        35.0553,
+        4.1647,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 197.0,
+        "apogee_km": 204.0,
+        "eccentricity": 0.00053,
+        "speed_mps": 7779.8,
+        "losses_mps": 2389.9,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_crew_iss_balanced",
+        "name": "Balanced Design (CREW_ISS Archetype)",
+        "profile": "crew_iss",
+        "payload_kg": 8968.2,
+        "stages": [
+          {
+            "dry_kg": 11719.2,
+            "prop_kg": 207045.3,
+            "thrust_n": 3772499.0,
+            "isp_s": 295.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          },
+          {
+            "dry_kg": 5870.4,
+            "prop_kg": 66917.4,
+            "thrust_n": 601856.0,
+            "isp_s": 348.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_crew_iss_heavyweight",
+      "name": "Heavyweight Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "label": "Heavyweight",
+      "payload_kg": 9275.9,
+      "liftoff_mass_kg": 307597.8,
+      "payload_fraction_pct": 3.02,
+      "pitch_params": [
+        12.0,
+        31.9648,
+        4.9932,
+        0.75,
+        0.7
+      ],
+      "simulation": {
+        "perigee_km": 182.4,
+        "apogee_km": 188.0,
+        "eccentricity": 0.00043,
+        "speed_mps": 7793.0,
+        "losses_mps": 2309.7,
+        "verified": true
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_crew_iss_heavyweight",
+        "name": "Heavyweight Design (CREW_ISS Archetype)",
+        "profile": "crew_iss",
+        "payload_kg": 9275.9,
+        "stages": [
+          {
+            "dry_kg": 11746.9,
+            "prop_kg": 213553.4,
+            "thrust_n": 3861889.0,
+            "isp_s": 295.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          },
+          {
+            "dry_kg": 5851.5,
+            "prop_kg": 67170.1,
+            "thrust_n": 616498.0,
+            "isp_s": 348.0,
+            "cd": 0.32,
+            "area_m2": 11.95
+          }
+        ]
+      }
+    }
+  ]
+}

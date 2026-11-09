@@ -1,7 +1,7 @@
 {
   "profile": "cargo_iss",
   "seed": 42,
-  "runtime_s": 0.09,
+  "runtime_s": 0.08,
   "n_pareto_designs": 35,
   "pareto_front": [
     {
@@ -189,13 +189,20 @@
       "payload_kg": 9502.4,
       "liftoff_mass_kg": 339244.2,
       "payload_fraction_pct": 2.8,
+      "pitch_params": [
+        12.0,
+        37.7013,
+        4.3437,
+        0.75,
+        0.7
+      ],
       "simulation": {
-        "perigee_km": -6326.7,
-        "apogee_km": -16.9,
-        "eccentricity": 0.98396,
-        "speed_mps": 1013.0,
-        "losses_mps": 9891.1,
-        "verified": false
+        "perigee_km": 187.1,
+        "apogee_km": 219.6,
+        "eccentricity": 0.00247,
+        "speed_mps": 7763.9,
+        "losses_mps": 2339.6,
+        "verified": true
       },
       "rocket": {
         "schema_version": 1,
@@ -231,13 +238,20 @@
       "payload_kg": 13475.0,
       "liftoff_mass_kg": 439864.2,
       "payload_fraction_pct": 3.06,
+      "pitch_params": [
+        12.0,
+        25.0905,
+        6.6096,
+        0.75,
+        0.7
+      ],
       "simulation": {
-        "perigee_km": -4446.8,
-        "apogee_km": 46.3,
-        "eccentricity": 0.53773,
-        "speed_mps": 5398.9,
-        "losses_mps": 5031.8,
-        "verified": false
+        "perigee_km": 175.3,
+        "apogee_km": 176.3,
+        "eccentricity": 7e-05,
+        "speed_mps": 7799.1,
+        "losses_mps": 1992.2,
+        "verified": true
       },
       "rocket": {
         "schema_version": 1,
@@ -273,13 +287,20 @@
       "payload_kg": 15980.9,
       "liftoff_mass_kg": 532550.2,
       "payload_fraction_pct": 3.0,
+      "pitch_params": [
+        12.0,
+        26.7022,
+        7.7076,
+        0.75,
+        0.7
+      ],
       "simulation": {
-        "perigee_km": -6281.8,
-        "apogee_km": 4.0,
-        "eccentricity": 0.97027,
-        "speed_mps": 1377.0,
-        "losses_mps": 9201.9,
-        "verified": false
+        "perigee_km": 177.5,
+        "apogee_km": 179.3,
+        "eccentricity": 0.00014,
+        "speed_mps": 7797.7,
+        "losses_mps": 2136.8,
+        "verified": true
       },
       "rocket": {
         "schema_version": 1,

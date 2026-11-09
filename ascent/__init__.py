@@ -19,12 +19,15 @@ from ascent.sim import DEFAULT_PITCH_PARAMS, SimResult, simulate_ascent
 __all__ = [
     "ARCHETYPES",
     "DEFAULT_PITCH_PARAMS",
+    "DesignFinalist",
     "G0",
     "MU_EARTH",
     "OMEGA_EARTH",
     "OptimizationResult",
     "R_EARTH",
     "Rocket",
+    "RocketDesignProblem",
+    "SearchResult",
     "SimResult",
     "Stage",
     "circular_orbit_speed",
@@ -36,8 +39,23 @@ __all__ = [
     "list_archetypes",
     "optimize_ascent",
     "pressure",
+    "search_rocket_designs",
     "simulate_ascent",
     "spherical_forward",
     "spherical_forward_array",
+    "tune_pitch_program",
 ]
 
+
+def __getattr__(name: str):
+    if name in (
+        "DesignFinalist",
+        "RocketDesignProblem",
+        "SearchResult",
+        "search_rocket_designs",
+        "tune_pitch_program",
+    ):
+        import ascent.design as _design
+
+        return getattr(_design, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
