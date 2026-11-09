@@ -22,7 +22,7 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
   - Achieved measured 626.3 kg propellant savings (0.13% total wet mass reduction, ~7% payload capacity equivalent) versus baseline, achieving 176.1 x 182.2 km parking orbit (e = 0.00047, max-q 42.4 kPa at 71.7 s).
   - Generated comparison artifact `data/results/naive_vs_optimized_medlift_a.png` (4-panel altitude, speed, dynamic pressure, pitch angle curves).
   - Exported contract-valid `data/results/trajectory_optimized_medlift_a.json` with seed=42 recorded in outputs.
-  - Test suite `tests/ascent/test_optimize.py` added; full repo test suite passes (155 tests green).
+  - Test suite `tests/ascent/test_optimize.py` added; full repo test suite passes (159 tests green).
 
 
 
