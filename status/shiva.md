@@ -17,10 +17,13 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
   - Removed `xfail` on `test_every_contract_has_a_dummy`; test suite now passes (53 passed, 1 skipped).
   - Pinned Shiva lane dependencies in `requirements.txt`: cma==4.5.0, pymoo==0.6.2, ortools==9.15.6755, pennylane==0.45.1, pennylane-lightning==0.45.0, matplotlib==3.11.2 (Yellow item noted). PennyLane installed cleanly on Python 3.13.
   - Trajectory dummy provides 521-point 1 Hz profile for `traj_medlift_a_w0` ready for Yash's frontend (WP-03) and screening (WP-08).
-- 01:40 IST — WP-05 (Ascent Simulator P0) DONE:
-  - Shipped `ascent/{rockets,atmosphere,geo,sim}.py` and test suite `tests/ascent/` (32 unit/acceptance tests, 85 passed total).
-  - Implemented 2D point mass dynamics with RK4 integrator, exponential atmosphere, Earth-rotation boost (~408 m/s at Cape), stage drop, event detection (max_q, meco, stage_sep, insertion), and 1 Hz trajectory export conforming to `contracts/trajectory.schema.json`.
-  - Tuned 3 fictional archetypes (MedLift-A cargo, CrewLift-B crew, HeavyLift-C heavy); all 3 cleanly reach circular parking orbit (perigee ~198-200 km >= 160 km, e < 0.0005, speed ~7.78 km/s, max-q at ~67-70s, losses ~1.45-1.65 km/s).
+- 01:55 IST — WP-06 (Pitch/Staging Optimizer P1) DONE:
+  - Shipped `ascent/optimize.py` implementing CMA-ES optimization of ascent pitch program parameters.
+  - Achieved measured 626.3 kg propellant savings (0.13% total wet mass reduction, ~7% payload capacity equivalent) versus baseline, achieving 176.1 x 182.2 km parking orbit (e = 0.00047, max-q 42.4 kPa at 71.7 s).
+  - Generated comparison artifact `data/results/naive_vs_optimized_medlift_a.png` (4-panel altitude, speed, dynamic pressure, pitch angle curves).
+  - Exported contract-valid `data/results/trajectory_optimized_medlift_a.json` with seed=42 recorded in outputs.
+  - Test suite `tests/ascent/test_optimize.py` added; full repo test suite passes (155 tests green).
+
 
 
 

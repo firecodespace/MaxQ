@@ -12,15 +12,20 @@ from ascent.geo import (
     spherical_forward,
     spherical_forward_array,
 )
+from ascent.optimize import OptimizationResult, optimize_ascent
 from ascent.rockets import ARCHETYPES, Rocket, Stage, get_rocket, list_archetypes
+from ascent.sim import DEFAULT_PITCH_PARAMS, SimResult, simulate_ascent
 
 __all__ = [
     "ARCHETYPES",
+    "DEFAULT_PITCH_PARAMS",
     "G0",
     "MU_EARTH",
     "OMEGA_EARTH",
+    "OptimizationResult",
     "R_EARTH",
     "Rocket",
+    "SimResult",
     "Stage",
     "circular_orbit_speed",
     "density",
@@ -29,7 +34,9 @@ __all__ = [
     "get_rocket",
     "launch_azimuth",
     "list_archetypes",
+    "optimize_ascent",
     "pressure",
+    "simulate_ascent",
     "spherical_forward",
     "spherical_forward_array",
 ]
