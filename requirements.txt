@@ -1,0 +1,10 @@
+# MaxQ pinned dependencies (top-level packages; versions are what actually installed on 2026-11-10, Python 3.11).
+# WP-00..02 only. Add later packages (scikit-learn, cma, pymoo, ortools, pennylane, ...) when their WP needs them (Yellow: pin + note in status).
+sgp4==2.27
+numpy==2.4.6
+scipy==1.17.1
+pandas==3.1.1
+pyarrow==26.0.1
+jsonschema==4.26.0
+pytest==9.2.0
+ruff==0.17.4

@@ -1,0 +1,113 @@
+{
+  "schema_version": 1,
+  "_note": "DUMMY DATA - shapes follow HANDOFF.md section 5; numbers are illustrative and are not real launch windows, screening results, clusters or orbital elements. Counts are for the imaginary full catalog; points are only the 10-row dummy sample.",
+  "features": [
+    "incl_deg",
+    "log_mean_motion",
+    "ecc"
+  ],
+  "clusters": [
+    {
+      "label": 0,
+      "name": "LEO shell ~53 deg (Starlink-like)",
+      "count": 5400,
+      "centroid": {
+        "incl_deg": 53.05,
+        "log_mean_motion": 2.712,
+        "ecc": 0.0001
+      }
+    },
+    {
+      "label": 1,
+      "name": "GEO belt",
+      "count": 540,
+      "centroid": {
+        "incl_deg": 0.05,
+        "log_mean_motion": 0.0027,
+        "ecc": 0.0002
+      }
+    },
+    {
+      "label": 2,
+      "name": "MEO navigation (GPS-like)",
+      "count": 31,
+      "centroid": {
+        "incl_deg": 55.0,
+        "log_mean_motion": 0.6959,
+        "ecc": 0.005
+      }
+    },
+    {
+      "label": 3,
+      "name": "LEO debris cloud",
+      "count": 2100,
+      "centroid": {
+        "incl_deg": 82.5,
+        "log_mean_motion": 2.6603,
+        "ecc": 0.02
+      }
+    }
+  ],
+  "points": [
+    {
+      "norad_id": 25544,
+      "cluster": 0,
+      "x": -6.205,
+      "y": 2.409
+    },
+    {
+      "norad_id": 99101,
+      "cluster": 0,
+      "x": -6.181,
+      "y": 1.748
+    },
+    {
+      "norad_id": 99102,
+      "cluster": 0,
+      "x": -6.744,
+      "y": 1.829
+    },
+    {
+      "norad_id": 99103,
+      "cluster": 0,
+      "x": -5.11,
+      "y": 2.339
+    },
+    {
+      "norad_id": 99201,
+      "cluster": 2,
+      "x": 2.83,
+      "y": -5.801
+    },
+    {
+      "norad_id": 99202,
+      "cluster": 2,
+      "x": 2.316,
+      "y": -5.852
+    },
+    {
+      "norad_id": 99301,
+      "cluster": 1,
+      "x": 5.667,
+      "y": 5.684
+    },
+    {
+      "norad_id": 99302,
+      "cluster": 1,
+      "x": 7.405,
+      "y": 5.399
+    },
+    {
+      "norad_id": 99001,
+      "cluster": 3,
+      "x": -5.353,
+      "y": -6.395
+    },
+    {
+      "norad_id": 99002,
+      "cluster": 3,
+      "x": -4.712,
+      "y": -5.375
+    }
+  ]
+}

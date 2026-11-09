@@ -1,0 +1,13 @@
+# Decision log
+
+Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversible: <yes|no> - status: <FINAL|PROVISIONAL>`
+
+- 01:10 - Contracts use JSON Schema draft 2020-12 via `jsonschema` (not pydantic) - by yash / claude-code - rationale: language-neutral, the web side can reuse the schemas - reversible: yes - status: FINAL
+- 01:10 - All contract objects are strict (`additionalProperties: false`) except `params`, `metadata`, `centroid`; top-level optional `_note` is allowed everywhere for dummy labels - by yash / claude-code - rationale: catch typos early; additive fields are a Yellow schema change - reversible: yes - status: FINAL
+- 01:10 - `result.json` requires `schema_version: 1` although the HANDOFF 5.6 example omits it - by yash / claude-code - rationale: section 5 says every file carries it - reversible: yes - status: FINAL
+- 01:10 - Cross-field rules live in `contracts/validate.py` (UTC == unix, equal trajectory array lengths, strictly increasing `t_s`, manifest referential integrity, clusters label integrity, TLE catalog number == norad_id) - by yash / claude-code - rationale: JSON Schema cannot express them - reversible: yes - status: FINAL
+- 01:10 - Catalog contract is a column spec (`x-columns`) plus a row-oriented JSON form; `validate("catalog", ...)` accepts the JSON form, a DataFrame, or a pyarrow Table. Parquet files carry file metadata `maxq_schema_version=1`. Dummy sample is `data/dummy/catalog_dummy.json` - by yash / claude-code - rationale: parquet cannot hold a `_note`; JSON sample is human-readable - reversible: yes - status: FINAL
+- 01:10 - Trajectory arrays are range-checked (lat -90..90, lon -180..180, speed >= 0, q >= 0, mass > 0) - by yash / claude-code - rationale: cheap sanity - reversible: yes - status: FINAL (tell Yash if the sim legitimately needs lon outside +-180)
+- 01:20 - Windows `phase_angle_deg`, `rendezvous_hours_fast`, `rendezvous_hours_slow` are optional/nullable (not meaningful for GEO/MEO profiles) - by yash / claude-code - rationale: profiles geo_comm/meo_gps have no ISS rendezvous - reversible: yes - status: FINAL
+- 01:20 - `make` is not installed on Yash's Windows machine; Makefile targets are plain `python -m ...` calls, run directly when `make` is unavailable - by yash / claude-code - rationale: no admin install overnight - reversible: yes - status: PROVISIONAL
+- 01:20 - Pushed WP-00 contracts straight to `origin/main` (fast-forward) on Yash's explicit instruction to unblock Shiva - by yash / claude-code - rationale: gated merge, lead gave the OK in chat - reversible: no (pushed) - status: FINAL
