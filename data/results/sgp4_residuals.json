@@ -1,0 +1,14 @@
+{
+  "norad_id": 25544,
+  "object_name": "ISS (ZARYA)",
+  "horizon_days": 7.0,
+  "calibration_days": 2.0,
+  "rms_uncorrected_km": 103.81,
+  "max_uncorrected_km": 193.44,
+  "rms_corrected_km": 111.13,
+  "max_corrected_km": 278.75,
+  "error_reduction_pct": -7.0,
+  "intrack_rms_uncorrected_km": 102.83,
+  "intrack_rms_corrected_km": 107.65,
+  "plot_path": "C:\\MaxQ\\data\\results\\sgp4_residuals_benchmark.png"
+}
