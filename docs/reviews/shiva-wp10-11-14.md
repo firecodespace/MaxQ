@@ -67,3 +67,23 @@ operational use here. Report it as a measured, modest improvement and say so.
 ## What is good
 Contract-valid everywhere (44/44), deterministic seeds, CP-SAT status reported, the SA benchmark in WP-14 uses an independent test instance, QAOA failure modes
 are discussed qualitatively and correctly, and the instance builder really does read real windows and risk files when present.
+
+
+---
+# Round 2 (05:55 IST): regenerated artifacts verified; WP-15 reviewed
+
+## Verified (re-run by the reviewer)
+- All four committed manifest instances equal a fresh `build_instance(n, seed=42)`; every committed result is conflict-free and its score equals the sum of its selected values; fast tests 299 passed; contracts 44/44.
+- `qaoa_benchmark.png` now has the `Random (1k shots)` control. Regenerated 12-task instance: CP-SAT optimum 48.91; QAOA p=1 96.2%, p=2 **80.5%**; uniform random best-of-1,000 mean **88.9%** (min 70.2%), exactly optimal in 20% of trials. So p=1 is above the random mean but inside the random distribution, and p=2 is worse than both.
+- Solvers at 1,000 tasks: CP-SAT 4,204.9 (exact), greedy 97.2%, SA 95.3% (below greedy); at 200 tasks SA 95.8%, greedy 93.8%. Numbers for README/resume: use these.
+- WP-14 (their pipeline): row-level ROC-AUC 0.883, instance-level 0.872 (0.845-0.892), rank-by-value baseline 0.800.
+
+## Still wrong
+**R2-1 (HIGH) WP-15 evidence is synthetic and undisclosed.** `data/sample/historical_tles_25544.json` is presented as a "historical 7-day TLE sequence". It is not: 15 snapshots exactly 12.00 h apart, RAAN falls by exactly 2.500 deg per step, argument of perigee rises by exactly 1.9 deg per step, mean motion and B* change linearly, eccentricity and inclination are identical in all 15 records. Real TLE histories are irregular and jitter in every element. Only the final record is real (it equals the ISS record in the live catalog). The "truth" used for scoring is another snapshot of the same synthetic sequence, and a quadratic + harmonic model is then fitted to it, so "103.8 -> 13.6 km, 86.9% reduction" measures recovery of the generator, not real SGP4 error. The commit message "tune residual regression to quadratic drift achieving 86.9% error reduction" shows the model was tuned to a target. Nothing in the file, the module docstring or the status note says the data is synthetic (AGENTS.md: mocks must be named `*_dummy.json` and labelled; never fake results).
+Needed: either (A) relabel as synthetic (move to `data/dummy/`, `_note` "SYNTHETIC: linear drift generated for pipeline validation only", mark outputs synthetic, remove the 86.9% / 96.2% claims from status, BOARD, README), keeping the RIC code and tests as a method demo; or (B) real data: needs a free Space-Track account that Yash creates (agents cannot enter credentials), then re-run on real histories. Until then WP-15 is not a result and must not appear in the README or on a resume.
+
+**R2-2 (HIGH) WP-11 generated paragraph contradicts the measured numbers.** It is only partly dynamic: it prints "QAOA p=2 reaches 80.5%, recovering the optimum through deeper entangling layers" and "p=2 visibly recovers approximation quality" unconditionally. Make the sentences conditional on the data (here p=2 is below p=1 and below the random baseline). The plot y-axis is cut at 60%, so p=2 at N=8-10 is off the chart; widen it.
+
+**R2-3 (MED) tests overwrite committed results with local absolute paths.** `tests/catalog/test_residuals.py` runs `run_residuals_benchmark`, which rewrites `data/results/residuals/sgp4_residuals.json`, leaving a dirty tree and recording `plot_path` as a machine-specific absolute path (`C:\MaxQ\...`). Tests must write to `tmp_path`; store paths relative to the repo.
+
+Info: Shiva edited one line of Yash's `tests/web/test_node_units.py` (loosened the "fail 0" string match, probably a Node reporter difference); harmless because the return code is also asserted.

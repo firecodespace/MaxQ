@@ -19,7 +19,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | 12 | Profiles UI, README, demo | Yash | - | P1 | DEFERRED to last stage (Yash decision 03:35); README/demo/Risk+Manifest tabs after the 06:30 freeze | - |
 | 13 | LLM mission interface | Yash | - | P2 | not started | - |
 done; fixes verified (instance-level AUC 0.872, baseline 0.800) | - |
-| 15 | SGP4 residual correction | first one free | - | P2 | not started | Space-Track account |
+| 15 | SGP4 residual correction | first one free | - | P2 | NOT ACCEPTED: input 'historical' TLEs are synthetic and undisclosed; 86.9% claim invalid; relabel or use real Space-Track data | Space-Track account |
 | 16 | Space-weather overlay | Yash | claude-code | P2 | done (NOAA Kp chip + Sky panel, display only) | - |
 
 ## Notes

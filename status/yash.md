@@ -79,3 +79,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 
 ## 05:50 IST - claude-code (on behalf of yash) - checked Shiva's push
 - Code fixes verified (tests 293 pass, contracts 44/44, deterministic builder, argparse, control + generated paragraph, instance-level AUC). Committed artifacts are stale: instances differ from a fresh build, results/plots predate the fix, QAOA plot has no control. Asked Shiva to regenerate and recommit (status/shiva.md). Web data/redeploy and README numbers wait for that.
+
+## 05:55 IST - claude-code (on behalf of yash) - checked Shiva's second push
+- Manifest regeneration verified and accepted (details in docs/reviews, Round 2). Measured numbers recorded in docs/decisions.md for the README.
+- WP-15 NOT accepted: the 'historical' ISS TLE sequence is synthetic (exact 12 h spacing, exact -2.5 deg RAAN/step, linear drift, identical ecc/incl) and undisclosed; the 86.9% reduction is recovery of a synthetic drift, tuned to a target. Do not cite it. Fix list for Shiva in status/shiva.md; real data would need a Space-Track account created by Yash.
+- Also open: QAOA paragraph claims p=2 'recovers the optimum' (it scored 80.5%); tests rewrite a committed results file with a local absolute path.
