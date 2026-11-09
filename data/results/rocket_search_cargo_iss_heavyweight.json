@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_cargo_iss_heavyweight",
+  "name": "Heavyweight Design (CARGO_ISS Archetype)",
+  "profile": "cargo_iss",
+  "payload_kg": 15980.9,
+  "stages": [
+    {
+      "dry_kg": 21456.0,
+      "prop_kg": 372463.3,
+      "thrust_n": 7459052.0,
+      "isp_s": 292.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    },
+    {
+      "dry_kg": 8868.6,
+      "prop_kg": 113781.4,
+      "thrust_n": 965093.0,
+      "isp_s": 348.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    }
+  ]
+}

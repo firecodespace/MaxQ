@@ -1,0 +1,311 @@
+{
+  "profile": "cargo_iss",
+  "seed": 42,
+  "runtime_s": 0.08,
+  "n_pareto_designs": 35,
+  "pareto_front": [
+    {
+      "payload_kg": 9502.4,
+      "liftoff_mass_kg": 339244.3,
+      "payload_fraction_pct": 2.8
+    },
+    {
+      "payload_kg": 9508.8,
+      "liftoff_mass_kg": 366421.0,
+      "payload_fraction_pct": 2.6
+    },
+    {
+      "payload_kg": 10280.9,
+      "liftoff_mass_kg": 368448.4,
+      "payload_fraction_pct": 2.79
+    },
+    {
+      "payload_kg": 10870.0,
+      "liftoff_mass_kg": 370992.3,
+      "payload_fraction_pct": 2.93
+    },
+    {
+      "payload_kg": 10870.0,
+      "liftoff_mass_kg": 370992.3,
+      "payload_fraction_pct": 2.93
+    },
+    {
+      "payload_kg": 12400.4,
+      "liftoff_mass_kg": 393854.0,
+      "payload_fraction_pct": 3.15
+    },
+    {
+      "payload_kg": 12401.5,
+      "liftoff_mass_kg": 394439.8,
+      "payload_fraction_pct": 3.14
+    },
+    {
+      "payload_kg": 12474.6,
+      "liftoff_mass_kg": 402608.1,
+      "payload_fraction_pct": 3.1
+    },
+    {
+      "payload_kg": 12494.8,
+      "liftoff_mass_kg": 407910.0,
+      "payload_fraction_pct": 3.06
+    },
+    {
+      "payload_kg": 12634.2,
+      "liftoff_mass_kg": 408333.5,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 12640.2,
+      "liftoff_mass_kg": 412170.0,
+      "payload_fraction_pct": 3.07
+    },
+    {
+      "payload_kg": 12730.0,
+      "liftoff_mass_kg": 412170.9,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 12755.0,
+      "liftoff_mass_kg": 413438.9,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 12783.1,
+      "liftoff_mass_kg": 413466.9,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 12783.1,
+      "liftoff_mass_kg": 413466.9,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 13145.0,
+      "liftoff_mass_kg": 423270.0,
+      "payload_fraction_pct": 3.11
+    },
+    {
+      "payload_kg": 13230.0,
+      "liftoff_mass_kg": 427692.1,
+      "payload_fraction_pct": 3.09
+    },
+    {
+      "payload_kg": 13475.0,
+      "liftoff_mass_kg": 439864.2,
+      "payload_fraction_pct": 3.06
+    },
+    {
+      "payload_kg": 13475.0,
+      "liftoff_mass_kg": 439864.2,
+      "payload_fraction_pct": 3.06
+    },
+    {
+      "payload_kg": 13693.0,
+      "liftoff_mass_kg": 440082.1,
+      "payload_fraction_pct": 3.11
+    },
+    {
+      "payload_kg": 13817.7,
+      "liftoff_mass_kg": 468193.4,
+      "payload_fraction_pct": 2.95
+    },
+    {
+      "payload_kg": 13817.7,
+      "liftoff_mass_kg": 468193.4,
+      "payload_fraction_pct": 2.95
+    },
+    {
+      "payload_kg": 13845.8,
+      "liftoff_mass_kg": 468221.4,
+      "payload_fraction_pct": 2.96
+    },
+    {
+      "payload_kg": 13845.8,
+      "liftoff_mass_kg": 468221.4,
+      "payload_fraction_pct": 2.96
+    },
+    {
+      "payload_kg": 13850.1,
+      "liftoff_mass_kg": 468224.6,
+      "payload_fraction_pct": 2.96
+    },
+    {
+      "payload_kg": 14308.7,
+      "liftoff_mass_kg": 468839.0,
+      "payload_fraction_pct": 3.05
+    },
+    {
+      "payload_kg": 14309.8,
+      "liftoff_mass_kg": 468840.1,
+      "payload_fraction_pct": 3.05
+    },
+    {
+      "payload_kg": 14629.9,
+      "liftoff_mass_kg": 487228.2,
+      "payload_fraction_pct": 3.0
+    },
+    {
+      "payload_kg": 15203.2,
+      "liftoff_mass_kg": 509509.9,
+      "payload_fraction_pct": 2.98
+    },
+    {
+      "payload_kg": 15210.9,
+      "liftoff_mass_kg": 509521.8,
+      "payload_fraction_pct": 2.99
+    },
+    {
+      "payload_kg": 15920.5,
+      "liftoff_mass_kg": 510199.0,
+      "payload_fraction_pct": 3.12
+    },
+    {
+      "payload_kg": 15920.5,
+      "liftoff_mass_kg": 510199.0,
+      "payload_fraction_pct": 3.12
+    },
+    {
+      "payload_kg": 15921.7,
+      "liftoff_mass_kg": 513489.5,
+      "payload_fraction_pct": 3.1
+    },
+    {
+      "payload_kg": 15973.4,
+      "liftoff_mass_kg": 515341.5,
+      "payload_fraction_pct": 3.1
+    },
+    {
+      "payload_kg": 15980.9,
+      "liftoff_mass_kg": 532550.1,
+      "payload_fraction_pct": 3.0
+    }
+  ],
+  "finalists": [
+    {
+      "design_id": "search_cargo_iss_lightweight",
+      "name": "Lightweight Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "label": "Lightweight",
+      "payload_kg": 9502.4,
+      "liftoff_mass_kg": 339244.2,
+      "payload_fraction_pct": 2.8,
+      "simulation": {
+        "perigee_km": -6326.7,
+        "apogee_km": -16.9,
+        "eccentricity": 0.98396,
+        "speed_mps": 1013.0,
+        "losses_mps": 9891.1,
+        "verified": false
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_cargo_iss_lightweight",
+        "name": "Lightweight Design (CARGO_ISS Archetype)",
+        "profile": "cargo_iss",
+        "payload_kg": 9502.4,
+        "stages": [
+          {
+            "dry_kg": 12201.8,
+            "prop_kg": 223777.6,
+            "thrust_n": 4811535.0,
+            "isp_s": 292.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          },
+          {
+            "dry_kg": 6777.5,
+            "prop_kg": 86984.9,
+            "thrust_n": 722124.0,
+            "isp_s": 348.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_cargo_iss_balanced",
+      "name": "Balanced Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "label": "Balanced",
+      "payload_kg": 13475.0,
+      "liftoff_mass_kg": 439864.2,
+      "payload_fraction_pct": 3.06,
+      "simulation": {
+        "perigee_km": -4446.8,
+        "apogee_km": 46.3,
+        "eccentricity": 0.53773,
+        "speed_mps": 5398.9,
+        "losses_mps": 5031.8,
+        "verified": false
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_cargo_iss_balanced",
+        "name": "Balanced Design (CARGO_ISS Archetype)",
+        "profile": "cargo_iss",
+        "payload_kg": 13475.0,
+        "stages": [
+          {
+            "dry_kg": 17112.0,
+            "prop_kg": 308753.3,
+            "thrust_n": 6178556.0,
+            "isp_s": 292.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          },
+          {
+            "dry_kg": 7489.5,
+            "prop_kg": 93034.4,
+            "thrust_n": 841894.0,
+            "isp_s": 348.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          }
+        ]
+      }
+    },
+    {
+      "design_id": "search_cargo_iss_heavyweight",
+      "name": "Heavyweight Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "label": "Heavyweight",
+      "payload_kg": 15980.9,
+      "liftoff_mass_kg": 532550.2,
+      "payload_fraction_pct": 3.0,
+      "simulation": {
+        "perigee_km": -6281.8,
+        "apogee_km": 4.0,
+        "eccentricity": 0.97027,
+        "speed_mps": 1377.0,
+        "losses_mps": 9201.9,
+        "verified": false
+      },
+      "rocket": {
+        "schema_version": 1,
+        "id": "search_cargo_iss_heavyweight",
+        "name": "Heavyweight Design (CARGO_ISS Archetype)",
+        "profile": "cargo_iss",
+        "payload_kg": 15980.9,
+        "stages": [
+          {
+            "dry_kg": 21456.0,
+            "prop_kg": 372463.3,
+            "thrust_n": 7459052.0,
+            "isp_s": 292.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          },
+          {
+            "dry_kg": 8868.6,
+            "prop_kg": 113781.4,
+            "thrust_n": 965093.0,
+            "isp_s": 348.0,
+            "cd": 0.3,
+            "area_m2": 10.75
+          }
+        ]
+      }
+    }
+  ]
+}
