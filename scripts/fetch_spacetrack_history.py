@@ -6,7 +6,7 @@
 
 Rules this script follows (Space-Track documentation, checked 2026-11-10):
   * Free account required; credentials come ONLY from the environment variables SPACETRACK_USER / SPACETRACK_PASS.
-  * Limit API queries to < 30 per minute and < 300 per hour. This script makes exactly ONE request.
+  * Limit API queries to < 30 per minute and < 300 per hour. This script makes one login and ONE data query.
   * GP_HISTORY is "1 / lifetime": download an object's history once and store it; do not download it again.
     So the script REFUSES to run when the output file already exists (unless --force).
   * Do not use gp_history for current elements (use CelesTrak/GP): the query is bounded by --days.
@@ -26,6 +26,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import UTC, datetime
+from http.cookiejar import CookieJar
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -88,20 +89,45 @@ def validate_records(records: object, norad: int) -> list[dict]:
     return out
 
 
-def request_history(norad: int, days: float, creds: tuple[str, str], opener=None) -> list[dict]:
-    """ONE POST: login and query together (Space-Track's documented single-request form)."""
-    body = urllib.parse.urlencode(
-        {"identity": creds[0], "password": creds[1], "query": build_query(norad, days)}
-    ).encode()
-    req = urllib.request.Request(LOGIN_URL, data=body, headers={"User-Agent": USER_AGENT})
-    open_fn = opener or urllib.request.urlopen
+def default_opener():
+    """urlopen-compatible callable that keeps the session cookie between the login and the query."""
+    return urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CookieJar())).open
+
+
+def _call(open_fn, req, step: str, secret: str) -> str:
+    """Perform one request; errors name the step and include Space-Track's own message (never the password)."""
     try:
         with open_fn(req, timeout=TIMEOUT_S) as resp:
-            payload = resp.read().decode("utf-8")
+            return resp.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        raise FetchError(f"Space-Track answered HTTP {e.code}; do not retry in a loop (rate limits apply)") from None
+        try:
+            said = e.read().decode("utf-8", "replace").replace(secret, "***")[:300]
+        except Exception:  # noqa: BLE001 - the error body is a courtesy only
+            said = ""
+        raise FetchError(
+            f"Space-Track answered HTTP {e.code} during {step}"
+            + (f": {said!r}" if said else "")
+            + ". Do not retry in a loop (rate limits apply)."
+        ) from None
     except (urllib.error.URLError, TimeoutError, OSError) as e:
-        raise FetchError(f"network error: {e}") from None
+        raise FetchError(f"network error during {step}: {e}") from None
+
+
+def request_history(norad: int, days: float, creds: tuple[str, str], opener=None) -> list[dict]:
+    """Login (POST), then ONE data query (GET with a percent-encoded path): the standard two-step form."""
+    open_fn = opener or default_opener()
+    login = urllib.request.Request(
+        LOGIN_URL,
+        data=urllib.parse.urlencode({"identity": creds[0], "password": creds[1]}).encode(),
+        headers={"User-Agent": USER_AGENT},
+    )
+    reply = _call(open_fn, login, "login", creds[1])
+    if "failed" in reply.lower():
+        raise FetchError(
+            "login failed: check the email/password and that the Space-Track account is approved and activated"
+        )
+    query = urllib.request.Request(build_query(norad, days), headers={"User-Agent": USER_AGENT})
+    payload = _call(open_fn, query, "history query", creds[1])
     try:
         return validate_records(json.loads(payload), norad)
     except json.JSONDecodeError:
