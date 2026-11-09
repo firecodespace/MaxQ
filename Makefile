@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup test lint data windows ascent manifest web
+.PHONY: setup test lint data data-offline windows ascent manifest web
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -18,8 +18,11 @@ test:  ## run all tests (contracts, catalog, frames, ...)
 lint:  ## ruff
 	$(PY) -m ruff check .
 
-data:  ## WP-01: fetch CelesTrak (cached) -> data/processed/catalog.parquet
-	@echo "data: not implemented yet (WP-01 in progress)"
+data:  ## WP-01: fetch CelesTrak (cached, max 1 request/group/2h) -> data/processed/catalog.parquet
+	$(PY) -m catalog.fetch
+
+data-offline:  ## WP-01: same, but no network (raw cache, else committed data/sample)
+	$(PY) -m catalog.fetch --offline
 
 windows:  ## WP-02: launch windows -> windows.json
 	@echo "windows: not implemented yet (WP-02)"

@@ -24,3 +24,7 @@ web/dist/
 
 # Claude worktrees
 .claude/worktrees/
+
+# Generated: rebuild with `make data` / `make data-offline`
+data/processed/*
+!data/processed/.gitkeep
