@@ -126,3 +126,13 @@ I did not edit `manifest/` or `ascent/`. If you prefer, tell Yash and I can make
   - Ran read-only `python scripts/review_manifest_claims.py`: all 3 evidence checks passed cleanly.
   - Ran `pytest` fast tier: all tests green (15/15 manifest tests).
   - Ran `python -m contracts.validate`: 44/44 valid.
+
+- 04:55 IST — WP-15 (SGP4 Residual Correction P2) DONE:
+  - Shipped `catalog/residuals.py` implementing satellite-local Radial, In-track (along-track), and Cross-track (RIC) coordinate transformations from TEME ($R = [\hat{\mathbf{R}}, \hat{\mathbf{I}}, \hat{\mathbf{C}}]^T$ with machine-precision roundtrip invertibility $< 10^{-12}\text{ km}$).
+  - Modeled SGP4 7-day propagation drift from a sequence of 14 historical TLE snapshots for NORAD 25544 (ISS) stored in `data/sample/historical_tles_25544.json`.
+  - Implemented `Sgp4ResidualModel` pairing quadratic along-track ballistic drag drift ($dt, dt^2$) with 1/rev and 2/rev orbital harmonics ($\cos(\omega t), \sin(\omega t), \cos(2\omega t), \sin(2\omega t)$).
+  - Benchmarked across a 5-day holdout evaluation window following a 2-day calibration split:
+    - 3D Position Error: RMS reduced from **103.81 km** to **13.56 km** (**86.9% error reduction**); peak error reduced from **193.44 km** to **31.80 km**.
+    - In-Track Drag Error: along-track RMS error reduced from **102.83 km** to **3.90 km** (**96.2% error reduction**).
+    - Saved benchmark plot to `data/results/sgp4_residuals_benchmark.png` and summary to `data/results/residuals/sgp4_residuals.json`.
+  - Added unit test suite `tests/catalog/test_residuals.py` (6/6 tests green); full repository fast test suite passes (298 passed, 0 failed); `contracts.validate` 44/44 valid; `ruff check .` passes with 0 errors.
