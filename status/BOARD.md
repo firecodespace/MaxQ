@@ -6,7 +6,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 |----|-------|-------|------------|------|-------|---------|
 | 00 | Kickoff and scaffolding | Yash + Shiva | claude-code (Yash half) | P0 | Yash half DONE (contracts + scaffold pushed). Shiva half (rocket/trajectory/manifest/result dummies, env) pending | Shiva dummies |
 | 01 | Catalog pipeline and frames | Yash | claude-code | P0 | done (TLE-only catalog confirmed by Yash; revisit OMM at WP-08) | - |
-| 02 | Launch windows and phasing | Yash | - | P0 | not started | WP-01 |
+| 02 | Launch windows and phasing | Yash | claude-code | P0 | done (real ISS/GPS windows; geo_comm placeholder PROVISIONAL) | - |
 | 03 | Frontend v0 | Yash | - | P0 | not started | dummy data |
 | 04 | Deploy v1 | Yash | - | P0 | not started | WP-03 |
 | 05 | Ascent simulator | Shiva | - | P0 | not started | contracts (done) |

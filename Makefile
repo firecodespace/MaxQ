@@ -24,8 +24,8 @@ data:  ## WP-01: fetch CelesTrak (cached, max 1 request/group/2h) -> data/proces
 data-offline:  ## WP-01: same, but no network (raw cache, else committed data/sample)
 	$(PY) -m catalog.fetch --offline
 
-windows:  ## WP-02: launch windows -> windows.json
-	@echo "windows: not implemented yet (WP-02)"
+windows:  ## WP-02: 7 days of launch windows, all profiles, Cape Canaveral -> data/results/windows_*.json
+	$(PY) -m mission.windows --profile all --site cape_canaveral --days 7
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 	@echo "ascent: not implemented yet (WP-05, Shiva's lane)"

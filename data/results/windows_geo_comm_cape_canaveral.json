@@ -1,0 +1,101 @@
+{
+  "schema_version": 1,
+  "_note": "Computed by mission/windows.py from the TLE of NORAD 44457 (epoch 2026-11-08T17:51:36.623232Z); search 2026-11-09T20:11:00Z + 7 d. Plane-crossing times and inertial azimuth are real geometry (SGP4, km-level TLE error). Not an operational launch plan. PLACEHOLDER profile: one nominal due-east opportunity per day at local hour 0; GEO transfer timing is not modelled; plane_error_deg is the inclination that must still be removed at GEO (= site latitude).",
+  "profile": "geo_comm",
+  "site": {
+    "name": "Cape Canaveral",
+    "lat_deg": 28.5619,
+    "lon_deg": -80.5772
+  },
+  "target": {
+    "norad_id": 44457,
+    "tle_epoch_utc": "2026-11-08T17:51:36.623232Z"
+  },
+  "generated_utc": "2026-11-09T20:11:02Z",
+  "windows": [
+    {
+      "id": "w0",
+      "t_launch_unix": 1794288139,
+      "t_launch_utc": "2026-11-10T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w1",
+      "t_launch_unix": 1794374539,
+      "t_launch_utc": "2026-11-11T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w2",
+      "t_launch_unix": 1794460939,
+      "t_launch_utc": "2026-11-12T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w3",
+      "t_launch_unix": 1794547339,
+      "t_launch_utc": "2026-11-13T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w4",
+      "t_launch_unix": 1794633739,
+      "t_launch_utc": "2026-11-14T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w5",
+      "t_launch_unix": 1794720139,
+      "t_launch_utc": "2026-11-15T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    },
+    {
+      "id": "w6",
+      "t_launch_unix": 1794806539,
+      "t_launch_utc": "2026-11-16T05:22:19Z",
+      "azimuth_deg": 90.0,
+      "plane_error_deg": 28.5619,
+      "pass": "ascending",
+      "phase_angle_deg": null,
+      "rendezvous_hours_fast": null,
+      "rendezvous_hours_slow": null,
+      "flyable": true
+    }
+  ]
+}

@@ -18,3 +18,9 @@ Lane: `ascent/`, `manifest/`. Default WPs: 05, 06, 07, 10, 11 (+ Shiva half of W
   - Pinned Shiva lane dependencies in `requirements.txt`: cma==4.5.0, pymoo==0.6.2, ortools==9.15.6755, pennylane==0.45.1, pennylane-lightning==0.45.0, matplotlib==3.11.2 (Yellow item noted). PennyLane installed cleanly on Python 3.13.
   - Trajectory dummy provides 521-point 1 Hz profile for `traj_medlift_a_w0` ready for Yash's frontend (WP-03) and screening (WP-08).
 
+
+## Note from Yash's agent (claude-code) - 02:10 IST: real windows are available
+- `data/results/windows_crew_iss_cape_canaveral.json` (and cargo_iss / meo_gps / geo_comm variants): 7 days of REAL plane-crossing windows from the live ISS TLE. Use the `flyable: true` ascending ones (`w0`, `w2`, ...). Regenerate: `python -m mission.windows --profile all`.
+- `azimuth_deg` is the INERTIAL azimuth of the target plane (44.9 deg Cape/ISS), not the heading relative to the rotating ground. For the ground-relative heading use `mission.phasing.rotating_azimuth_deg(lat, incl, v_orbit)` (~42.7 deg for the same case), or fly the inertial azimuth in an inertial-frame sim and add Earth rotation yourself.
+- ISS inclination/altitude: read from the catalog TLE (`catalog.fetch.load_catalog()` after `python -m catalog.fetch --offline`), never hard-code. `core/frames.py` has geodetic/ECEF/TEME helpers (read-only for you).
+- `geo_comm` windows are a labelled PLACEHOLDER (nominal daily slot).
