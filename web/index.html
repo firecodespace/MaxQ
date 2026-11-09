@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MaxQ - launch mission planner</title>
+  <meta name="description" content="Live satellite catalog, real ISS launch windows and ascent replay. Educational, reduced-fidelity.">
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand"><b>MaxQ</b><span>from the live satellite catalog to orbit</span></div>
+    <div class="clock">
+      <span class="label">Sim time</span> <span id="utc" class="mono">--</span>
+      <span id="clock-note" class="chip"></span>
+    </div>
+    <div class="controls">
+      <button id="btn-pause" type="button" aria-label="Pause or resume the simulation clock">Pause</button>
+      <label>Speed
+        <select id="sel-warp" aria-label="Clock speed">
+          <option value="1">1x</option><option value="10">10x</option><option value="60">60x</option>
+          <option value="600">600x</option><option value="3600">3600x</option>
+        </select>
+      </label>
+      <button id="btn-now" type="button">Now</button>
+    </div>
+  </header>
+
+  <div id="banners" class="banners" role="status"></div>
+
+  <main class="grid">
+    <section class="panel mapwrap" aria-label="World map with live satellites">
+      <div class="panel-head">
+        <h2>Live satellites</h2>
+        <div id="chips" class="chips" role="group" aria-label="Show or hide object groups"></div>
+      </div>
+      <div class="canvaswrap">
+        <canvas id="map" aria-label="Equirectangular map showing satellite positions"></canvas>
+        <div class="zoom">
+          <button id="btn-zoom-in" type="button" aria-label="Zoom in">+</button>
+          <button id="btn-zoom-out" type="button" aria-label="Zoom out">-</button>
+          <button id="btn-zoom-reset" type="button" aria-label="Reset view">&#8962;</button>
+        </div>
+        <div id="map-hint" class="hint">Drag to pan, wheel or +/- to zoom, click an object for details.</div>
+      </div>
+      <div id="catalog-note" class="note"></div>
+    </section>
+
+    <aside class="side">
+      <section class="panel" id="windows-panel" aria-label="Launch windows">
+        <div class="panel-head"><h2>Launch windows</h2><div id="win-badges" class="badges"></div></div>
+        <div id="tabs" class="tabs" role="tablist"></div>
+        <div id="win-site" class="note"></div>
+        <div class="tablewrap">
+          <table id="win-table">
+            <thead><tr><th>ID</th><th>Launch (UTC)</th><th>T-</th><th>Pass</th><th title="Inertial launch azimuth of the target plane">Az&deg;</th><th title="In-plane lead of the target at insertion">Phase&deg;</th><th title="Fast / slow rendezvous estimate, hours">Rdv h</th><th>Fly</th></tr></thead>
+            <tbody id="win-body"></tbody>
+          </table>
+        </div>
+        <div id="win-note" class="note"></div>
+      </section>
+      <section class="panel" id="info-panel" aria-label="Selected object">
+        <div class="panel-head"><h2>Selected object</h2></div>
+        <div id="info" class="info">Click an object on the map.</div>
+      </section>
+    </aside>
+
+    <section class="panel replay" id="replay-panel" aria-label="Ascent replay">
+      <div class="panel-head">
+        <h2>Ascent replay</h2>
+        <div id="traj-badges" class="badges"></div>
+        <select id="traj-select" aria-label="Trajectory file"></select>
+      </div>
+      <div id="traj-note" class="note"></div>
+      <div class="replay-controls">
+        <button id="btn-play" type="button">Play</button>
+        <label>Speed
+          <select id="sel-speed" aria-label="Replay speed"><option value="1">1x</option><option value="5" selected>5x</option><option value="20">20x</option></select>
+        </label>
+        <label class="chk"><input type="checkbox" id="chk-sync" checked> Sync satellites to replay</label>
+        <label class="chk"><input type="checkbox" id="chk-follow"> Follow vehicle</label>
+        <span id="readout" class="mono readout"></span>
+      </div>
+      <div class="scrubwrap">
+        <input id="scrub" type="range" min="0" max="520" step="1" value="0" aria-label="Replay time">
+        <div id="markers" class="markers"></div>
+      </div>
+      <div class="plots">
+        <canvas id="plot-alt" aria-label="Altitude versus time"></canvas>
+        <canvas id="plot-speed" aria-label="Speed versus time"></canvas>
+        <canvas id="plot-q" aria-label="Dynamic pressure versus time"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <strong>Fidelity.</strong> Real: the public CelesTrak catalog and ISS orbit (TLEs, kilometre-level position error) and the
+    orbital-mechanics math for windows and azimuth. Approximate: ascent is a 2D point-mass model with a simple atmosphere;
+    rockets are fictional archetypes; rendezvous hours are impulsive estimates; screening thresholds are illustrative.
+    MaxQ is an educational and portfolio project, not an operational planning tool. Anything marked
+    <span class="badge dummy">DUMMY</span> is placeholder data.
+  </footer>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+{
+  "generated_utc": "2026-11-09T20:19:33Z",
+  "files": [
+    {
+      "name": "clusters_dummy.json",
+      "kind": "clusters",
+      "dummy": true,
+      "bytes": 2239
+    },
+    {
+      "name": "manifest_instance_dummy.json",
+      "kind": "manifest_instance",
+      "dummy": true,
+      "bytes": 2236
+    },
+    {
+      "name": "result_dummy.json",
+      "kind": "result",
+      "dummy": true,
+      "bytes": 204
+    },
+    {
+      "name": "risk_dummy.json",
+      "kind": "risk",
+      "dummy": true,
+      "bytes": 1330
+    },
+    {
+      "name": "rocket_dummy.json",
+      "kind": "rocket",
+      "dummy": true,
+      "bytes": 504
+    },
+    {
+      "name": "trajectory_dummy.json",
+      "kind": "trajectory",
+      "dummy": true,
+      "bytes": 48220
+    },
+    {
+      "name": "windows_dummy.json",
+      "kind": "windows",
+      "dummy": true,
+      "bytes": 2155
+    },
+    {
+      "name": "windows_cargo_iss_cape_canaveral.json",
+      "kind": "windows",
+      "dummy": false,
+      "bytes": 5530
+    },
+    {
+      "name": "windows_crew_iss_cape_canaveral.json",
+      "kind": "windows",
+      "dummy": false,
+      "bytes": 5529
+    },
+    {
+      "name": "windows_geo_comm_cape_canaveral.json",
+      "kind": "windows",
+      "dummy": false,
+      "bytes": 3160
+    },
+    {
+      "name": "windows_meo_gps_cape_canaveral.json",
+      "kind": "windows",
+      "dummy": false,
+      "bytes": 5311
+    }
+  ],
+  "catalog": {
+    "name": "catalog_web.json",
+    "_note": "REAL CelesTrak TLEs (or the committed offline sample if catalog_mode says so); subsampled per group.",
+    "catalog_mode": "full-catalog",
+    "groups": [
+      "stations",
+      "gps-ops",
+      "geo",
+      "active",
+      "starlink",
+      "debris"
+    ],
+    "total_objects": 18555,
+    "shown_objects": 6815,
+    "latest_tle_epoch_utc": "2026-11-10T19:43:23.687616Z"
+  }
+}

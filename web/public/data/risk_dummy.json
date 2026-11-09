@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "_note": "DUMMY DATA - shapes follow HANDOFF.md section 5; numbers are illustrative and are not real launch windows, screening results, clusters or orbital elements.",
+  "threshold_km": 25,
+  "metadata": {
+    "tle_accuracy_note": "DUMMY. Real screening uses TLEs with kilometer-level position error; thresholds here are illustrative, not agency keep-out volumes."
+  },
+  "results": [
+    {
+      "window_id": "w0",
+      "trajectory_id": "traj_medlift_a_w0",
+      "min_miss_km": 41.3,
+      "object": {
+        "norad_id": 99001,
+        "name": "DUMMY DEB A"
+      },
+      "t_closest_utc": "2026-11-10T04:52:50Z",
+      "risk_score": 0.12,
+      "status": "go"
+    },
+    {
+      "window_id": "w2",
+      "trajectory_id": "traj_medlift_a_w2",
+      "min_miss_km": 14.2,
+      "object": {
+        "norad_id": 99002,
+        "name": "DUMMY DEB B"
+      },
+      "t_closest_utc": "2026-11-11T04:31:30Z",
+      "risk_score": 0.55,
+      "status": "review"
+    },
+    {
+      "window_id": "w4",
+      "trajectory_id": "traj_medlift_a_w4",
+      "min_miss_km": 3.8,
+      "object": {
+        "norad_id": 99003,
+        "name": "DUMMY DEB C"
+      },
+      "t_closest_utc": "2026-11-12T04:09:15Z",
+      "risk_score": 0.93,
+      "status": "no-go"
+    }
+  ]
+}

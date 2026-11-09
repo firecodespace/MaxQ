@@ -1,0 +1,26 @@
+{
+  "_note": "dummy",
+  "schema_version": 1,
+  "id": "medlift_kerolox_a",
+  "name": "MedLift-A (fictional archetype)",
+  "profile": "cargo_iss",
+  "payload_kg": 8000,
+  "stages": [
+    {
+      "dry_kg": 22000,
+      "prop_kg": 400000,
+      "thrust_n": 7600000,
+      "isp_s": 282,
+      "cd": 0.3,
+      "area_m2": 10.8
+    },
+    {
+      "dry_kg": 4000,
+      "prop_kg": 110000,
+      "thrust_n": 934000,
+      "isp_s": 348,
+      "cd": 0.3,
+      "area_m2": 10.8
+    }
+  ]
+}

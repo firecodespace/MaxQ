@@ -1,0 +1,77 @@
+{
+  "schema_version": 1,
+  "_note": "DUMMY DATA - shapes follow HANDOFF.md section 5; numbers are illustrative and are not real launch windows, screening results, clusters or orbital elements.",
+  "profile": "crew_iss",
+  "site": {
+    "name": "Cape Canaveral",
+    "lat_deg": 28.5,
+    "lon_deg": -80.6
+  },
+  "target": {
+    "norad_id": 25544,
+    "tle_epoch_utc": "2026-11-10T00:00:00Z"
+  },
+  "generated_utc": "2026-11-10T01:00:00Z",
+  "windows": [
+    {
+      "id": "w0",
+      "t_launch_unix": 1794286000,
+      "t_launch_utc": "2026-11-10T04:46:40Z",
+      "azimuth_deg": 44.9,
+      "plane_error_deg": 0.0,
+      "pass": "ascending",
+      "phase_angle_deg": 31.2,
+      "rendezvous_hours_fast": 3.2,
+      "rendezvous_hours_slow": 25.0,
+      "flyable": true
+    },
+    {
+      "id": "w1",
+      "t_launch_unix": 1794329320,
+      "t_launch_utc": "2026-11-10T16:48:40Z",
+      "azimuth_deg": 135.1,
+      "plane_error_deg": 0.0,
+      "pass": "descending",
+      "phase_angle_deg": 214.6,
+      "rendezvous_hours_fast": 4.1,
+      "rendezvous_hours_slow": 26.0,
+      "flyable": false
+    },
+    {
+      "id": "w2",
+      "t_launch_unix": 1794371080,
+      "t_launch_utc": "2026-11-11T04:24:40Z",
+      "azimuth_deg": 44.9,
+      "plane_error_deg": 0.0,
+      "pass": "ascending",
+      "phase_angle_deg": 118.4,
+      "rendezvous_hours_fast": 6.0,
+      "rendezvous_hours_slow": 25.0,
+      "flyable": true
+    },
+    {
+      "id": "w3",
+      "t_launch_unix": 1794414400,
+      "t_launch_utc": "2026-11-11T16:26:40Z",
+      "azimuth_deg": 135.1,
+      "plane_error_deg": 0.0,
+      "pass": "descending",
+      "phase_angle_deg": 301.8,
+      "rendezvous_hours_fast": 4.6,
+      "rendezvous_hours_slow": 27.0,
+      "flyable": false
+    },
+    {
+      "id": "w4",
+      "t_launch_unix": 1794456160,
+      "t_launch_utc": "2026-11-12T04:02:40Z",
+      "azimuth_deg": 44.9,
+      "plane_error_deg": 0.0,
+      "pass": "ascending",
+      "phase_angle_deg": 205.7,
+      "rendezvous_hours_fast": 9.4,
+      "rendezvous_hours_slow": 26.0,
+      "flyable": true
+    }
+  ]
+}
