@@ -7,7 +7,8 @@ velocity calculations per HANDOFF.md §7.
 from __future__ import annotations
 
 import math
-from typing import Sequence
+from collections.abc import Sequence
+
 import numpy as np
 
 # WGS84 and astronomical constants

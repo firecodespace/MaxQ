@@ -10,7 +10,7 @@ fictional baseline archetypes:
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, dataclass, field
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -131,7 +131,7 @@ class Rocket:
 
     @classmethod
     def from_json(cls, path: Path | str) -> Rocket:
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             return cls.from_dict(json.load(f))
 
 
