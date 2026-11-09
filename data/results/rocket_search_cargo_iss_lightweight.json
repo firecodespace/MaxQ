@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_cargo_iss_lightweight",
+  "name": "Lightweight Design (CARGO_ISS Archetype)",
+  "profile": "cargo_iss",
+  "payload_kg": 9502.4,
+  "stages": [
+    {
+      "dry_kg": 12201.8,
+      "prop_kg": 223777.6,
+      "thrust_n": 4811535.0,
+      "isp_s": 292.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    },
+    {
+      "dry_kg": 6777.5,
+      "prop_kg": 86984.9,
+      "thrust_n": 722124.0,
+      "isp_s": 348.0,
+      "cd": 0.3,
+      "area_m2": 10.75
+    }
+  ]
+}

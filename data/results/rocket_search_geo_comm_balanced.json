@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_geo_comm_balanced",
+  "name": "Balanced Design (GEO_COMM Archetype)",
+  "profile": "geo_comm",
+  "payload_kg": 24679.4,
+  "stages": [
+    {
+      "dry_kg": 18338.1,
+      "prop_kg": 350015.1,
+      "thrust_n": 6613176.0,
+      "isp_s": 305.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    },
+    {
+      "dry_kg": 8219.7,
+      "prop_kg": 106966.3,
+      "thrust_n": 1264033.0,
+      "isp_s": 445.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "search_geo_comm_lightweight",
+  "name": "Lightweight Design (GEO_COMM Archetype)",
+  "profile": "geo_comm",
+  "payload_kg": 16073.9,
+  "stages": [
+    {
+      "dry_kg": 17933.2,
+      "prop_kg": 350033.5,
+      "thrust_n": 6057402.0,
+      "isp_s": 305.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    },
+    {
+      "dry_kg": 6342.5,
+      "prop_kg": 83665.9,
+      "thrust_n": 969301.0,
+      "isp_s": 445.0,
+      "cd": 0.35,
+      "area_m2": 21.24
+    }
+  ]
+}
