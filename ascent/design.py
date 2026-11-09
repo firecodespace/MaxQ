@@ -14,23 +14,35 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
+import sys
 import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+# Ensure project root is on sys.path for direct script execution
+REPO_ROOT = Path(__file__).resolve().parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
+# Avoid font cache write permissions warning on Windows sandbox
+os.environ.setdefault("MPLCONFIGDIR", str(REPO_ROOT / ".cache" / "matplotlib"))
+
 import matplotlib
+
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from pymoo.algorithms.moo.nsga2 import NSGA2
 from pymoo.core.problem import ElementwiseProblem
 from pymoo.optimize import minimize
+from scipy.optimize import minimize as sp_minimize
 
 from ascent.geo import G0
 from ascent.rockets import Rocket, Stage
-from ascent.sim import simulate_ascent
-
+from ascent.sim import SimResult, simulate_ascent
+from contracts.validate import validate
 
 # Profile design parameters and physical constraints
 PROFILE_SPECS: dict[str, dict[str, Any]] = {
@@ -49,6 +61,7 @@ PROFILE_SPECS: dict[str, dict[str, Any]] = {
         "dv_req_mps": 9200.0,
         "max_a_g": 5.0,
         "target_incl_deg": 51.6,
+        "azimuth_deg": 44.9,
     },
     "crew_iss": {
         "payload_bounds": (7500.0, 13000.0),  # Crew capsule range
@@ -65,6 +78,7 @@ PROFILE_SPECS: dict[str, dict[str, Any]] = {
         "dv_req_mps": 9200.0,
         "max_a_g": 4.2,  # Strict limit for crew safety
         "target_incl_deg": 51.6,
+        "azimuth_deg": 44.9,
     },
     "geo_comm": {
         "payload_bounds": (10000.0, 28000.0),  # High payload to LEO for high-energy GTO transfer
@@ -81,6 +95,7 @@ PROFILE_SPECS: dict[str, dict[str, Any]] = {
         "dv_req_mps": 9800.0,
         "max_a_g": 5.0,
         "target_incl_deg": 28.5,
+        "azimuth_deg": 90.0,
     },
 }
 
@@ -172,6 +187,7 @@ class DesignFinalist:
     payload_kg: float
     liftoff_mass_kg: float
     payload_fraction_pct: float
+    pitch_params: list[float]
     sim_perigee_km: float
     sim_apogee_km: float
     sim_eccentricity: float
@@ -188,6 +204,7 @@ class DesignFinalist:
             "payload_kg": round(self.payload_kg, 1),
             "liftoff_mass_kg": round(self.liftoff_mass_kg, 1),
             "payload_fraction_pct": round(self.payload_fraction_pct, 2),
+            "pitch_params": [round(float(p), 4) for p in self.pitch_params],
             "simulation": {
                 "perigee_km": round(self.sim_perigee_km, 1),
                 "apogee_km": round(self.sim_apogee_km, 1),
@@ -220,7 +237,11 @@ class SearchResult:
             "runtime_s": round(self.runtime_s, 2),
             "n_pareto_designs": self.n_pareto_designs,
             "pareto_front": [
-                {"payload_kg": round(p, 1), "liftoff_mass_kg": round(m, 1), "payload_fraction_pct": round(p / m * 100, 2)}
+                {
+                    "payload_kg": round(p, 1),
+                    "liftoff_mass_kg": round(m, 1),
+                    "payload_fraction_pct": round(p / m * 100, 2),
+                }
                 for p, m in zip(self.pareto_payloads_kg, self.pareto_masses_kg)
             ],
             "finalists": [f.to_dict() for f in self.finalists],
@@ -274,6 +295,81 @@ def convert_vector_to_rocket(
         payload_kg=round(float(payload), 1),
         stages=[stage1, stage2],
     )
+
+
+def tune_pitch_program(
+    rocket: Rocket,
+    profile: str,
+    site_lat_deg: float = 28.5,
+    azimuth_deg: float = 44.9,
+    target_incl_deg: float = 51.6,
+) -> tuple[list[float], SimResult]:
+    """Adaptively tunes pitch program parameters for a synthesized rocket design.
+
+    Uses a fast coarse grid evaluation followed by local Nelder-Mead polishing to
+    ensure the candidate achieves a circular parking orbit with perigee >= 160 km.
+    """
+    best_loss = 1e9
+    best_p = [12.0, 28.0, 3.0, 0.75, 0.7]
+
+    pm_candidates = [18.0, 24.0, 30.0, 36.0, 42.0, 46.0]
+    pf_candidates = [-2.0, 1.0, 4.0, 7.0, 10.0]
+
+    for pm in pm_candidates:
+        for pf in pf_candidates:
+            p = [12.0, pm, pf, 0.75, 0.7]
+            sim = simulate_ascent(
+                rocket,
+                pitch_params=p,
+                site_lat_deg=site_lat_deg,
+                azimuth_deg=azimuth_deg,
+                target_incl_deg=target_incl_deg,
+                dt_substep=0.10,
+            )
+            if sim.perigee_km < 0:
+                err = 1e6 + abs(sim.perigee_km)
+            else:
+                err = (
+                    max(0.0, 175.0 - sim.perigee_km) ** 2
+                    + max(0.0, sim.apogee_km - 225.0) ** 2
+                    + sim.eccentricity * 20000.0
+                )
+            if err < best_loss:
+                best_loss = err
+                best_p = p
+
+    # Local polish via Nelder-Mead
+    def loss(sub_p: Sequence[float]) -> float:
+        p = [12.0, float(sub_p[0]), float(sub_p[1]), 0.75, 0.7]
+        sim = simulate_ascent(
+            rocket,
+            pitch_params=p,
+            site_lat_deg=site_lat_deg,
+            azimuth_deg=azimuth_deg,
+            target_incl_deg=target_incl_deg,
+            dt_substep=0.10,
+        )
+        if sim.perigee_km < 0:
+            return 1e6 + abs(sim.perigee_km)
+        return (
+            max(0.0, 175.0 - sim.perigee_km) ** 2
+            + max(0.0, sim.apogee_km - 225.0) ** 2
+            + sim.eccentricity * 20000.0
+        )
+
+    opt = sp_minimize(loss, [best_p[1], best_p[2]], method="Nelder-Mead", options={"maxiter": 20})
+    best_params = [12.0, float(opt.x[0]), float(opt.x[1]), 0.75, 0.7]
+
+    # Full fidelity verification run
+    final_sim = simulate_ascent(
+        rocket,
+        pitch_params=best_params,
+        site_lat_deg=site_lat_deg,
+        azimuth_deg=azimuth_deg,
+        target_incl_deg=target_incl_deg,
+        dt_substep=0.05,
+    )
+    return best_params, final_sim
 
 
 def plot_pareto_front(
@@ -373,6 +469,7 @@ def search_rocket_designs(
     if profile not in PROFILE_SPECS:
         raise ValueError(f"Unknown profile: {profile}. Valid: {list(PROFILE_SPECS.keys())}")
 
+    specs = PROFILE_SPECS[profile]
     t0 = time.time()
     prob = RocketDesignProblem(profile=profile)
     alg = NSGA2(pop_size=pop_size)
@@ -385,7 +482,7 @@ def search_rocket_designs(
     x_vals = res.X
 
     if f_vals is None or len(f_vals) == 0:
-        raise RuntimeError("NSGA-II found no feasible non-dominated designs.")
+        raise RuntimeError(f"NSGA-II found no feasible non-dominated designs for profile {profile}.")
 
     # Sort strictly by increasing payload (decreasing f1)
     payloads = [-float(f[0]) for f in f_vals]
@@ -413,13 +510,13 @@ def search_rocket_designs(
 
         rocket = convert_vector_to_rocket(x_final, profile, slug, name)
 
-        # Verify finalist in the 2D point mass ascent simulator
-        sim_res = simulate_ascent(
+        # Adaptively tune pitch program and verify in the 2D point mass ascent simulator
+        pitch_params, sim_res = tune_pitch_program(
             rocket=rocket,
+            profile=profile,
             site_lat_deg=28.5,
-            azimuth_deg=44.9 if "iss" in profile else 90.0,
-            target_incl_deg=PROFILE_SPECS[profile]["target_incl_deg"],
-            trajectory_id=f"traj_{slug}_verify",
+            azimuth_deg=specs["azimuth_deg"],
+            target_incl_deg=specs["target_incl_deg"],
         )
 
         verified = (
@@ -437,6 +534,7 @@ def search_rocket_designs(
             payload_kg=rocket.payload_kg,
             liftoff_mass_kg=rocket.liftoff_mass_kg,
             payload_fraction_pct=(rocket.payload_kg / rocket.liftoff_mass_kg) * 100.0,
+            pitch_params=pitch_params,
             sim_perigee_km=sim_res.perigee_km,
             sim_apogee_km=sim_res.apogee_km,
             sim_eccentricity=sim_res.eccentricity,
@@ -451,9 +549,6 @@ def search_rocket_designs(
             r_path = Path("data/results") / f"rocket_{slug}.json"
             r_path.parent.mkdir(parents=True, exist_ok=True)
             rocket.to_json(r_path)
-            # Validate against contracts
-            from contracts.validate import validate
-
             validate("rocket", rocket.to_dict())
 
     # Generate plot if requested
@@ -489,9 +584,9 @@ def main() -> None:
     parser.add_argument(
         "--profile",
         type=str,
-        default="cargo_iss",
-        choices=["cargo_iss", "crew_iss", "geo_comm"],
-        help="Mission profile for design search",
+        default="all",
+        choices=["cargo_iss", "crew_iss", "geo_comm", "all"],
+        help="Mission profile for design search (default: 'all')",
     )
     parser.add_argument("--pop-size", type=int, default=35, help="Population size")
     parser.add_argument("--n-gen", type=int, default=35, help="Generations")
@@ -500,48 +595,55 @@ def main() -> None:
         "--out-json",
         type=str,
         default=None,
-        help="Output summary JSON path (default: data/results/pareto_designs_<profile>.json)",
+        help="Output summary JSON path",
     )
     parser.add_argument(
         "--out-plot",
         type=str,
         default=None,
-        help="Output plot PNG path (default: data/results/pareto_front_<profile>.png)",
+        help="Output plot PNG path",
     )
     args = parser.parse_args()
 
-    out_json = args.out_json or f"data/results/pareto_designs_{args.profile}.json"
-    out_plot = args.out_plot or f"data/results/pareto_front_{args.profile}.png"
-
-    print(f"Executing NSGA-II rocket design search for profile '{args.profile}'...")
-    res = search_rocket_designs(
-        profile=args.profile,
-        pop_size=args.pop_size,
-        n_gen=args.n_gen,
-        seed=args.seed,
-        out_results_json=out_json,
-        out_plot_png=out_plot,
-        export_finalists=True,
+    profiles_to_run = (
+        ["cargo_iss", "crew_iss", "geo_comm"] if args.profile == "all" else [args.profile]
     )
 
-    print("\n" + "=" * 65)
-    print(f"PARETO DESIGN SEARCH RESULTS ({args.profile.upper()}):")
-    print(f"  Non-dominated Designs: {res.n_pareto_designs}")
-    print(f"  Search Runtime:        {res.runtime_s:.2f} s")
-    print(f"  Summary JSON:          {out_json}")
-    print(f"  Pareto Plot:           {out_plot}")
-    print("\nVERIFIED FINALIST ARCHITECTURES:")
-    for f in res.finalists:
-        ver_status = "VERIFIED (Reaches Orbit)" if f.verified else "UNVERIFIED"
-        print(
-            f"  * [{f.label}] {f.name}\n"
-            f"      Payload: {f.payload_kg:.0f} kg | GLOW: {f.liftoff_mass_kg:.0f} kg ({f.payload_fraction_pct:.2f}% payload fraction)\n"
-            f"      Sim Orbit: Perigee={f.sim_perigee_km:.1f} km, Apogee={f.sim_apogee_km:.1f} km, Ecc={f.sim_eccentricity:.5f}\n"
-            f"      Insertion Speed: {f.sim_speed_mps:.1f} m/s | Status: {ver_status}"
+    for prof in profiles_to_run:
+        out_json = args.out_json or f"data/results/pareto/pareto_designs_{prof}.json"
+        out_plot = args.out_plot or f"data/results/pareto_front_{prof}.png"
+
+        print(f"\nExecuting NSGA-II rocket design search for profile '{prof}'...")
+        res = search_rocket_designs(
+            profile=prof,
+            pop_size=args.pop_size,
+            n_gen=args.n_gen,
+            seed=args.seed,
+            out_results_json=out_json,
+            out_plot_png=out_plot,
+            export_finalists=True,
         )
-    print("=" * 65)
+
+        print("\n" + "=" * 65)
+        print(f"PARETO DESIGN SEARCH RESULTS ({prof.upper()}):")
+        print(f"  Non-dominated Designs: {res.n_pareto_designs}")
+        print(f"  Search Runtime:        {res.runtime_s:.2f} s")
+        print(f"  Summary JSON:          {out_json}")
+        print(f"  Pareto Plot:           {out_plot}")
+        print("\nVERIFIED FINALIST ARCHITECTURES:")
+        for f in res.finalists:
+            ver_status = "VERIFIED (Reaches Orbit)" if f.verified else "UNVERIFIED"
+            print(
+                f"  * [{f.label}] {f.name}\n"
+                f"      Payload: {f.payload_kg:.0f} kg | GLOW: {f.liftoff_mass_kg:.0f} kg "
+                f"({f.payload_fraction_pct:.2f}% payload fraction)\n"
+                f"      Pitch Params: {[round(p, 2) for p in f.pitch_params]}\n"
+                f"      Sim Orbit: Perigee={f.sim_perigee_km:.1f} km, Apogee={f.sim_apogee_km:.1f} km, "
+                f"Ecc={f.sim_eccentricity:.5f}\n"
+                f"      Insertion Speed: {f.sim_speed_mps:.1f} m/s | Status: {ver_status}"
+            )
+        print("=" * 65)
 
 
 if __name__ == "__main__":
     main()
-
