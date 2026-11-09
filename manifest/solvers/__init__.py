@@ -7,12 +7,14 @@ from typing import Any
 from manifest.instance import ManifestInstance
 from manifest.solvers.cpsat import solve_cpsat
 from manifest.solvers.greedy import solve_greedy
+from manifest.solvers.qaoa import solve_qaoa
 from manifest.solvers.sa import solve_sa
 
 SOLVERS = {
     "greedy": solve_greedy,
     "sa": solve_sa,
     "cpsat": solve_cpsat,
+    "qaoa": solve_qaoa,
 }
 
 
@@ -40,5 +42,5 @@ def solve_manifest(
     return SOLVERS[solver_key](instance, seed=seed, **kwargs)
 
 
-__all__ = ["solve_manifest", "solve_greedy", "solve_sa", "solve_cpsat", "SOLVERS"]
+__all__ = ["solve_manifest", "solve_greedy", "solve_sa", "solve_cpsat", "solve_qaoa", "SOLVERS"]
 
