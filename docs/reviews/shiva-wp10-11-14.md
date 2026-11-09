@@ -87,3 +87,7 @@ Needed: either (A) relabel as synthetic (move to `data/dummy/`, `_note` "SYNTHET
 **R2-3 (MED) tests overwrite committed results with local absolute paths.** `tests/catalog/test_residuals.py` runs `run_residuals_benchmark`, which rewrites `data/results/residuals/sgp4_residuals.json`, leaving a dirty tree and recording `plot_path` as a machine-specific absolute path (`C:\MaxQ\...`). Tests must write to `tmp_path`; store paths relative to the repo.
 
 Info: Shiva edited one line of Yash's `tests/web/test_node_units.py` (loosened the "fail 0" string match, probably a Node reporter difference); harmless because the return code is also asserted.
+
+
+## Round 2 follow-up (06:20 IST): WP-15 reworked
+Yash asked for real data and for the problem to be fixed. The synthetic file and the results computed from it were deleted; `catalog/residuals.py` was rebuilt to evaluate only on a real Space-Track history (pairs of baseline/later snapshots, strict temporal split, manoeuvre exclusion, bootstrap CI, simpler baseline) and refuses non-real input; `scripts/fetch_spacetrack_history.py` fetches the history once with credentials from environment variables only. Real data could not be obtained by the agent (Space-Track needs an account; SatNOGS offers only the current element set; CelesTrak has no history). WP-15 therefore has no result yet.

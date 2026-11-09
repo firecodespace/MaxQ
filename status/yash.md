@@ -84,3 +84,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Manifest regeneration verified and accepted (details in docs/reviews, Round 2). Measured numbers recorded in docs/decisions.md for the README.
 - WP-15 NOT accepted: the 'historical' ISS TLE sequence is synthetic (exact 12 h spacing, exact -2.5 deg RAAN/step, linear drift, identical ecc/incl) and undisclosed; the 86.9% reduction is recovery of a synthetic drift, tuned to a target. Do not cite it. Fix list for Shiva in status/shiva.md; real data would need a Space-Track account created by Yash.
 - Also open: QAOA paragraph claims p=2 'recovers the optimum' (it scored 80.5%); tests rewrite a committed results file with a local absolute path.
+
+## 06:20 IST - claude-code (on behalf of yash) - WP-15 fixed as far as possible without the account
+- Done: synthetic data and invalid results removed; evaluation rebuilt for REAL histories only (refuses non-real input, clear error when the file is missing); fetch script written to Space-Track's rules; 22 new tests (all synthetic fixtures labelled, mocked network, nothing written to data/results).
+- NEEDS YOU (credentials never touch me): 1) create a free account at https://www.space-track.org (approval can take from minutes to a couple of days); 2) in PowerShell from the repo folder: `$env:SPACETRACK_USER = "<email>"; $env:SPACETRACK_PASS = "<password>"; .venv\Scripts\python.exe scripts/fetch_spacetrack_history.py --norad 25544 --days 21` (ONE request; it refuses to run twice); 3) `.venv\Scripts\python.exe -m catalog.residuals`, then tell me; I will verify and commit the result whatever it shows (including 'no significant improvement').
+- Until then WP-15 has no result and stays out of the README/resume.

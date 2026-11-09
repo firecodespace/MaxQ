@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup doctor test test-all lint data data-offline windows risk cluster ascent manifest web web-export
+.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -39,6 +39,9 @@ risk:  ## WP-08: screen ascent + 2 h parking-orbit coast against the catalog -> 
 
 cluster:  ## WP-09: cluster the catalog + altitude congestion -> data/results/clusters.json
 	$(PY) -m catalog.cluster
+
+residuals:  ## WP-15: SGP4 error vs element-set age on a REAL Space-Track history (fetch it once first: scripts/fetch_spacetrack_history.py)
+	$(PY) -m catalog.residuals
 
 ascent:  ## WP-05/06: ascent simulation -> trajectory.json (Shiva)
 	$(PY) -m ascent.sim --rocket medlift_kerolox_a --out data/results/trajectory_cargo_iss_w0.json
