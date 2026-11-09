@@ -24,6 +24,8 @@ def solve_sa(
     t_end: float = 0.005,
     seed: int = 42,
     restarts: int = 2,
+    init_selected: list[int] | None = None,
+    log_trajectory: bool = False,
     **kwargs: Any,
 ) -> dict[str, Any]:
     """Solve manifest scheduling using Simulated Annealing on QUBO formulation.
@@ -35,6 +37,8 @@ def solve_sa(
         t_end: Final temperature.
         seed: Random seed for deterministic reproducibility.
         restarts: Number of independent annealing runs from different initial seeds.
+        init_selected: Optional initial list of active task IDs for warm-starting.
+        log_trajectory: Whether to log intermediate best scores along the run.
 
     Returns:
         Contract-compliant dictionary with selected task IDs, score, and runtime.
@@ -81,6 +85,7 @@ def solve_sa(
 
     global_best_selected: list[int] = []
     global_best_score = 0.0
+    trajectory: list[tuple[int, float]] = []
 
     master_rng = random.Random(seed)
 
@@ -88,20 +93,36 @@ def solve_sa(
         run_seed = master_rng.randint(0, 10**8)
         rng = random.Random(run_seed)
 
-        # Initialize: warm-start from a light greedy or empty state
         x = [0] * n
         conflict_counts = [0] * n
 
-        # Initial random or greedy seed: pick a few high-value nodes without immediate conflict
-        for i in rng.sample(range(n), min(n, max(1, n // 5))):
-            if conflict_counts[i] == 0:
-                x[i] = 1
-                for neighbor in adj[i]:
-                    conflict_counts[neighbor] += 1
+        # Initial seed: warm-start from provided list, or sample random nodes
+        if init_selected is not None:
+            # Filter and greedily load provided warm-start task IDs
+            seen_forbidden: set[int] = set()
+            for i in init_selected:
+                if 0 <= i < n and i not in seen_forbidden and conflict_counts[i] == 0:
+                    x[i] = 1
+                    seen_forbidden.add(i)
+                    seen_forbidden.update(adj[i])
+                    for neighbor in adj[i]:
+                        conflict_counts[neighbor] += 1
+        else:
+            # Initial random or greedy seed: pick a few high-value nodes without immediate conflict
+            for i in rng.sample(range(n), min(n, max(1, n // 5))):
+                if conflict_counts[i] == 0:
+                    x[i] = 1
+                    for neighbor in adj[i]:
+                        conflict_counts[neighbor] += 1
 
         curr_t = t_start
-        run_best_selected: list[int] = []
-        run_best_score = 0.0
+        run_best_selected: list[int] = [i for i in range(n) if x[i] == 1 and conflict_counts[i] == 0]
+        run_best_score = sum(values[i] for i in run_best_selected)
+
+        if log_trajectory and run_idx == 0:
+            trajectory.append((0, run_best_score))
+
+        log_interval = max(10, steps // 100)
 
         for step in range(steps):
             k = rng.randint(0, n - 1)
@@ -144,6 +165,9 @@ def solve_sa(
                             run_best_score = cand_score
                             run_best_selected = active_nodes[:]
 
+            if log_trajectory and run_idx == 0 and (step % log_interval == 0 or step == steps - 1):
+                trajectory.append((step + 1, run_best_score))
+
             curr_t = max(t_end, curr_t * cooling_rate)
 
         # Fallback repair on final state if no feasible solution was tracked
@@ -166,7 +190,7 @@ def solve_sa(
 
     runtime_s = max(1e-6, time.perf_counter() - t0)
 
-    return {
+    res = {
         "schema_version": 1,
         "_note": "Simulated Annealing QUBO solution",
         "instance": instance.id,
@@ -176,4 +200,9 @@ def solve_sa(
         "runtime_s": round(runtime_s, 6),
         "seed": seed,
     }
+
+    if log_trajectory:
+        return res, trajectory
+
+    return res
 

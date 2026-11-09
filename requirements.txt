@@ -10,11 +10,12 @@ pytest==9.2.0
 ruff==0.17.4
 scikit-learn==1.9.1
 
-# Shiva lane (WP-00, WP-05, WP-06, WP-07, WP-10, WP-11)
+# Shiva lane (WP-00, WP-05, WP-06, WP-07, WP-10, WP-11, WP-14)
 cma==4.5.0
 pymoo==0.6.2
 ortools==9.15.6755
 pennylane==0.45.1
 pennylane-lightning==0.45.0
 matplotlib==3.11.2
+scikit-learn==1.9.1
 
