@@ -71,3 +71,8 @@ Lane: `catalog/`, `mission/`, `web/`, `scripts/`, `api/`, `core/frames.py`. Defa
 - Done: `web/js/spaceweather.js` (parse/validate NOAA rows, G scale, activity class, current/peak, cached fetch), header Kp chip, Sky-tab panel with chart, 9 Node unit tests wired into pytest. Verified in the browser with live NOAA data (Kp 3.7 quiet; a real G1 storm period on Nov 7-8 is visible), failure path ("Kp n/a" + message, recovers), mobile 375px (no overflow).
 - Display only, labelled "Context only": no calculation uses it.
 - Next: redeploy (Sky tab + WP-16), then re-check Shiva's fixes when they push; WP-12 last.
+
+## 05:25 IST - claude-code (on behalf of yash) - redeployed https://maxq-nu.vercel.app (Sky tab + WP-16)
+- Production deploy `maxq-kwlyeb0gi-firecodespaces.vercel.app` READY. Live now: complete catalog, Mission + Sky tabs (clusters, congestion), NOAA Kp chip and panel, regenerated windows/risk, Shiva's results exported.
+- Verified on the live URL: assets 200; desktop 1200x900 and mobile 375x812 with no console errors and no horizontal overflow; Kp chip loads NOAA live from the deployed origin; Sky tab loads 24 clusters and the congestion chart.
+- Still manual: `python scripts/export_web_data.py` then `npx vercel@65.14.0 deploy --prod --yes`. Not yet on the live site: nothing pending from my side; Shiva's review fixes will need another export+deploy.
