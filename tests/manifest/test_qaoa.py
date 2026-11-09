@@ -54,3 +54,4 @@ def test_qaoa_qubit_limit_guard():
     inst = build_instance(num_tasks=20, seed=42)
     with pytest.raises(ValueError, match="QAOA simulator limit exceeded"):
         solve_qaoa(inst, p=1)
+
