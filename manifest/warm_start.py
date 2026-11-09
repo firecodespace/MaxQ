@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.metrics import average_precision_score, roc_auc_score, roc_curve
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import GroupShuffleSplit, train_test_split
 
 from manifest.instance import ManifestInstance, build_instance
 from manifest.solvers.cpsat import solve_cpsat
@@ -93,10 +93,12 @@ def generate_training_data(
     min_tasks: int = 30,
     max_tasks: int = 70,
     seed: int = 42,
-) -> tuple[np.ndarray, np.ndarray]:
-    """Generate training dataset of task features and exact CP-SAT optimal binary labels."""
+    return_groups: bool = False,
+) -> tuple[np.ndarray, np.ndarray] | tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Generate training dataset of task features, optimal binary labels, and group indicators."""
     all_x: list[np.ndarray] = []
     all_y: list[np.ndarray] = []
+    all_g: list[np.ndarray] = []
 
     rng = np.random.default_rng(seed)
 
@@ -118,9 +120,13 @@ def generate_training_data(
 
         all_x.append(x_inst)
         all_y.append(y_inst)
+        all_g.append(np.full(n_tasks, idx, dtype=np.int32))
 
     x = np.vstack(all_x)
     y = np.concatenate(all_y)
+    if return_groups:
+        g = np.concatenate(all_g)
+        return x, y, g
     return x, y
 
 
@@ -182,24 +188,57 @@ def run_warm_start_experiment(
     test_sizes: tuple[int, ...] = (50, 100, 200),
     seed: int = 42,
 ) -> dict[str, Any]:
-    """Train model, evaluate ROC metrics, and compare Cold-Start vs Warm-Start SA."""
+    """Train model, evaluate ROC metrics across split types, and compare Cold vs Warm SA."""
     print("=" * 88)
     print("MaxQ Manifest Scheduler Warm-Start Benchmark (WP-14)")
     print("=" * 88)
 
     # 1. Generate dataset and train model
     print("Generating training data with exact CP-SAT labels...")
-    x, y = generate_training_data(num_instances=22, min_tasks=35, max_tasks=65, seed=seed)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.25, random_state=seed, stratify=y)
+    x, y, g = generate_training_data(num_instances=22, min_tasks=35, max_tasks=65, seed=seed, return_groups=True)
 
-    print(f"Dataset generated: {len(y)} total tasks ({np.mean(y)*100:.1f}% selected in optimal manifests).")
-    print("Training HistGradientBoostingClassifier...")
-    clf = train_model(x_train, y_train, seed=seed)
+    # Standard row-level split (as originally tested)
+    xa, xb, ya, yb = train_test_split(x, y, test_size=0.25, random_state=seed, stratify=y)
+    clf_row = train_model(xa, ya, seed=seed)
+    p_row = clf_row.predict_proba(xb)[:, 1]
+    row_auc = float(roc_auc_score(yb, p_row))
+    row_pr = float(average_precision_score(yb, p_row))
 
-    y_pred_proba = clf.predict_proba(x_test)[:, 1]
-    roc_auc = roc_auc_score(y_test, y_pred_proba)
-    pr_auc = average_precision_score(y_test, y_pred_proba)
-    print(f"Model Performance: ROC-AUC = {roc_auc:.4f}, PR-AUC = {pr_auc:.4f}")
+    # Instance-level split (GroupShuffleSplit across 8 random partitions)
+    inst_splits = []
+    sample_y_test = None
+    sample_p_test = None
+    for s_idx in range(8):
+        tr, te = next(GroupShuffleSplit(n_splits=1, test_size=0.25, random_state=s_idx).split(x, y, g))
+        clf_inst = train_model(x[tr], y[tr], seed=seed)
+        p_te = clf_inst.predict_proba(x[te])[:, 1]
+        inst_splits.append((roc_auc_score(y[te], p_te), average_precision_score(y[te], p_te)))
+        if s_idx == 0:
+            sample_y_test = y[te]
+            sample_p_test = p_te
+
+    inst_res_arr = np.array(inst_splits)
+    inst_auc_mean = float(inst_res_arr[:, 0].mean())
+    inst_auc_min = float(inst_res_arr[:, 0].min())
+    inst_auc_max = float(inst_res_arr[:, 0].max())
+    inst_pr_mean = float(inst_res_arr[:, 1].mean())
+
+    # Trivial baseline: rank by task value alone
+    val_idx = FEATURE_NAMES.index("value")
+    baseline_auc = float(roc_auc_score(y, x[:, val_idx]))
+
+    # Final production model trained on full dataset for inference
+    clf = train_model(x, y, seed=seed)
+
+    n_inst = len(np.unique(g))
+    print(f"Dataset generated: {len(y)} tasks across {n_inst} instances ({np.mean(y)*100:.1f}% selected).")
+    print("Model Evaluation:")
+    print(
+        f"  Instance Split (8 partitions): ROC-AUC = {inst_auc_mean:.3f} "
+        f"(min {inst_auc_min:.3f}, max {inst_auc_max:.3f}), PR-AUC = {inst_pr_mean:.3f}"
+    )
+    print(f"  Baseline (Rank by Value alone): ROC-AUC = {baseline_auc:.3f}")
+    print(f"  Row-Level Split (as shipped):   ROC-AUC = {row_auc:.3f}, PR-AUC = {row_pr:.3f}")
     print("-" * 88)
 
     # 2. Benchmark Cold-Start vs Warm-Start SA across test instances
@@ -275,28 +314,43 @@ def run_warm_start_experiment(
     print("-" * 88)
 
     # 3. Generate benchmark plot
-    plot_file = plot_warm_start_results(y_test, y_pred_proba, trajectory_data, results_records)
+    plot_file = plot_warm_start_results(
+        sample_y_test if sample_y_test is not None else yb,
+        sample_p_test if sample_p_test is not None else p_row,
+        trajectory_data,
+        results_records,
+        baseline_auc=baseline_auc,
+        inst_auc=inst_auc_mean,
+    )
     print(f"\nWarm-start visualization saved to: {plot_file}")
 
     init_pct_first = results_records[0]["warm_init_score"] / results_records[0]["opt_score"] * 100
     init_pct_last = results_records[-1]["warm_init_score"] / results_records[-1]["opt_score"] * 100
-    honest_text = f"""
-### WP-14 Scheduler Warm-Start Honest Assessment
+    honest_text = f"""### WP-14 Scheduler Warm-Start Honest Assessment
 
-The gradient boosted warm-start classifier achieves an ROC-AUC of {roc_auc:.3f} on unseen launch instances,
-leveraging value-to-conflict ratio, competitor maximum value, and graph degree to identify viable flights.
-By seeding Simulated Annealing with model-selected non-conflicting candidates, the initial state begins
-at {init_pct_first:.1f}% to {init_pct_last:.1f}% of global CP-SAT optimal value (versus 0-25% for cold starts).
-Consequently, warm-started SA matches or exceeds cold-start solution quality with a 3x reduction in proposal steps,
-delivering an empirical {results_records[0]['speedup']:.1f}x to {results_records[-1]['speedup']:.1f}x runtime speedup.
-Limitation: while gradient boosting reliably flags strong independent tasks, it operates on local graph
-neighborhoods and cannot resolve cycle conflicts; stochastic annealing remains essential to polish schedules.
-"""
+Model Validation & Generalization:
+- Instance Split (GroupShuffleSplit across 8 independent partitions):
+  ROC-AUC = {inst_auc_mean:.3f} (min {inst_auc_min:.3f}, max {inst_auc_max:.3f}), PR-AUC = {inst_pr_mean:.3f}.
+- Trivial Baseline ("Rank by Task Value Alone"):
+  ROC-AUC = {baseline_auc:.3f}.
+  The graph features provide a modest +{inst_auc_mean - baseline_auc:.3f} AUC gain over priority ranking alone.
+- Row-Level Split:
+  ROC-AUC = {row_auc:.3f}, PR-AUC = {row_pr:.3f} (slight task leakage across same graph).
+
+Operational Reality & Limits:
+- Seeding SA with model priors boosts initial state quality to {init_pct_first:.1f}%–{init_pct_last:.1f}% of optimum.
+- The observed speedup ({results_records[0]['speedup']:.1f}x–{results_records[-1]['speedup']:.1f}x) is by construction
+  (reducing proposal budget to 1/3 based on initial warm seed quality).
+  Wall-clock timing excludes feature extraction and ML inference (~10 ms).
+- Operationally, exact CP-SAT already solves these manifest instances to proven optimality
+  in tens of milliseconds (0.01–0.12 s) with zero constraint violation risk.
+  The ML warm start is therefore an algorithmic proof of concept, not an operational necessity."""
     print(honest_text)
 
     return {
-        "roc_auc": roc_auc,
-        "pr_auc": pr_auc,
+        "instance_auc": inst_auc_mean,
+        "row_auc": row_auc,
+        "baseline_auc": baseline_auc,
         "records": results_records,
         "plot_path": str(plot_file),
         "model": clf,
@@ -308,16 +362,21 @@ def plot_warm_start_results(
     y_probs: np.ndarray,
     traj_data: dict[str, Any],
     records: list[dict[str, Any]],
+    baseline_auc: float = 0.775,
+    inst_auc: float = 0.827,
 ) -> Path:
-    """Generate 3-panel visualization: ROC curve, convergence trajectories, and runtime speedup."""
+    """Generate 3-panel visualization: ROC curve, convergence trajectories, and runtime comparison."""
     fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(16, 4.8), dpi=150)
     fig.patch.set_facecolor("#0b0f19")
 
     # Panel 1: ROC Curve
     fpr, tpr, _ = roc_curve(y_test, y_probs)
-    auc_val = roc_auc_score(y_test, y_probs)
-    ax1.plot(fpr, tpr, color="#38bdf8", linewidth=2.2, label=f"HistGradientBoosting (AUC = {auc_val:.3f})")
-    ax1.plot([0, 1], [0, 1], color="#6b7280", linestyle="--", linewidth=1.2, label="Random Guess (AUC = 0.5)")
+    ax1.plot(fpr, tpr, color="#38bdf8", linewidth=2.2, label=f"HistGradientBoosting (AUC = {inst_auc:.3f})")
+    ax1.plot(
+        [0, 1], [0, 1], color="#9ca3af", linestyle=":", linewidth=1.4,
+        label=f"Rank by Value (AUC = {baseline_auc:.3f})"
+    )
+    ax1.plot([0, 1], [0, 1], color="#4b5563", linestyle="--", linewidth=1.0, label="Random (AUC = 0.500)")
     ax1.set_title("Task Inclusion Prediction (ROC)", color="#f9fafb", fontsize=12, fontweight="bold")
     ax1.set_xlabel("False Positive Rate", color="#e5e7eb", fontsize=10)
     ax1.set_ylabel("True Positive Rate", color="#e5e7eb", fontsize=10)
@@ -368,6 +427,22 @@ def plot_warm_start_results(
     ax3.set_xticks(indices)
     ax3.set_xticklabels([str(t) for t in tasks_x])
     ax3.legend(facecolor="#1f2937", edgecolor="#374151", labelcolor="#e5e7eb", fontsize=9)
+
+    # Style axes
+    for ax in (ax1, ax2, ax3):
+        ax.set_facecolor("#111827")
+        ax.tick_params(colors="#9ca3af", which="both")
+        for spine in ax.spines.values():
+            spine.set_color("#374151")
+        ax.grid(True, linestyle="--", alpha=0.3, color="#4b5563")
+
+    plt.suptitle("MaxQ Scheduler Warm-Start Benchmark (WP-14)", color="#f9fafb", fontsize=14, y=1.02, fontweight="bold")
+    plt.tight_layout()
+
+    out_file = RESULTS_DIR / "warm_start_benchmark.png"
+    plt.savefig(out_file, dpi=150, facecolor=fig.get_facecolor(), bbox_inches="tight")
+    plt.close(fig)
+    return out_file
 
     # Style axes
     for ax in (ax1, ax2, ax3):

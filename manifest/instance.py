@@ -6,6 +6,7 @@ Produces QUBO matrix formulation for SA and QAOA.
 
 from __future__ import annotations
 
+import hashlib
 import json
 import random
 from dataclasses import dataclass
@@ -138,13 +139,24 @@ class ManifestInstance:
         return q, float(penalty)
 
 
-def _load_available_windows() -> list[dict[str, Any]]:
-    """Load real windows from data/results or fallback to data/dummy."""
+def _compute_file_hash(path: Path) -> str:
+    """Compute first 8 characters of SHA256 hex digest for file provenance."""
+    h = hashlib.sha256()
+    try:
+        h.update(path.read_bytes())
+        return h.hexdigest()[:8]
+    except Exception:
+        return "unknown"
+
+
+def _load_available_windows() -> tuple[list[dict[str, Any]], list[str]]:
+    """Load real windows from data/results or fallback to data/dummy, tracking provenance hashes."""
     results_dir = REPO_ROOT / "data" / "results"
     dummy_file = REPO_ROOT / "data" / "dummy" / "windows_dummy.json"
 
-    window_files = list(results_dir.glob("windows_*.json"))
+    window_files = sorted(results_dir.glob("windows_*.json"), key=lambda p: p.name)
     raw_windows: list[dict[str, Any]] = []
+    file_hashes: list[str] = []
 
     if window_files:
         for p in window_files:
@@ -152,9 +164,18 @@ def _load_available_windows() -> list[dict[str, Any]]:
                 with open(p, encoding="utf-8") as f:
                     d = json.load(f)
                     profile = d.get("profile", "cargo_iss")
+                    site_dict = d.get("site", {})
+                    site_name = (
+                        site_dict.get("name", "Cape Canaveral")
+                        if isinstance(site_dict, dict)
+                        else "Cape Canaveral"
+                    )
+                    f_hash = _compute_file_hash(p)
+                    file_hashes.append(f"{p.name}:{f_hash}")
                     for w in d.get("windows", []):
                         w_copy = dict(w)
                         w_copy["profile"] = profile
+                        w_copy["site_name"] = site_name
                         raw_windows.append(w_copy)
             except Exception:
                 continue
@@ -163,43 +184,65 @@ def _load_available_windows() -> list[dict[str, Any]]:
         with open(dummy_file, encoding="utf-8") as f:
             d = json.load(f)
             profile = d.get("profile", "cargo_iss")
+            site_dict = d.get("site", {})
+            site_name = (
+                site_dict.get("name", "Cape Canaveral")
+                if isinstance(site_dict, dict)
+                else "Cape Canaveral"
+            )
+            f_hash = _compute_file_hash(dummy_file)
+            file_hashes.append(f"{dummy_file.name}:{f_hash}")
             for w in d.get("windows", []):
                 w_copy = dict(w)
                 w_copy["profile"] = profile
+                w_copy["site_name"] = site_name
                 raw_windows.append(w_copy)
 
-    return raw_windows
+    return raw_windows, file_hashes
 
 
-def _load_risk_screening() -> dict[str, dict[str, Any]]:
-    """Load risk screening results mapped by window_id."""
+def _load_risk_screening() -> tuple[dict[Any, dict[str, Any]], list[str]]:
+    """Load risk screening results mapped by (profile, window_id) and window_id, tracking hashes."""
     results_dir = REPO_ROOT / "data" / "results"
     dummy_file = REPO_ROOT / "data" / "dummy" / "risk_dummy.json"
 
-    risk_files = list(results_dir.glob("risk_*.json"))
-    lookup: dict[str, dict[str, Any]] = {}
+    risk_files = sorted(results_dir.glob("risk_*.json"), key=lambda p: p.name)
+    lookup: dict[Any, dict[str, Any]] = {}
+    file_hashes: list[str] = []
 
     if risk_files:
         for p in risk_files:
             try:
                 with open(p, encoding="utf-8") as f:
                     d = json.load(f)
+                    meta = d.get("metadata", {})
+                    profile = meta.get("windows_profile", "cargo_iss")
+                    f_hash = _compute_file_hash(p)
+                    file_hashes.append(f"{p.name}:{f_hash}")
                     for r in d.get("results", []):
                         wid = r.get("window_id")
                         if wid:
-                            lookup[wid] = r
+                            lookup[(profile, wid)] = r
+                            if wid not in lookup:
+                                lookup[wid] = r
             except Exception:
                 continue
 
     if not lookup and dummy_file.exists():
         with open(dummy_file, encoding="utf-8") as f:
             d = json.load(f)
+            meta = d.get("metadata", {})
+            profile = meta.get("windows_profile", "cargo_iss")
+            f_hash = _compute_file_hash(dummy_file)
+            file_hashes.append(f"{dummy_file.name}:{f_hash}")
             for r in d.get("results", []):
                 wid = r.get("window_id")
                 if wid:
-                    lookup[wid] = r
+                    lookup[(profile, wid)] = r
+                    if wid not in lookup:
+                        lookup[wid] = r
 
-    return lookup
+    return lookup, file_hashes
 
 
 def build_instance(
@@ -219,8 +262,8 @@ def build_instance(
         target_separation_hours: Minimum hours between arrivals to the same target (ISS).
     """
     rng = random.Random(seed)
-    raw_windows = _load_available_windows()
-    risk_map = _load_risk_screening()
+    raw_windows, window_hashes = _load_available_windows()
+    risk_map, risk_hashes = _load_risk_screening()
 
     # Launch sites and pads
     pads = ["LC-39A", "SLC-40", "SLC-41", "VAFB-SLC-4E", "LC-36"]
@@ -234,6 +277,16 @@ def build_instance(
         active_pads = pads
 
     missions = ["crew_iss", "cargo_iss", "geo_comm", "meo_gps"]
+
+    # Site-specific and mission-specific allowed pads
+    cape_pads = [p for p in active_pads if p in ("LC-39A", "SLC-40", "SLC-41", "LC-36")]
+    vafb_pads = [p for p in active_pads if p == "VAFB-SLC-4E"]
+    mission_pads_map: dict[str, list[str]] = {
+        "crew_iss": [p for p in active_pads if p in ("LC-39A", "SLC-41")],
+        "cargo_iss": [p for p in active_pads if p in ("LC-39A", "SLC-40", "SLC-41")],
+        "geo_comm": [p for p in active_pads if p in ("SLC-40", "SLC-41", "LC-36")],
+        "meo_gps": [p for p in active_pads if p in ("SLC-40", "SLC-41", "LC-36")],
+    }
 
     # Base values reflecting real launch priorities
     mission_base_values = {
@@ -251,37 +304,43 @@ def build_instance(
     target_sep_s = int(target_separation_hours * 3600)
 
     # Spread candidate launches across time proportional to num_tasks
-    # Realistic operational cadence: ~2-4 launch slots per day across all pads
     total_days = max(7, int(num_tasks / 2.5))
     day_span_s = total_days * 86400
 
+    # Max available real window slots across 3 repeating cycles
+    max_real_tasks = min(num_tasks, 147)
+
     # Build tasks
     for tid in range(num_tasks):
-        mission = rng.choice(missions)
-        pad = rng.choice(active_pads)
-
-        # Draw a window timestamp either from raw windows or synthesize realistically
-        window_id = None
-        fast_rendezvous = False
-        is_flyable = True
-        risk_status = "go"
-
-        if raw_windows and tid < len(raw_windows) * 3:
+        if raw_windows and tid < max_real_tasks:
             w = raw_windows[tid % len(raw_windows)]
             window_id = f"{w.get('id', f'w{tid}')}_t{tid}"
-            # Time-shift cycles
             cycle_offset = (tid // len(raw_windows)) * (7 * 86400)
             t_launch = int(w.get("t_launch_unix", base_epoch)) + cycle_offset
+            mission = str(w.get("profile", "cargo_iss"))
+            site_name = str(w.get("site_name", "Cape Canaveral"))
+
+            # Determine pad consistent with window site and mission
+            allowed = [
+                p for p in mission_pads_map.get(mission, active_pads)
+                if p in (cape_pads if site_name == "Cape Canaveral" else vafb_pads)
+            ]
+            pad = rng.choice(allowed or cape_pads or active_pads)
+
             fast_rendezvous = bool(w.get("rendezvous_hours_fast") is not None)
             is_flyable = bool(w.get("flyable", True))
+
             orig_wid = w.get("id")
-            if orig_wid in risk_map:
-                risk_status = risk_map[orig_wid].get("status", "go")
+            risk_entry = risk_map.get((mission, orig_wid)) or risk_map.get(orig_wid)
+            risk_status = risk_entry.get("status", "go") if risk_entry else "go"
         else:
             # Synthetic candidate opportunity within scheduling horizon
             time_offset = rng.randint(0, day_span_s)
             t_launch = base_epoch + time_offset
             window_id = f"syn_w{tid}"
+            mission = rng.choice(missions)
+            allowed = mission_pads_map.get(mission, active_pads)
+            pad = rng.choice(allowed or active_pads)
             fast_rendezvous = rng.random() < 0.25
             is_flyable = rng.random() > 0.08
             risk_status = "go" if rng.random() > 0.1 else ("review" if rng.random() > 0.3 else "no-go")
@@ -300,7 +359,7 @@ def build_instance(
         if risk_status == "review":
             val *= 0.85  # Review penalty
         elif risk_status == "no-go":
-            val *= 0.30  # High risk collision penalty
+            val *= 0.30  # High risk collision discount (discounted x0.30, not excluded)
 
         # Add small unique noise so values are continuous
         val += rng.uniform(-0.4, 0.4)
@@ -361,12 +420,24 @@ def build_instance(
                 continue
 
             # Direct window overlap on any pad (e.g. range tracking capacity)
-            # If windows physically overlap in real time, only 1 launch permitted range-wide
             if max(t_i.start_unix, t_j.start_unix) < min(t_i.end_unix, t_j.end_unix):
                 conflicts_set.add((i, j))
 
     conflicts = sorted([[u, v] for u, v in conflicts_set])
     inst_id = instance_id or f"manifest_{num_tasks}_tasks"
+
+    n_syn = sum(1 for t in reindexed_tasks if str(t.window_id or "").startswith("syn_"))
+    n_real = len(reindexed_tasks) - n_syn
+    syn_pct = (n_syn / len(reindexed_tasks)) if reindexed_tasks else 0.0
+    inputs_summary = ", ".join(sorted(window_hashes + risk_hashes))
+
+    _note = (
+        f"Realistic launch manifest with {num_tasks} tasks "
+        f"({n_real} from real windows, {n_syn} synthetic, {syn_pct:.0%}) "
+        f"and {len(conflicts)} physical conflicts. "
+        f"Inputs: {inputs_summary}. "
+        f"Note: no-go risk windows are discounted (x0.30 value) rather than excluded."
+    )
 
     return ManifestInstance(
         id=inst_id,
@@ -375,5 +446,5 @@ def build_instance(
         tasks=reindexed_tasks,
         conflicts=conflicts,
         schema_version=1,
-        _note=f"Realistic launch manifest with {num_tasks} tasks and {len(conflicts)} physical conflicts",
+        _note=_note,
     )
