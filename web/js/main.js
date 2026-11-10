@@ -468,6 +468,37 @@ async function simWindowsFor(profile) {
   return value;
 }
 
+/**
+ * Which window to fly when the user has not picked one.
+ *
+ * The first flyable window is often in the middle of the local night, and a night ascent out of a
+ * dark pad is a black screen with a flame on it -- correct, and useless as a first look. So the
+ * default prefers a window where the sun is actually up at the launch site. Every window in the file
+ * is equally real; this only chooses which real one to show first, and the panel names it.
+ */
+async function pickDaylightWindow(wins) {
+  const flyable = wins.windows.filter((x) => x.flyable);
+  const pool = flyable.length ? flyable : wins.windows;
+  if (!pool.length) return null;
+  try {
+    const { geodeticToEcef, sunDirEcef } = await import("./sim3d/geoframe.js");
+    const up = geodeticToEcef(wins.site.lat_deg, wins.site.lon_deg, 0);
+    const n = Math.hypot(up[0], up[1], up[2]);
+    const elevation = (w) => {
+      const s = sunDirEcef(w.t_launch_unix);
+      return (up[0] * s[0] + up[1] * s[1] + up[2] * s[2]) / n; // sine of the sun's elevation
+    };
+    // At least about 25 degrees up. Ten is sunrise: long shadows, a dim ground and a terminator
+    // running through the shot, which looks like a rendering fault rather than like dawn.
+    const lit = pool.filter((w) => elevation(w) > 0.42);
+    if (lit.length) return lit[0];
+    // Nothing in daylight: take the brightest available rather than simply the first.
+    return pool.slice().sort((a, b) => elevation(b) - elevation(a))[0];
+  } catch (_) {
+    return pool[0];
+  }
+}
+
 /** Fly the selected vehicle from the selected window, in the browser. */
 async function simLaunch() {
   const entry = SIM.vehicle;
@@ -485,7 +516,7 @@ async function simLaunch() {
   if (S.windows && S.windows.profile === entry.profile && S.selWindow) {
     w = wins.windows.find((x) => x.id === S.selWindow) || null;
   }
-  if (!w) w = wins.windows.find((x) => x.flyable) || wins.windows[0];
+  if (!w) w = await pickDaylightWindow(wins);
   if (!w) {
     SIM.panel.status("That windows file has no windows in it.", "bad");
     return;
@@ -521,8 +552,8 @@ async function simLaunch() {
     const ins = res.trajectory.events.find((e) => e.name === "insertion");
     SIM.panel.status(
       res.reachedOrbit
-        ? `Orbit: ${res.trajectory.final_orbit.perigee_km} x ${res.trajectory.final_orbit.apogee_km} km at T+${ins.t_s} s (${ms.toFixed(0)} ms)`
-        : `Did not reach orbit (${ms.toFixed(0)} ms)`,
+        ? `Window ${w.id} · orbit ${res.trajectory.final_orbit.perigee_km} x ${res.trajectory.final_orbit.apogee_km} km at T+${ins.t_s} s (flown in ${ms.toFixed(0)} ms)`
+        : `Window ${w.id} · did not reach orbit (${ms.toFixed(0)} ms)`,
       res.reachedOrbit ? "ok" : "bad",
     );
   } catch (e) {

@@ -84,7 +84,7 @@ export class Sim3D {
     // Filmic tone mapping with a little headroom: the bright limb and the plume both run well past
     // 1.0, and clipping them to white is what makes a space scene look flat.
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.22;
+    this.renderer.toneMappingExposure = 1.35;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(FOV, 1, 1, 1e7);
@@ -609,10 +609,23 @@ export class Sim3D {
     const rel = (v) => new THREE.Vector3(v.x - o.x, v.y - o.y, v.z - o.z);
 
     if (this.cameraMode === "chase") {
-      // Behind and a little above, framing the whole vehicle and its plume.
-      const back = st.axis.clone().multiplyScalar(-len * 2.6);
-      const up = st.up.clone().multiplyScalar(len * 0.85);
-      const side = new THREE.Vector3().crossVectors(st.axis, st.up).normalize().multiplyScalar(len * 1.5);
+      // Uprange and above, framing the vehicle against the Earth.
+      //
+      // The offset is along the GROUND TRACK, not along the body axis. Early in the flight the
+      // vehicle is nearly vertical, so "behind" in body axis means directly underneath: the camera
+      // ends up below the rocket looking up its tail at empty sky, with the planet out of frame
+      // entirely. Offsetting uprange and lifting above keeps the ground in shot the whole way,
+      // which is what a chase view is for.
+      // The vertical offset swings with altitude, and that is a framing decision worth stating.
+      // Down low the camera sits slightly BELOW the vehicle, so the backdrop is horizon, air and
+      // space: that is the shot every launch is watched in, and it is the only one that works
+      // there, because the ground five kilometres under a rocket is a single texel of dark ocean
+      // however it is lit. High up the camera moves ABOVE, so the backdrop becomes the lit Earth,
+      // which by then is the thing worth looking at.
+      const f = Math.min(1, Math.max(0, (st.altM / 1000 - 3) / 90));
+      const up = st.up.clone().multiplyScalar(len * (-0.3 + 1.7 * f));
+      const back = st.horiz.clone().multiplyScalar(-len * 2.4);
+      const side = new THREE.Vector3().crossVectors(st.horiz, st.up).normalize().multiplyScalar(len * 1.3);
       const cam = st.posKm.clone().add(back).add(up).add(side);
       this.camera.near = Math.max(0.0015, len * 0.05);
       this.camera.far = 2e6;
@@ -653,6 +666,7 @@ export class Sim3D {
       .addScaledVector(padBasis.east, -1.4)
       .addScaledVector(padBasis.north, -1.6)
       .addScaledVector(padBasis.up, 0.03);
+    void padBasis;
 
     // A pad camera that does not zoom is useless after about twenty seconds: at T+90 the vehicle is
     // forty kilometres away and a 65 m rocket is under two pixels wide. Real range-tracking cameras
@@ -721,7 +735,7 @@ export class Sim3D {
     }
 
     // --- sun and sky
-    this.globe.update(sun, this.camera.position);
+    this.globe.update(sun, this.camera.position, altitudeKm(this._camAbs));
     this.stars.update(this.camera);
     this.sunLight.position.set(sun[0], sun[1], sun[2]).multiplyScalar(1e6);
     this.sunLight.target.position.set(0, 0, 0);

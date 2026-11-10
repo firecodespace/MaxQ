@@ -107,6 +107,9 @@ const SURFACE_FRAG = /* glsl */ `
   uniform float nightGain;
   uniform float bumpScale;
   uniform float texelLon;     // 1.0 / topo width, for the finite-difference bump
+  uniform float hazeScaleKm;  // path length for unit optical depth at sea level
+  uniform float camAltKm;     // camera altitude, for the density weighting
+  uniform vec3 hazeColor;
 
   varying vec2 vUv;
   varying vec3 vNormal;
@@ -159,6 +162,28 @@ const SURFACE_FRAG = /* glsl */ `
     // Atmospheric pick-up at grazing view angles, warm toward the sun.
     float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
     col += mix(vec3(0.13, 0.18, 0.26), vec3(0.5, 0.34, 0.17), smoothstep(-0.2, 0.6, lambert)) * rim * day * 0.65;
+
+    // Aerial perspective.
+    //
+    // Air scatters, so ground seen through a long slant of it washes toward the colour of the sky,
+    // and more so the further away it is. Without this the view from a few kilometres up is a flat
+    // slab of one texture colour -- at 4,096 pixels across, 5 km above the ground is well inside a
+    // single texel, so there is no detail left to carry the image and it reads as a void. The haze
+    // is what the eye actually uses to judge distance down there, and it is real physics rather than
+    // invented terrain: we are not drawing detail we do not have, we are drawing the air in front
+    // of it.
+    // Optical depth is the AIR ALONG THE PATH, not the path length: a single haze distance cannot
+    // be right for both a view from orbit and a view from five kilometres up, because almost all of
+    // the atmosphere is in the bottom ten. So the path is weighted by the density at its midpoint,
+    // with the same 8.5 km scale height the ascent simulator uses. From orbit that factor is
+    // essentially zero and the ground stays crisp; from a few kilometres up it is near one and
+    // distant ground washes out, which is why the sea looks pale grey-blue from an aeroplane and
+    // navy from a satellite.
+    float viewKm = distance(cameraPosKm, vWorld);
+    float midAltKm = max(0.0, camAltKm * 0.5);
+    float tau = (viewKm / hazeScaleKm) * exp(-midAltKm / 8.5);
+    float haze = (1.0 - exp(-tau)) * day * (0.35 + 0.65 * max(lambert, 0.0));
+    col = mix(col, hazeColor * (0.45 + 0.55 * max(lambert, 0.0)), clamp(haze, 0.0, 0.86));
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -231,6 +256,10 @@ export function createGlobe(opts = {}) {
     nightGain: { value: 1.9 },
     bumpScale: { value: 0.0 },
     texelLon: { value: 1 / 2048 },
+    // 32 km of sea-level air is about one optical depth: a clear day's visibility.
+    hazeScaleKm: { value: 32 },
+    camAltKm: { value: 1e6 },
+    hazeColor: { value: new THREE.Color(0.52, 0.65, 0.82) },
   };
 
   let pending = 0;
@@ -303,9 +332,10 @@ export function createGlobe(opts = {}) {
     atmosphere: atmo,
     uniforms,
     /** Call once per frame: `sun` is a unit ECEF vector, `camKm` the camera in floating-origin space. */
-    update(sun, camKm) {
+    update(sun, camKm, camAltKm) {
       uniforms.sunDir.value.set(sun[0], sun[1], sun[2]);
       uniforms.cameraPosKm.value.copy(camKm);
+      if (camAltKm != null) uniforms.camAltKm.value = camAltKm;
     },
     setOrigin(originKm) {
       group.position.set(-originKm.x, -originKm.y, -originKm.z);
