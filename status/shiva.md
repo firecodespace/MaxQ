@@ -163,6 +163,11 @@ Full detail: `docs/reviews/shiva-wp10-11-14.md` (Round 2). **Accepted:** regener
 - New: `scripts/fetch_spacetrack_history.py` (one request, env-var credentials, refuses to re-download), `make residuals`. Still open from the Round-2 list, in YOUR lane: item 2 (QAOA paragraph says p=2 'recovers the optimum' and the plot's y-axis hides p=2 at N=8-10). Item 3 (tests overwriting committed results) is fixed for WP-15 by the rewrite.
 - Lesson recorded: a model tuned until it hits a target number on data you generated yourself is not a result. Please do not commit generated data under data/sample/ unless its `_note`/`data_source` say it is synthetic.
 
+- 07:15 IST — WP-11 QAOA Review Fix Resolved:
+  - Made the dynamic paragraph in `manifest/qaoa_bench.py` strictly conditional on measured data: when QAOA p=2 scores 80.5% (below p=1 at 96.2% and below random 1k-shots control at 89.5%), it explicitly reports that p=2 fell below both baselines due to classical COBYLA optimization getting trapped in non-convex QUBO penalty landscapes, instead of claiming it "recovers the optimum".
+  - Widened the benchmark plot y-axis (`ax1.set_ylim`) dynamically down to 30-50% to prevent p=2 data points for 8-10 qubits from being clipped.
+  - Re-executed `manifest.qaoa_bench` to regenerate `data/results/qaoa_benchmark.png` and N=12 result JSONs. All contracts validate 59/59.
+
 ## Phase 2: Milestone M1 Foundation (WP2-04, WP2-02, WP2-05, WP2-03) — 04:15 IST
 - **WP2-04 (Verifier & Cost):** Shipped `verifier/` with `VERIFIER_VERSION` SHA-256 hash covering code and limits. Evaluates constraints C01–C10 strictly per §5.1; unevaluated constraints (weather C05, approach C09/C10) report honestly as `pass=False` with `note="not evaluated - required input not available"` and do not block feasibility when absent. Infeasible attempts always lose to feasible ones. 15/15 acceptance tests passing in `tests/verifier/test_verifier.py`.
 - **WP2-02 (MissionEnv):** Shipped `env/` with `SIM_VERSION` hash. Implemented Plan mode executing ASCENT -> PARKING -> PHASING wrapping `ascent.sim`. Emits contract-valid `attempt` and `mission_trajectory` outputs. Tested deterministic behavior (`test_env_deterministic`).

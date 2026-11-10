@@ -10,6 +10,7 @@ Exports contract-compliant result files and comparison plots.
 from __future__ import annotations
 
 import json
+import math
 import os
 import tempfile
 import time
@@ -71,6 +72,29 @@ def generate_qaoa_paragraph(records: list[dict[str, Any]], r12: dict[str, float]
     rnd_mean = r12["mean_ratio"]
     rnd_opt = r12["opt_freq"]
 
+    if q2_12 >= q1_12 and q2_12 >= rnd_mean:
+        p2_summary = (
+            f"QAOA p=2 reaches {q2_12:.1f}%, recovering approximation quality "
+            "through deeper entangling layers."
+        )
+        p2_discussion = (
+            "Increasing circuit depth to p=2 visibly improves approximation quality, but requires "
+            "deeper two-qubit entangling gates (IsingZZ) across all conflict edges."
+        )
+    else:
+        p2_summary = (
+            f"QAOA p=2 reaches {q2_12:.1f}%, which in this run falls below both p=1 ({q1_12:.1f}%) "
+            f"and the classical random baseline ({rnd_mean:.1f}%), indicating that classical COBYLA "
+            "optimization struggled to navigate the non-convex parameter landscape at higher depth "
+            "within the iteration budget."
+        )
+        p2_discussion = (
+            "Increasing circuit depth to p=2 did not improve approximation quality in this run, as classical "
+            "gradient-free optimizers (COBYLA) frequently fail to converge in the non-convex landscape "
+            "created by QUBO penalty terms. Furthermore, deeper two-qubit entangling gates (IsingZZ) "
+            "significantly increase classical simulation overhead."
+        )
+
     return f"""### MaxQ Quantum-vs-Classical Manifest Benchmark Analysis (WP-11)
 
 We benchmarked the Quantum Approximate Optimization Algorithm (QAOA) using PennyLane state-vector
@@ -81,8 +105,8 @@ was not run due to state-vector simulation overhead and gate depth limits).
 On the 12-task instance (optimum {r_12['opt_score']:.2f}):
 - Classical random sampling (best feasible of 1,000 uniform random bitstrings) achieves {rnd_mean:.1f}%
   of optimum on average and hits the exact optimum in {rnd_opt:.0f}% of trials.
-- QAOA p=1 reaches {q1_12:.1f}% (comparable to the random-sampling baseline).
-- QAOA p=2 reaches {q2_12:.1f}%, recovering the optimum through deeper entangling layers.
+- QAOA p=1 reaches {q1_12:.1f}% (comparable to or slightly above the random-sampling baseline).
+- {p2_summary}
 
 Classical solvers decisively outperform QAOA across all operational metrics: OR-Tools CP-SAT consistently
 finds the proven global optimum in 10-30 ms, and Greedy finds >=92% approximations in under 0.1 ms—over
@@ -93,8 +117,7 @@ to enforce conflict-freedom, the QUBO penalty P must exceed task values, which i
 cliffs in the problem Hamiltonian. Because the standard transverse-field mixer explores the full
 Hilbert space (where only a small fraction of the 2^N states are independent sets), shallow circuits
 (p=1) frequently trap probability mass in the trivial vacuum state (|00...0>) or local minima.
-Increasing circuit depth to p=2 visibly recovers approximation quality, but requires deeper two-qubit
-entangling gates (IsingZZ) across all conflict edges. On current Noisy Intermediate-Scale Quantum (NISQ)
+{p2_discussion} On current Noisy Intermediate-Scale Quantum (NISQ)
 processors, gate infidelities and limited qubit connectivity would severely degrade this coherence.
 Classical CP-SAT and heuristic SA remain the rigorous operational choice for real-time launch manifest planning."""
 
@@ -225,7 +248,8 @@ def plot_qaoa_benchmark(records: list[dict[str, Any]]) -> Path:
 
     ax1.set_title("Approximation Ratio vs Problem Size", color="#f9fafb", fontsize=12, fontweight="bold")
     ax1.set_ylabel("Approximation Ratio (% of Opt)", color="#e5e7eb", fontsize=10)
-    ax1.set_ylim(60, 105)
+    min_val = min(min(q1_ratios), min(q2_ratios), min(rnd_ratios))
+    ax1.set_ylim(max(30, math.floor((min_val - 5) / 10) * 10), 105)
 
     # Panel 2: Feasible State Probability Mass
     q1_mass = [r["q1_mass"] * 100 for r in records]
