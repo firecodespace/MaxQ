@@ -1,0 +1,121 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/benchmark.schema.json",
+  "title": "benchmarks/benchmark.json - suite, splits, best-known and lower bounds (Phase 2, 6.6)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "suite_id",
+    "protocol_hash",
+    "splits",
+    "best_known",
+    "lower_bound",
+    "systems"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "suite_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "protocol_hash": {
+      "type": "string",
+      "minLength": 1
+    },
+    "splits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "train",
+        "val",
+        "test"
+      ],
+      "properties": {
+        "train": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "val": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "test": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "best_known": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "cost",
+          "attempt_id",
+          "budget_sims"
+        ],
+        "properties": {
+          "cost": {
+            "type": "number"
+          },
+          "attempt_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "budget_sims": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "seeds": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "lower_bound": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dv_mps"
+        ],
+        "properties": {
+          "dv_mps": {
+            "type": "number",
+            "minimum": 0
+          },
+          "prop_kg": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "systems": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object"
+      }
+    }
+  }
+}

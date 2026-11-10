@@ -1,0 +1,341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/attempt.schema.json",
+  "title": "attempt.json - one full launch-to-dock run (Phase 2, 6.2)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "mission_id",
+    "agent",
+    "sim_version",
+    "verifier_version",
+    "seed",
+    "plan",
+    "phases",
+    "metrics",
+    "constraint_report",
+    "feasible",
+    "cost",
+    "best_known_gap_pct",
+    "trajectory_ref",
+    "wall_s",
+    "status"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "mission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "model",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "sim_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "verifier_version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "seed": {
+      "type": "integer"
+    },
+    "plan": {
+      "type": "object",
+      "description": "Known fields are typed; extra plan parameters are allowed (parameterization is free, HANDOFF_PHASE2 WP2-02/05).",
+      "required": [
+        "launch_t_unix",
+        "pitch_program",
+        "parking_alt_km",
+        "burns",
+        "waypoints"
+      ],
+      "properties": {
+        "launch_t_unix": {
+          "type": "integer"
+        },
+        "pitch_program": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "parking_alt_km": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "burns": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "phase",
+              "t_s",
+              "dv_mps",
+              "frame"
+            ],
+            "properties": {
+              "phase": {
+                "enum": [
+                  "ascent",
+                  "parking",
+                  "phasing",
+                  "approach",
+                  "dock"
+                ]
+              },
+              "t_s": {
+                "type": "number",
+                "minimum": 0
+              },
+              "dv_mps": {
+                "type": "array",
+                "minItems": 3,
+                "maxItems": 3,
+                "items": {
+                  "type": "number"
+                }
+              },
+              "frame": {
+                "enum": [
+                  "LVLH",
+                  "ECI"
+                ]
+              }
+            }
+          }
+        },
+        "waypoints": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "range_m"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1
+              },
+              "range_m": {
+                "type": "number",
+                "minimum": 0
+              },
+              "hold_s": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "phases": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "t0_s",
+          "t1_s",
+          "prop_kg"
+        ],
+        "properties": {
+          "name": {
+            "enum": [
+              "ascent",
+              "parking",
+              "phasing",
+              "approach",
+              "dock"
+            ]
+          },
+          "t0_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "t1_s": {
+            "type": "number",
+            "minimum": 0
+          },
+          "prop_kg": {
+            "type": "number",
+            "minimum": 0
+          },
+          "dv_mps": {
+            "type": "number",
+            "minimum": 0
+          }
+        }
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "prop_used_kg",
+        "total_dv_mps",
+        "time_to_dock_s"
+      ],
+      "additionalProperties": {
+        "type": [
+          "number",
+          "null"
+        ]
+      },
+      "properties": {
+        "prop_used_kg": {
+          "type": "number",
+          "minimum": 0
+        },
+        "total_dv_mps": {
+          "type": "number",
+          "minimum": 0
+        },
+        "time_to_dock_s": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "constraint_report": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "value",
+          "limit",
+          "op",
+          "pass",
+          "margin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^C[0-9]{2}$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "value": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "limit": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "op": {
+            "enum": [
+              ">=",
+              "<=",
+              "==",
+              "!=",
+              "in"
+            ]
+          },
+          "pass": {
+            "type": "boolean"
+          },
+          "margin": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "feasible": {
+      "type": "boolean"
+    },
+    "cost": {
+      "type": "number"
+    },
+    "best_known_gap_pct": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "trajectory_ref": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "wall_s": {
+      "type": "number",
+      "minimum": 0
+    },
+    "status": {
+      "enum": [
+        "finished",
+        "failed",
+        "aborted",
+        "running"
+      ]
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "config": {
+      "type": "object"
+    }
+  }
+}

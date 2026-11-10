@@ -128,3 +128,20 @@ Update your owner's `status/<name>.md` with the same, in 3–6 lines.
 ## 10. End-of-session handoff note
 
 Agents don't share memory across tools or sessions. Before you stop (or when context is running out), write a **handoff note** (template in `HANDOFF.md` §10) to `status/<name>.md`: what is done, what is half-done, what you'd do next, traps you found, and exact commands to resume. The next agent, in any tool, should be able to continue without asking.
+
+---
+
+## 11. Phase 2 charter additions (from `HANDOFF_PHASE2.md` section 2)
+
+Integrity rules for work where AI sits inside the loop. They apply to every agent and human.
+
+1. **The verifier and benchmark are ground truth.** `verifier/` and `benchmarks/` are read-only to any agent being trained or evaluated, and to any code path the agent controls at runtime. Changes need Yash's OK (🔴) and must bump `verifier_version`. Old attempts are re-scored before comparison.
+2. **No leakage.** Never tune, prompt, or fine-tune on the **test** split. Use train/val for development; run test once per reported result.
+3. **Memory is a hint, not truth.** Retrieved experiences only warm-start. Every retrieved plan is re-simulated and re-verified before it counts.
+4. **Version everything.** Each attempt records `sim_version`, `verifier_version`, agent id/model/version, seed, and config. Memory records older than the current `sim_version` are filtered out or re-scored.
+5. **Reproducibility.** Same mission + seed + versions ⇒ same result. Log seeds; no hidden nondeterminism.
+6. **Cite real data.** Rocket, pad, and constraint numbers come from cited sources (manufacturer guides, agency pages), fetched and checked, not recalled. Store `sources[]` and `confidence`; mark approximate; note conflicts.
+7. **No operational claims.** Label sim output "SIM · reduced fidelity" and constraint values "illustrative" unless sourced.
+8. **Show decision traces, not raw hidden reasoning.** The trace holds the agent's stated plan, tool calls, key numbers, and decisions. Don't present model free-text as fact.
+9. **Budgets.** Every agent run has `max_attempts` and `max_wall_s`. Enforce them in code.
+10. **Models and licenses.** Use open-weight models only after checking the license and recording it in `docs/decisions.md` (🔴 for the first choice). Keep secrets in env vars.

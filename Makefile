@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export
+.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export contracts env bench agent server
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -54,3 +54,19 @@ web-export:  ## WP-03: validate + export data for the static site -> web/public/
 
 web: web-export  ## WP-03: export data, then serve web/ at http://localhost:8765
 	$(PY) -m http.server 8765 --directory web
+
+# ---------------------------------------------------------------- Phase 2 (HANDOFF_PHASE2.md)
+contracts:  ## validate every contract file (dummy, results, rockets, pads, attempts, sessions)
+	$(PY) -m contracts.validate
+
+env:  ## WP2-02: run one mission through MissionEnv (Shiva)
+	@echo "not implemented yet (WP2-02, Shiva): env/ MissionEnv" && exit 1
+
+bench:  ## WP2-05/12: best-known runner and benchmark suite
+	@echo "not implemented yet (WP2-05 Shiva, WP2-12 shared): optimize/ + benchmarks/" && exit 1
+
+agent:  ## WP2-11: run the agent on a mission_request
+	@echo "not implemented yet (WP2-11, Yash): agent/" && exit 1
+
+server:  ## WP2-06: API + session streaming
+	@echo "not implemented yet (WP2-06, Yash): server/" && exit 1

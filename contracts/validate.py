@@ -42,7 +42,21 @@ KINDS = (
     "manifest_instance",
     "result",
     "clusters",
+    # Phase 2 (HANDOFF_PHASE2.md section 6)
+    "mission_request",
+    "attempt",
+    "mission_trajectory",
+    "session",
+    "memory_record",
+    "vehicle",
+    "pad",
+    "benchmark",
 )
+
+# Library and run folders name files by id, not by kind, so the kind comes from the folder.
+_DIR_KINDS = {"rockets": "vehicle", "pads": "pad", "attempts": "attempt", "sessions": "session"}
+_MISSION_TRAJ_ARRAYS = ("phase", "lat_deg", "lon_deg", "alt_m", "speed_mps", "mass_kg")
+_MISSION_TRAJ_OPTIONAL = ("q_pa", "accel_g", "rel_pos_m", "rel_vel_mps")
 
 _TRAJECTORY_ARRAYS = ("t_s", "lat_deg", "lon_deg", "alt_m", "speed_mps", "q_pa", "mass_kg")
 _PARQUET_VERSION_KEY = b"maxq_schema_version"
@@ -239,7 +253,91 @@ def _check_catalog(obj: dict) -> list[str]:
     return errs
 
 
+def _check_attempt(obj: dict) -> list[str]:
+    errs = []
+    report = obj["constraint_report"]
+    ids = [c["id"] for c in report]
+    if len(set(ids)) != len(ids):
+        errs.append("constraint_report: duplicate constraint id")
+    # The verifier decides feasibility; the file may not disagree with its own report.
+    all_pass = all(c["pass"] for c in report)
+    if obj["status"] == "finished" and obj["feasible"] != all_pass:
+        errs.append(f"feasible: is {obj['feasible']} but constraint_report says all-pass = {all_pass}")
+    if obj["feasible"] and obj["status"] != "finished":
+        errs.append(f"feasible: true is only allowed for status 'finished', got {obj['status']!r}")
+    prev_end = None
+    for i, ph in enumerate(obj["phases"]):
+        if ph["t1_s"] < ph["t0_s"]:
+            errs.append(f"phases[{i}].t1_s: before t0_s ({ph['t0_s']} .. {ph['t1_s']})")
+        if prev_end is not None and ph["t0_s"] < prev_end:
+            errs.append(
+                f"phases[{i}].t0_s: overlaps the previous phase (starts {ph['t0_s']}, previous ends {prev_end})"
+            )
+        prev_end = ph["t1_s"]
+    return errs
+
+
+def _check_mission_trajectory(obj: dict) -> list[str]:
+    errs = []
+    n = len(obj["t_s"])
+    for k in _MISSION_TRAJ_ARRAYS + tuple(k for k in _MISSION_TRAJ_OPTIONAL if k in obj):
+        if len(obj[k]) != n:
+            errs.append(f"{k}: length {len(obj[k])} != len(t_s) {n}")
+    t = obj["t_s"]
+    for i in range(1, n):
+        if not t[i] > t[i - 1]:
+            errs.append(f"t_s[{i}]: not strictly increasing ({t[i - 1]} -> {t[i]})")
+            break
+    return errs
+
+
+def _check_vehicle(obj: dict) -> list[str]:
+    errs = []
+    if obj["kind"] == "real":
+        # Charter addition 6: real numbers are cited, never recalled.
+        if not obj["sources"]:
+            errs.append("sources: a vehicle with kind 'real' needs at least one cited source")
+        if obj["confidence"] == "unverified":
+            errs.append("confidence: 'unverified' is not allowed for kind 'real'")
+    return errs
+
+
+def _check_pad(obj: dict) -> list[str]:
+    return []
+
+
+def _check_benchmark(obj: dict) -> list[str]:
+    errs = []
+    sp = obj["splits"]
+    seen: dict[str, str] = {}
+    for name in ("train", "val", "test"):
+        for m in sp[name]:
+            if m in seen:
+                errs.append(f"splits.{name}: mission {m!r} is also in split {seen[m]!r} (leakage)")
+            seen[m] = name
+    for key in ("best_known", "lower_bound"):
+        for m in obj[key]:
+            if m not in seen:
+                errs.append(f"{key}.{m}: mission is not in any split")
+    return errs
+
+
+def _check_mission_request(obj: dict) -> list[str]:
+    errs = []
+    if obj["profile"] == "crew_iss" and obj["payload"]["crew"] < 1:
+        errs.append("payload.crew: a crew_iss mission needs at least 1 crew")
+    if obj["objective"]["w_fuel"] == 0 and obj["objective"]["w_time"] == 0:
+        errs.append("objective: w_fuel and w_time are both 0, so every feasible attempt would tie")
+    return errs
+
+
 _SEMANTIC = {
+    "attempt": _check_attempt,
+    "mission_trajectory": _check_mission_trajectory,
+    "vehicle": _check_vehicle,
+    "pad": _check_pad,
+    "benchmark": _check_benchmark,
+    "mission_request": _check_mission_request,
     "windows": _check_windows,
     "trajectory": _check_trajectory,
     "manifest_instance": _check_manifest_instance,
@@ -335,8 +433,18 @@ def validate(kind: str, obj: Any) -> Any:
 
 
 def kind_for_path(path: str | Path) -> str | None:
-    """Infer the contract kind from a file name such as ``windows_dummy.json``."""
-    stem = Path(path).stem.lower()
+    """Infer the contract kind from a file name such as ``windows_dummy.json``.
+
+    Files under ``data/rockets``, ``data/pads``, ``data/attempts`` and ``data/sessions`` are named by
+    id, so their kind comes from the folder (``*.traj.json`` in ``attempts`` is a mission trajectory).
+    """
+    path = Path(path)
+    parent = path.parent.name.lower()
+    if parent in _DIR_KINDS:
+        if parent == "attempts" and path.name.lower().endswith(".traj.json"):
+            return "mission_trajectory"
+        return _DIR_KINDS[parent]
+    stem = path.stem.lower()
     if stem.endswith("_dummy"):
         stem = stem[: -len("_dummy")]
     for kind in sorted(KINDS, key=len, reverse=True):
@@ -361,6 +469,52 @@ def validate_catalog_parquet(path: str | Path) -> None:
     validate("catalog", pq.read_table(path))
 
 
+def validate_session_file(path: str | Path) -> int:
+    """Validate a session.jsonl: every line is one event, in order. Returns the event count."""
+    path = Path(path)
+    errs: list[str] = []
+    last_t = -1.0
+    types: list[str] = []
+    open_attempts: set[str] = set()
+    with open(path, encoding="utf-8") as f:
+        for n, line in enumerate(f, 1):
+            if not line.strip():
+                continue
+            try:
+                ev = json.loads(line, parse_constant=_reject_constant)
+            except ValueError as e:
+                errs.append(f"line {n}: cannot parse: {e}")
+                continue
+            try:
+                validate("session", ev)
+            except ContractError as e:
+                errs += [f"line {n}: {m}" for m in e.errors]
+                continue
+            if ev["t_wall"] < last_t:
+                errs.append(f"line {n}: t_wall goes backwards ({last_t} -> {ev['t_wall']})")
+            last_t = ev["t_wall"]
+            types.append(ev["type"])
+            if ev["type"] == "attempt_started":
+                open_attempts.add(ev["attempt_id"])
+            elif ev["type"] == "attempt_finished":
+                if ev["attempt_id"] not in open_attempts:
+                    errs.append(f"line {n}: attempt_finished for {ev['attempt_id']!r} which never started")
+                open_attempts.discard(ev["attempt_id"])
+            elif "attempt_id" in ev and ev["type"] != "memory_hit" and ev["attempt_id"] not in open_attempts:
+                errs.append(f"line {n}: {ev['type']} refers to attempt {ev['attempt_id']!r} which is not running")
+    if not types:
+        errs.append("file has no events")
+    elif types[0] != "mission_started":
+        errs.append(f"line 1: a session must begin with mission_started, got {types[0]!r}")
+    if types.count("mission_finished") > 1:
+        errs.append("more than one mission_finished event")
+    if "mission_finished" in types and types[-1] != "mission_finished":
+        errs.append("events continue after mission_finished")
+    if errs:
+        raise ContractError("session", errs)
+    return len(types)
+
+
 def validate_file(path: str | Path, kind: str | None = None) -> str:
     """Validate a file on disk; returns the kind used."""
     path = Path(path)
@@ -372,6 +526,10 @@ def validate_file(path: str | Path, kind: str | None = None) -> str:
             if kind != "catalog":
                 raise ContractError(kind, [f"{path.name}: only the catalog contract is a parquet file"])
             validate_catalog_parquet(path)
+        elif path.suffix == ".jsonl":
+            if kind != "session":
+                raise ContractError(kind, [f"{path.name}: only the session contract is a .jsonl file"])
+            validate_session_file(path)
         else:
             validate(kind, load_json(path))
     except ContractError as e:
@@ -383,8 +541,8 @@ def validate_file(path: str | Path, kind: str | None = None) -> str:
 
 def default_files() -> list[Path]:
     files: list[Path] = []
-    for d in ("data/dummy", "data/results"):
-        files += sorted(p for p in (REPO_ROOT / d).glob("*") if p.suffix in (".json", ".parquet"))
+    for d in ("data/dummy", "data/results", "data/rockets", "data/pads", "data/attempts", "data/sessions"):
+        files += sorted(p for p in (REPO_ROOT / d).glob("*") if p.suffix in (".json", ".jsonl", ".parquet"))
     return files
 
 

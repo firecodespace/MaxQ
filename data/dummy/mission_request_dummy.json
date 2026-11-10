@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "id": "msn_crew_iss_0001",
+  "profile": "crew_iss",
+  "payload": {
+    "mass_kg": 12000,
+    "crew": 4
+  },
+  "rocket_id": "vehicle_dummy",
+  "pad_id": "pad_dummy",
+  "target": {
+    "norad_id": 25544
+  },
+  "window_id": "w0",
+  "constraints_profile": "crew_default",
+  "objective": {
+    "w_fuel": 1.0,
+    "w_time": 0.5,
+    "fuel_ref_kg": 1.0,
+    "time_ref_s": 1.0
+  },
+  "budget": {
+    "max_attempts": 200,
+    "max_wall_s": 1800
+  },
+  "seed": 7
+}

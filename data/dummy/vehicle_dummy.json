@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "id": "vehicle_dummy",
+  "name": "Dummy Vehicle (not a real rocket)",
+  "kind": "archetype",
+  "crew_rated": true,
+  "max_q_limit_kpa": 35.0,
+  "stages": [
+    {
+      "dry_kg": 25000,
+      "prop_kg": 410000,
+      "thrust_n": 7600000,
+      "isp_s": 292,
+      "cd": 0.32,
+      "area_m2": 11.5
+    },
+    {
+      "dry_kg": 4500,
+      "prop_kg": 102000,
+      "thrust_n": 980000,
+      "isp_s": 348,
+      "cd": 0.32,
+      "area_m2": 11.5
+    }
+  ],
+  "payload_to_leo_kg_published": null,
+  "sources": [],
+  "confidence": "unverified",
+  "notes": "Fictional. Same numbers as the v1 CrewLift-B archetype."
+}

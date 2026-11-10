@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/mission_request.schema.json",
+  "title": "mission_request.json - what the wizard asks for (Phase 2, 6.1)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "profile",
+    "payload",
+    "rocket_id",
+    "pad_id",
+    "target",
+    "window_id",
+    "constraints_profile",
+    "objective",
+    "budget",
+    "seed"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "enum": [
+        "crew_iss",
+        "cargo_iss",
+        "geo_comm",
+        "meo_gps"
+      ]
+    },
+    "payload": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mass_kg",
+        "crew"
+      ],
+      "properties": {
+        "mass_kg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "crew": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "rocket_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "pad_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "norad_id"
+      ],
+      "properties": {
+        "norad_id": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "window_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "constraints_profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "w_fuel",
+        "w_time",
+        "fuel_ref_kg",
+        "time_ref_s"
+      ],
+      "properties": {
+        "w_fuel": {
+          "type": "number",
+          "minimum": 0
+        },
+        "w_time": {
+          "type": "number",
+          "minimum": 0
+        },
+        "fuel_ref_kg": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "time_ref_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "max_attempts",
+        "max_wall_s"
+      ],
+      "properties": {
+        "max_attempts": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "max_wall_s": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        }
+      }
+    },
+    "seed": {
+      "type": "integer"
+    }
+  }
+}

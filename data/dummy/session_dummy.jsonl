@@ -1,0 +1,12 @@
+{"schema_version": 1, "t_wall": 0.0, "type": "mission_started", "mission_id": "msn_crew_iss_0001", "data": {"agent": "optimizer-cma", "mode": "dummy", "max_attempts": 200}}
+{"schema_version": 1, "t_wall": 0.1, "type": "memory_hit", "mission_id": "msn_crew_iss_0001", "data": {"memory_id": "mem_000045", "similarity": 0.91, "used_for": "warm_start_center"}}
+{"schema_version": 1, "t_wall": 0.2, "type": "attempt_started", "attempt_id": "att_000123", "mission_id": "msn_crew_iss_0001"}
+{"schema_version": 1, "t_wall": 0.3, "type": "agent_step", "attempt_id": "att_000123", "kind": "plan", "summary": "Start from the retrieved plan; parking orbit 200 km, one phasing burn", "data": {"tool": "propose_plan", "key_numbers": {"parking_alt_km": 200}}}
+{"schema_version": 1, "t_wall": 0.4, "type": "phase_changed", "attempt_id": "att_000123", "data": {"phase": "ascent", "t_s": 0}}
+{"schema_version": 1, "t_wall": 0.6, "type": "telemetry", "attempt_id": "att_000123", "data": {"t_s": 60, "phase": "ascent", "alt_m": 9000, "speed_mps": 520, "q_pa": 31200, "mass_kg": 420000}}
+{"schema_version": 1, "t_wall": 0.9, "type": "constraint_update", "attempt_id": "att_000123", "data": {"id": "C02", "value": 31.2, "limit": 35.0, "pass": true, "margin": 3.8}}
+{"schema_version": 1, "t_wall": 1.2, "type": "phase_changed", "attempt_id": "att_000123", "data": {"phase": "phasing", "t_s": 5400}}
+{"schema_version": 1, "t_wall": 1.5, "type": "agent_step", "attempt_id": "att_000123", "kind": "decision", "summary": "Widened phasing burn window after C08 margin fell to 3%", "data": {"tool": "propose_plan", "key_numbers": {"time_margin_pct": 3.0}}}
+{"schema_version": 1, "t_wall": 1.8, "type": "attempt_finished", "attempt_id": "att_000123", "data": {"feasible": true, "cost": 1.23, "prop_used_kg": 485355.0, "time_to_dock_s": 20100.0}}
+{"schema_version": 1, "t_wall": 1.9, "type": "benchmark_update", "mission_id": "msn_crew_iss_0001", "data": {"best_cost": 1.23, "best_attempt_id": "att_000123", "best_known_gap_pct": 4.2}}
+{"schema_version": 1, "t_wall": 2.0, "type": "mission_finished", "mission_id": "msn_crew_iss_0001", "data": {"attempts": 1, "feasible_attempts": 1, "stop_reason": "dummy"}}

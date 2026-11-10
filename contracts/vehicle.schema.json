@@ -1,0 +1,195 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/vehicle.schema.json",
+  "title": "data/rockets/<id>.json - launch-vehicle library entry (Phase 2, 6.5). Named 'vehicle' so the v1 'rocket' contract stays untouched.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "kind",
+    "crew_rated",
+    "max_q_limit_kpa",
+    "stages",
+    "payload_to_leo_kg_published",
+    "sources",
+    "confidence",
+    "notes"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": [
+        "real",
+        "archetype"
+      ]
+    },
+    "crew_rated": {
+      "type": "boolean"
+    },
+    "max_q_limit_kpa": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "stages": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "dry_kg",
+          "prop_kg",
+          "thrust_n",
+          "isp_s",
+          "cd",
+          "area_m2"
+        ],
+        "properties": {
+          "dry_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "prop_kg": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "thrust_n": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "isp_s": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "cd": {
+            "type": "number",
+            "minimum": 0
+          },
+          "area_m2": {
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "engines": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "name": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "payload_to_leo_kg_published": {
+      "type": [
+        "number",
+        "null"
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "url",
+          "retrieved_utc"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_utc": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "confidence": {
+      "enum": [
+        "approximate",
+        "sourced",
+        "unverified"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "profile": {
+      "enum": [
+        "crew_iss",
+        "cargo_iss",
+        "geo_comm",
+        "meo_gps"
+      ]
+    },
+    "fairing_kg": {
+      "type": "number",
+      "minimum": 0
+    },
+    "sim_validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "payload_to_leo_kg_sim",
+        "error_pct",
+        "tolerance_pct",
+        "pass",
+        "sim_version"
+      ],
+      "properties": {
+        "payload_to_leo_kg_sim": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "error_pct": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "tolerance_pct": {
+          "type": "number"
+        },
+        "pass": {
+          "type": "boolean"
+        },
+        "sim_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "note": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

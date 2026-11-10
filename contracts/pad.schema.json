@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/pad.schema.json",
+  "title": "data/pads/<id>.json - launch pad library entry (Phase 2, 6.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "id",
+    "name",
+    "lat_deg",
+    "lon_deg",
+    "supported_rocket_ids",
+    "azimuth_range_deg",
+    "sources"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lat_deg": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "lon_deg": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "supported_rocket_ids": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "azimuth_range_deg": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 360
+          }
+        }
+      ]
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "title",
+          "url",
+          "retrieved_utc"
+        ],
+        "properties": {
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "url": {
+            "type": "string",
+            "minLength": 1
+          },
+          "retrieved_utc": {
+            "type": "string",
+            "minLength": 1
+          },
+          "note": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "confidence": {
+      "enum": [
+        "approximate",
+        "sourced",
+        "unverified"
+      ]
+    },
+    "notes": {
+      "type": "string"
+    },
+    "site": {
+      "type": "string"
+    }
+  }
+}

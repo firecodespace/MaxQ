@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "maxq/contracts/session.schema.json",
+  "title": "session.jsonl - ONE event (one line) of the stream/replay log (Phase 2, 6.3)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "t_wall",
+    "type"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "_note": {
+      "type": "string"
+    },
+    "t_wall": {
+      "type": "number",
+      "minimum": 0
+    },
+    "type": {
+      "enum": [
+        "mission_started",
+        "attempt_started",
+        "memory_hit",
+        "agent_step",
+        "phase_changed",
+        "telemetry",
+        "constraint_update",
+        "attempt_finished",
+        "benchmark_update",
+        "mission_finished"
+      ]
+    },
+    "mission_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "kind": {
+      "enum": [
+        "plan",
+        "tool_call",
+        "tool_result",
+        "memory_hit",
+        "decision",
+        "note"
+      ]
+    },
+    "summary": {
+      "type": "string"
+    },
+    "data": {
+      "type": "object"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "const": "agent_step"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "kind",
+          "summary",
+          "attempt_id"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "type": {
+            "enum": [
+              "attempt_started",
+              "attempt_finished",
+              "phase_changed",
+              "telemetry",
+              "constraint_update"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "attempt_id"
+        ]
+      }
+    }
+  ]
+}

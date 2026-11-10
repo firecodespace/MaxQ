@@ -1,0 +1,137 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "id": "att_000123",
+  "mission_id": "msn_crew_iss_0001",
+  "agent": {
+    "id": "optimizer-cma",
+    "model": null,
+    "version": "0.1.0"
+  },
+  "sim_version": "env-0.0.0-dummy",
+  "verifier_version": "ver-0.0.0-dummy",
+  "seed": 123,
+  "plan": {
+    "launch_t_unix": 1794372400,
+    "pitch_program": [
+      11.9,
+      18.3,
+      -1.0,
+      0.81,
+      0.75
+    ],
+    "parking_alt_km": 200,
+    "burns": [
+      {
+        "phase": "phasing",
+        "t_s": 5400,
+        "dv_mps": [
+          60.9,
+          0.0,
+          0.0
+        ],
+        "frame": "LVLH"
+      }
+    ],
+    "waypoints": [
+      {
+        "name": "hold_1km",
+        "range_m": 1000
+      },
+      {
+        "name": "hold_200m",
+        "range_m": 200
+      }
+    ]
+  },
+  "phases": [
+    {
+      "name": "ascent",
+      "t0_s": 0,
+      "t1_s": 520,
+      "prop_kg": 485000.0
+    },
+    {
+      "name": "parking",
+      "t0_s": 520,
+      "t1_s": 5400,
+      "prop_kg": 0.0
+    },
+    {
+      "name": "phasing",
+      "t0_s": 5400,
+      "t1_s": 16200,
+      "prop_kg": 310.0
+    },
+    {
+      "name": "approach",
+      "t0_s": 16200,
+      "t1_s": 19800,
+      "prop_kg": 42.0
+    },
+    {
+      "name": "dock",
+      "t0_s": 19800,
+      "t1_s": 20100,
+      "prop_kg": 3.0
+    }
+  ],
+  "metrics": {
+    "prop_used_kg": 485355.0,
+    "total_dv_mps": 9512.0,
+    "time_to_dock_s": 20100.0
+  },
+  "constraint_report": [
+    {
+      "id": "C01",
+      "name": "orbit_insertion",
+      "value": 199.6,
+      "limit": 160,
+      "op": ">=",
+      "pass": true,
+      "margin": 39.6
+    },
+    {
+      "id": "C02",
+      "name": "max_q",
+      "value": 31.2,
+      "limit": 35.0,
+      "op": "<=",
+      "pass": true,
+      "margin": 3.8
+    },
+    {
+      "id": "C03",
+      "name": "max_accel_g",
+      "value": 3.6,
+      "limit": 4.0,
+      "op": "<=",
+      "pass": true,
+      "margin": 0.4
+    },
+    {
+      "id": "C07",
+      "name": "propellant_reserve_pct",
+      "value": 6.1,
+      "limit": 5.0,
+      "op": ">=",
+      "pass": true,
+      "margin": 1.1
+    },
+    {
+      "id": "C10",
+      "name": "final_closing_speed_mps",
+      "value": 0.08,
+      "limit": 0.1,
+      "op": "<=",
+      "pass": true,
+      "margin": 0.02
+    }
+  ],
+  "feasible": true,
+  "cost": 1.23,
+  "best_known_gap_pct": 4.2,
+  "trajectory_ref": "data/dummy/mission_trajectory_dummy.json",
+  "wall_s": 1.8,
+  "status": "finished"
+}

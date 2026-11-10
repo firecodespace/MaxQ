@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "suite_id": "suite_dummy",
+  "protocol_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+  "splits": {
+    "train": [
+      "msn_crew_iss_0001"
+    ],
+    "val": [
+      "msn_crew_iss_0002"
+    ],
+    "test": [
+      "msn_cargo_iss_0001"
+    ]
+  },
+  "best_known": {
+    "msn_crew_iss_0001": {
+      "cost": 1.18,
+      "attempt_id": "att_000099",
+      "budget_sims": 5000
+    }
+  },
+  "lower_bound": {
+    "msn_crew_iss_0001": {
+      "dv_mps": 9300.0
+    }
+  },
+  "systems": {
+    "cma_cold": {},
+    "cma_memory": {},
+    "llm_base": {},
+    "llm_ft": {}
+  }
+}

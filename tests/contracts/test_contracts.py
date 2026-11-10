@@ -30,7 +30,7 @@ ROOT = Path(__file__).resolve().parents[2]
 DUMMY_DIR = ROOT / "data" / "dummy"
 RESULTS_DIR = ROOT / "data" / "results"
 
-DUMMY_FILES = sorted(p for p in DUMMY_DIR.glob("*") if p.suffix in (".json", ".parquet"))
+DUMMY_FILES = sorted(p for p in DUMMY_DIR.glob("*") if p.suffix in (".json", ".jsonl", ".parquet"))
 RESULT_FILES = sorted(p for p in RESULTS_DIR.glob("*") if p.suffix in (".json", ".parquet"))
 
 
@@ -98,6 +98,9 @@ def test_trajectory_arrays_equal_length(path):
 def test_schema_version_is_1(path):
     if path.suffix == ".json":
         assert _load(path).get("schema_version") == 1
+    elif path.suffix == ".jsonl":
+        lines = [x for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+        assert lines and all(json.loads(x).get("schema_version") == 1 for x in lines)
     else:
         import pyarrow.parquet as pq
 

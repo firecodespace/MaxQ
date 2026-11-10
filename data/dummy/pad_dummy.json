@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "id": "pad_dummy",
+  "name": "Dummy Pad",
+  "lat_deg": 28.5619,
+  "lon_deg": -80.5772,
+  "supported_rocket_ids": [
+    "vehicle_dummy"
+  ],
+  "azimuth_range_deg": null,
+  "sources": []
+}

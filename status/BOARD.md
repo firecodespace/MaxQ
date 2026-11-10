@@ -24,3 +24,25 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 
 ## Notes
 - Contracts landed on `main` at 01:2x IST (commit `contract: add schemas and validator`). Consumers: use `from contracts.validate import validate`.
+
+## Phase 2 (HANDOFF_PHASE2.md) - added 2026-11-11
+
+| WP | Title | Owner | Agent/tool | Tier | State | Blocker |
+|----|-------|-------|------------|------|-------|---------|
+| WP2-00 | Scaffold, contracts, dummy data | shared | claude-code (Yash) | A | done: 8 schemas, dummies, validator, tests | - |
+| WP2-01 | Real rocket and pad library (cited) | Yash | - | A | not started | - |
+| WP2-02 | MissionEnv core (plan + step mode) | Shiva | - | A | not started | - |
+| WP2-03 | Phasing and rendezvous physics (HCW) | Shiva | - | A/B | not started | WP2-02 |
+| WP2-04 | Verifier and cost (gated) | Shiva | - | A | not started | - |
+| WP2-05 | Baseline optimizer, attempt log, best-known runner | Shiva | - | A | not started | WP2-02, WP2-04 |
+| WP2-06 | API + session streaming + replay recording | Yash | - | A | not started | - |
+| WP2-07 | UI: mission wizard | Yash | - | A | not started | WP2-01 |
+| WP2-08 | UI: mission control panels | Yash | - | A | not started | - |
+| WP2-09 | UI: 3D scene and cameras | Yash | claude-code | B | in progress (v1 WP-17 simulator; flight cameras mid-fix) | - |
+| WP2-10 | Experience memory + warm-start benchmark | Yash | - | B | not started | WP2-05 |
+| WP2-11 | Agent orchestrator (LLM tools + OptimizerAgent) | Yash | - | B | not started | WP2-04, WP2-05 |
+| WP2-12 | Benchmark suite, protocol, ablation runner | shared | - | B | not started | protocol is Red |
+| WP2-13 | Fine-tuning | Shiva | - | C | not started | GPU decision |
+| WP2-14 | RL guidance policy | Shiva / first free | - | C | not started | - |
+| WP2-15 | GPS/GEO profiles, real GEO windows | Yash | - | C | not started | - |
+| WP2-16 | README, demo recording, write-up | Yash | - | B | not started | - |

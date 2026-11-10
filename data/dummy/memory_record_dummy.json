@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "_note": "dummy: hand-written placeholder for contract testing only. Not a result.",
+  "id": "mem_000045",
+  "vector_spec": "features-v1",
+  "vector": [
+    1.0,
+    0.0,
+    0.41,
+    0.52,
+    0.31,
+    0.93
+  ],
+  "payload": {
+    "mission_id": "msn_crew_iss_0001",
+    "attempt_id": "att_000123",
+    "profile": "crew_iss",
+    "rocket_id": "vehicle_dummy",
+    "feasible": true,
+    "cost": 1.23,
+    "plan": {
+      "parking_alt_km": 200
+    },
+    "failure_modes": [],
+    "sim_version": "env-0.0.0-dummy",
+    "verifier_version": "ver-0.0.0-dummy",
+    "created_utc": "2026-11-11T04:46:40Z"
+  }
+}
