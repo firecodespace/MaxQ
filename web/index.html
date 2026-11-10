@@ -38,7 +38,7 @@
   </nav>
 
   <!-- ============================================================ 3D simulator -->
-  <main class="simview" id="view-sim">
+  <main class="viewgrid simview" id="view-sim">
     <section class="stage" aria-label="Three-dimensional simulator viewport">
       <canvas id="sim-canvas" tabindex="0" aria-label="3D view of Earth, the satellite catalog and the launch vehicle. Arrow keys orbit, plus and minus zoom."></canvas>
 
@@ -59,7 +59,7 @@
       <div class="pin" id="sim-pin" hidden></div>
     </section>
 
-    <aside class="mc" aria-label="Mission control">
+    <aside class="col mc" aria-label="Mission control">
       <section class="panel" id="flight-panel" aria-label="Vehicle and launch">
         <div class="panel-head">
           <h2>Vehicle</h2>
@@ -103,7 +103,8 @@
     </aside>
   </main>
 
-  <main class="grid" id="view-mission" hidden>
+  <main class="viewgrid grid" id="view-mission" hidden>
+    <div class="col mission-main">
     <section class="panel mapwrap" aria-label="World map with live satellites">
       <div class="panel-head">
         <h2>Live satellites</h2>
@@ -121,24 +122,6 @@
       <div id="catalog-note" class="note"></div>
     </section>
 
-    <aside class="side">
-      <section class="panel" id="windows-panel" aria-label="Launch windows">
-        <div class="panel-head"><h2>Launch windows</h2><div id="win-badges" class="badges"></div></div>
-        <div id="tabs" class="tabs" role="tablist"></div>
-        <div id="win-site" class="note"></div>
-        <div class="tablewrap">
-          <table id="win-table">
-            <thead><tr><th>ID</th><th>Launch (UTC)</th><th>T-</th><th>Pass</th><th title="Inertial launch azimuth of the target plane">Az&deg;</th><th title="In-plane lead of the target at insertion">Phase&deg;</th><th title="Fast / slow rendezvous estimate, hours">Rdv h</th><th>Fly</th></tr></thead>
-            <tbody id="win-body"></tbody>
-          </table>
-        </div>
-        <div id="win-note" class="note"></div>
-      </section>
-      <section class="panel" id="info-panel" aria-label="Selected object">
-        <div class="panel-head"><h2>Selected object</h2></div>
-        <div id="info" class="info">Click an object on the map.</div>
-      </section>
-    </aside>
 
     <section class="panel replay" id="replay-panel" aria-label="Ascent replay">
       <div class="panel-head">
@@ -166,9 +149,31 @@
         <canvas id="plot-q" aria-label="Dynamic pressure versus time"></canvas>
       </div>
     </section>
+    </div>
+
+    <aside class="col side">
+      <section class="panel" id="windows-panel" aria-label="Launch windows">
+        <div class="panel-head"><h2>Launch windows</h2><div id="win-badges" class="badges"></div></div>
+        <div id="tabs" class="tabs" role="tablist"></div>
+        <div id="win-site" class="note"></div>
+        <div class="tablewrap">
+          <table id="win-table">
+            <thead><tr><th>ID</th><th>Launch (UTC)</th><th>T-</th><th>Pass</th><th title="Inertial launch azimuth of the target plane">Az&deg;</th><th title="In-plane lead of the target at insertion">Phase&deg;</th><th title="Fast / slow rendezvous estimate, hours">Rdv h</th><th>Fly</th></tr></thead>
+            <tbody id="win-body"></tbody>
+          </table>
+        </div>
+        <div id="win-note" class="note"></div>
+      </section>
+      <section class="panel" id="info-panel" aria-label="Selected object">
+        <div class="panel-head"><h2>Selected object</h2></div>
+        <div id="info" class="info">Click an object on the map.</div>
+      </section>
+    </aside>
+
   </main>
 
-  <main class="sky" id="view-sky" hidden>
+  <main class="viewgrid sky" id="view-sky" hidden>
+    <div class="col sky-main">
     <section class="panel skymap-panel" aria-label="Orbit map of the catalog by cluster">
       <div class="panel-head">
         <h2>Sky: orbits by cluster</h2>
@@ -179,15 +184,7 @@
       <div id="sky-tip" class="note">Hover a point for details.</div>
       <div id="sky-summary" class="note">Loading clusters...</div>
     </section>
-    <aside class="panel skylegend" aria-label="Clusters">
-      <div class="panel-head"><h2>Clusters</h2></div>
-      <div class="legend-actions">
-        <button type="button" id="sky-all">All</button>
-        <button type="button" id="sky-none">None</button>
-        <label class="chk"><input type="checkbox" id="sky-labels" checked> Labels</label>
-      </div>
-      <div id="sky-legend" class="legend"></div>
-    </aside>
+
     <section class="panel skycong" aria-label="Congestion by altitude">
       <div class="panel-head">
         <h2>Congestion by altitude</h2>
@@ -198,6 +195,18 @@
       <div id="sky-cong-tip" class="note">Hover a bar for details.</div>
       <div id="sky-hotspots" class="hotspots"></div>
     </section>
+    </div>
+
+    <aside class="col">
+      <section class="panel skylegend" aria-label="Clusters">
+      <div class="panel-head"><h2>Clusters</h2></div>
+      <div class="legend-actions">
+        <button type="button" id="sky-all">All</button>
+        <button type="button" id="sky-none">None</button>
+        <label class="chk"><input type="checkbox" id="sky-labels" checked> Labels</label>
+      </div>
+      <div id="sky-legend" class="legend"></div>
+      </section>
     <section class="panel skysw" aria-label="Space weather, context only">
       <div class="panel-head">
         <h2>Space weather</h2>
@@ -206,7 +215,8 @@
       </div>
       <canvas id="sw-chart" aria-label="Planetary Kp index: last three days observed, next days forecast"></canvas>
       <div id="sw-summary" class="note"></div>
-    </section>
+      </section>
+    </aside>
   </main>
 
   <footer class="foot">

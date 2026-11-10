@@ -157,7 +157,7 @@ function buildChips() {
     // click brings them back. A first screen you can read beats a first screen that shows everything.
     if (!QUIET_LAYERS.includes(g)) S.groupsOn.add(g);
     const b = el("button", { type: "button", "aria-pressed": String(S.groupsOn.has(g)), title: `Toggle ${g}` });
-    b.append(el("span", { class: "dot", style: `background:${GROUP_COLORS[g] || "#b5a28a"}` }), `${g} ${counts[g]}`);
+    b.append(el("span", { class: "dot", style: `background:${GROUP_COLORS[g] || "#8da3c2"}` }), `${g} ${counts[g]}`);
     b.addEventListener("click", () => {
       const on = !S.groupsOn.has(g);
       on ? S.groupsOn.add(g) : S.groupsOn.delete(g);
@@ -295,9 +295,9 @@ setInterval(() => {
 
 // ---------------------------------------------------------------------------------------------- replay
 const plots = {
-  alt: new Plot($("plot-alt"), { title: "Altitude", unit: "km", color: "#8fbdce", onScrub: (t) => setReplayT(t, true) }),
-  speed: new Plot($("plot-speed"), { title: "Speed", unit: "m/s", color: "#a3bb89", onScrub: (t) => setReplayT(t, true) }),
-  q: new Plot($("plot-q"), { title: "Dynamic pressure q", unit: "kPa", color: "#efb455", onScrub: (t) => setReplayT(t, true) }),
+  alt: new Plot($("plot-alt"), { title: "Altitude", unit: "km", color: "#4d9fff", onScrub: (t) => setReplayT(t, true) }),
+  speed: new Plot($("plot-speed"), { title: "Speed", unit: "m/s", color: "#7cc6ff", onScrub: (t) => setReplayT(t, true) }),
+  q: new Plot($("plot-q"), { title: "Dynamic pressure q", unit: "kPa", color: "#4d9fff", onScrub: (t) => setReplayT(t, true) }),
 };
 
 function trajOk(d) {

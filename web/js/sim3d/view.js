@@ -26,6 +26,8 @@ import { scaleBar } from "./scalemath.js";
 import { C, hex } from "../theme.js";
 
 const FOV = 42;
+const X_AXIS = new THREE.Vector3(1, 0, 0);
+const Z_AXIS = new THREE.Vector3(0, 0, 1);
 /* Opening view, as a distance from the Earth's CENTRE in Earth radii: the whole disc then subtends
  * asin(1/3.0) = 19.5 degrees against a 21-degree half-frustum, so the planet fills the height with a
  * little room around it. Closer and the limb is cut off; further and it is a marble on a black page.
@@ -79,21 +81,21 @@ export class Sim3D {
     }
     // Not pure black: a trace of blue reads as space rather than as a dead canvas, and it gives
     // the star field and the atmosphere something to sit against.
-    this.renderer.setClearColor(0x070912, 1);
+    this.renderer.setClearColor(0x04070e, 1);
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     // Filmic tone mapping with a little headroom: the bright limb and the plume both run well past
     // 1.0, and clipping them to white is what makes a space scene look flat.
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    this.renderer.toneMappingExposure = 1.35;
+    this.renderer.toneMappingExposure = 1.5;
 
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(FOV, 1, 1, 1e7);
     this.camera.up.set(0, 0, 1);
 
-    this.sunLight = new THREE.DirectionalLight(0xfff4e0, 3.4);
+    this.sunLight = new THREE.DirectionalLight(0xfff6e8, 4.0);
     // Ambient stands in for earthshine and starlight: without it the shadowed side of a rocket is
     // pure black, which is technically defensible in vacuum and unreadable on a screen.
-    this.scene.add(this.sunLight, new THREE.AmbientLight(0x6b5e4c, 0.85));
+    this.scene.add(this.sunLight, new THREE.AmbientLight(0x3d5a84, 1.15));
 
     this.globe = createGlobe({ onProgress: (p) => this.hooks.onTexture?.(p) });
     this.scene.add(this.globe.group);
@@ -102,7 +104,7 @@ export class Sim3D {
     this.scene.add(this.stars.points);
 
     this.trail = new OrbitTrail(C.ochre);
-    this.scene.add(this.trail.line);
+    this.scene.add(this.trail.root);
 
     this.closeUp = new CloseUpModel();
     this.scene.add(this.closeUp.group);
@@ -124,6 +126,18 @@ export class Sim3D {
     this._tmp = new THREE.Vector3();
     this._tmp2 = new THREE.Vector3();
     this._camAbs = new THREE.Vector3();
+    // Scratch vectors for the per-frame camera work. Allocating these inside the frame loop is the
+    // classic way to make a smooth scene stutter every few seconds as the collector runs.
+    this._tmpA = new THREE.Vector3();
+    this._tmpB = new THREE.Vector3();
+    this._tmpC = new THREE.Vector3();
+    this._tmpD = new THREE.Vector3();
+    this._tmpE = new THREE.Vector3();
+    this._padArr = [0, 0, 0]; // geodeticToEcef writes into this, once per frame, without allocating
+    this._tmpF = new THREE.Vector3();
+    this._tmpG = new THREE.Vector3();
+    this._camOut = new THREE.Vector3();
+    this._offs = null;
     this.ok = true;
     this.resize();
   }
@@ -237,12 +251,12 @@ export class Sim3D {
 
   setCatalog(catalog) {
     if (this.sats) {
-      this.scene.remove(this.sats.points);
+      this.scene.remove(this.sats.root);
       this.sats.dispose();
     }
     this.sats = new SatelliteLayer(catalog);
     this.catalog = catalog;
-    this.scene.add(this.sats.points);
+    this.scene.add(this.sats.root);
     if (this.groupsOn.size) this.sats.setGroups(this.groupsOn);
     this._syncPixelRatio();
   }
@@ -279,6 +293,7 @@ export class Sim3D {
     this.traj = traj;
     this.trajExtra = extra || null;
     this.replayT = 0;
+    this._stCache = null;
 
     if (this.vehicle) {
       this.scene.remove(this.vehicle.group);
@@ -373,7 +388,7 @@ export class Sim3D {
   /* ---------------------------------------------------------------- state in */
 
   setTime(simMs) { this.simMs = simMs; }
-  setReplayT(t) { this.replayT = t; }
+  setReplayT(t) { this.replayT = t; this._stCache = null; }
 
   setMode(mode) {
     if (mode === this.mode) return;
@@ -398,6 +413,8 @@ export class Sim3D {
 
   setCameraMode(m) {
     this.cameraMode = m;
+    this._followBound = null;
+    this._offs = null;
     if (this.mode === "flight") this.cam.setGeo(false);
     if (m === "orbit" && this.mode === "flight") {
       // Hand control to the user, centred on the vehicle at a sensible stand-off.
@@ -452,11 +469,24 @@ export class Sim3D {
 
   /* ---------------------------------------------------------------- picking */
 
+  /**
+   * What the camera should pivot on at a screen point: an object under the cursor, else the globe.
+   *
+   * Wheel events arrive in bursts, and a catalog pick per event is thousands of projections for a
+   * question the hover pass answered microseconds earlier at the same coordinates. So a fresh hover
+   * result is reused, and only a genuinely cold pivot pays for its own pick.
+   */
   _pivotAt(ndcX, ndcY) {
-    // An object under the cursor wins; otherwise the globe; otherwise empty space.
     if (this.sats && this.mode === "earth") {
-      const i = this.sats.pick(ndcX, ndcY, this.camera, this._size(), this.groupsOn, 12);
-      if (i >= 0) return this.sats.positionOf(i);
+      const h = this._lastHover;
+      const fresh =
+        h && performance.now() - h.at < 250 &&
+        Math.abs(h.x - ndcX) < 0.01 && Math.abs(h.y - ndcY) < 0.01;
+      const i = fresh ? h.i : (() => {
+        const k = this.sats.pick(ndcX, ndcY, this.camera, this._size(), this.groupsOn, 12);
+        return k >= 0 ? k : null;
+      })();
+      if (i != null) return this.sats.positionOf(i);
     }
     const ray = this._ray(ndcX, ndcY);
     const hit = rayEllipsoid(this._camAbs, ray);
@@ -474,10 +504,29 @@ export class Sim3D {
     this.hooks.onPick?.(i >= 0 ? i : null);
   }
 
+  /**
+   * Note where the cursor is; the pick itself happens once in the next frame.
+   *
+   * Picking walks the whole catalog, projecting 6,800 points. A 120 Hz mouse fires pointermove far
+   * more often than the scene is drawn, so doing the walk here meant up to a million projections a
+   * second for a hover label that can only change once per frame anyway.
+   */
   _hover(ndcX, ndcY) {
     if (!this.sats || !this.hooks.onHoverObject) return;
-    const i = this.sats.pick(ndcX, ndcY, this.camera, this._size(), this.groupsOn, 10);
-    this.hooks.onHoverObject(i >= 0 ? i : null, ndcX, ndcY);
+    this._hoverNdc = this._hoverNdc || [0, 0];
+    this._hoverNdc[0] = ndcX;
+    this._hoverNdc[1] = ndcY;
+    this._hoverPending = true;
+  }
+
+  /** Resolve a pending hover, at most once per frame. */
+  _resolveHover() {
+    if (!this._hoverPending || !this.sats) return;
+    this._hoverPending = false;
+    const [x, y] = this._hoverNdc;
+    const i = this.sats.pick(x, y, this.camera, this._size(), this.groupsOn, 10);
+    this._lastHover = { i: i >= 0 ? i : null, at: performance.now(), x, y };
+    this.hooks.onHoverObject(this._lastHover.i, x, y);
   }
 
   /* ---------------------------------------------------------------- frame */
@@ -494,10 +543,44 @@ export class Sim3D {
     this.vehicleDot.material.uniforms.pixelRatio.value = pr;
   }
 
+  /**
+   * Trade pixels for smoothness when the frame budget slips, and take them back when it recovers.
+   *
+   * A scene that holds a 36,000-triangle globe, an atmosphere shell, 6,800 sprites and a shaded
+   * vehicle is not free, and a 4K display asks for four times the pixels of a 1080p one. Rather than
+   * pick one quality setting and hope, the renderer watches its own frame time over a short window
+   * and moves the device pixel ratio between 0.75 and the display's own. The steps are deliberately
+   * coarse and rate-limited, because a resolution that hunts every few frames is worse than one that
+   * is simply a little soft.
+   */
+  _adaptResolution(dt) {
+    const hist = this._ft || (this._ft = []);
+    hist.push(dt);
+    if (hist.length < 45) return;
+    hist.sort((a, b) => a - b);
+    const median = hist[hist.length >> 1];
+    hist.length = 0;
+    const now = performance.now();
+    if (this._lastAdapt && now - this._lastAdapt < 1200) return;
+    const max = Math.min(window.devicePixelRatio || 1, 2);
+    const cur = this._targetPR ?? max;
+    let next = cur;
+    if (median > 0.0215 && cur > 0.75) next = Math.max(0.75, cur - 0.25);
+    else if (median < 0.0125 && cur < max) next = Math.min(max, cur + 0.25);
+    if (next !== cur) {
+      this._targetPR = next;
+      this._lastAdapt = now;
+      const { w, h } = this._size();
+      this.renderer.setPixelRatio(next);
+      this.renderer.setSize(w, h, false);
+      this._syncPixelRatio();
+    }
+  }
+
   resize() {
     if (!this.ok) return;
     const { w, h } = this._size();
-    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    this.renderer.setPixelRatio(this._targetPR ?? Math.min(window.devicePixelRatio || 1, 2));
     this.renderer.setSize(w, h, false);
     this.camera.aspect = w / Math.max(1, h);
     this.camera.updateProjectionMatrix();
@@ -522,10 +605,18 @@ export class Sim3D {
    * the body axis is taken from the velocity direction instead and the UI says it is derived. Either
    * way the vehicle has no roll and no angle of attack, because the 2D point-mass model has neither.
    */
+  /**
+   * Where the vehicle is and how it is pointing, cached for the frame.
+   *
+   * This allocates a handful of vectors and runs several interpolations, and it used to be called
+   * twice per frame -- once for the scene and once inside the follow-camera closure. Caching on
+   * (trajectory, time) makes the second call free and keeps the allocation out of the hot loop.
+   */
   _vehicleState() {
     const d = this.traj;
     if (!d) return null;
     const T = this.replayT;
+    if (this._stCache && this._stKey === T && this._stTraj === d) return this._stCache;
     const lat = interp(d.t_s, d.lat_deg, T);
     const lon = interpLon(d.t_s, d.lon_deg, T);
     const altM = interp(d.t_s, d.alt_m, T);
@@ -589,104 +680,159 @@ export class Sim3D {
     }
     const sep = ev("stage_sep");
 
-    return {
+    this._stKey = T;
+    this._stTraj = d;
+    this._stCache = {
       posKm, axis, up: basis.up, horiz, lat, lon, altM, speed, pitchDeg, derived, stage, thrustN,
       separated: sep ? T >= sep.t_s : false,
       massKg: interp(d.t_s, d.mass_kg, T),
       qPa: interp(d.t_s, d.q_pa, T),
     };
+    return this._stCache;
+  }
+
+  /* ---------------------------------------------------------------- flight cameras
+   *
+   * Every one of these has the same job: keep a 65 m object recognisable while it crosses eight
+   * orders of magnitude of altitude. The earlier versions placed the camera at a fixed offset and
+   * hoped, which is why the rocket kept vanishing -- at a fixed stand-off the vehicle is a sliver,
+   * and at a fixed field of view it is a pixel. So the distance is SOLVED instead:
+   *
+   *     distance = (length / 2) / (targetFraction * tan(fov / 2))
+   *
+   * which places the camera exactly where the vehicle covers the fraction of the frame asked for,
+   * whatever its size and wherever it is. A camera that cannot move (the pad) solves the same
+   * equation for the field of view instead, which is what a long lens physically is.
+   */
+
+  /** Screen-up for a view direction: the hint with its parallel component removed, never degenerate. */
+  _safeUp(viewDir, hint, out) {
+    out.copy(hint).addScaledVector(viewDir, -hint.dot(viewDir));
+    if (out.lengthSq() < 1e-14) {
+      // The hint lay along the view. Any perpendicular will do; take the smallest axis.
+      const a = Math.abs(viewDir.x) < 0.9 ? X_AXIS : Z_AXIS;
+      out.crossVectors(viewDir, a);
+    }
+    return out.normalize();
+  }
+
+  /** Distance at which a body of `lengthKm` covers `frac` of the frame height. */
+  _framingDistance(lengthKm, frac, fovDeg) {
+    const halfFov = (fovDeg * Math.PI) / 360;
+    return lengthKm / 2 / Math.max(0.02, frac) / Math.tan(halfFov);
+  }
+
+  /**
+   * Ease a camera offset IN THE VEHICLE'S OWN FRAME, and return the absolute point.
+   *
+   * This distinction is the whole thing. Easing an absolute camera position looks right in a still
+   * and is wrong the moment the subject moves: the vehicle is doing five kilometres a second by the
+   * end of the ascent, and with the replay at 5x the camera was settling more than a kilometre
+   * behind it -- far enough that the rocket was out of the frustum entirely and the onboard view was
+   * an empty blue screen. Offsets, by contrast, barely change from frame to frame, so smoothing them
+   * removes the jitter from the vehicle's attitude without ever letting the camera fall behind.
+   */
+  _easeOffset(key, anchor, offset, dt, snap, out) {
+    const store = this._offs || (this._offs = {});
+    let cur = store[key];
+    if (!cur) cur = store[key] = offset.clone();
+    if (snap) cur.copy(offset);
+    else cur.lerp(offset, 1 - Math.exp(-dt / 0.09));
+    return out.copy(anchor).add(cur);
+  }
+
+  /** Set the camera pose. No smoothing here: the callers smooth their offsets instead. */
+  _aimCamera(posAbs, lookAbs, upHint, nearKm) {
+    const o = this.origin;
+    const view = this._tmpA.copy(lookAbs).sub(posAbs);
+    const dist = view.length() || 1;
+    view.multiplyScalar(1 / dist);
+    this.camera.up.copy(this._safeUp(view, upHint, this._tmpB));
+    this.camera.near = Math.max(1e-5, Math.min(nearKm, dist * 0.08));
+    this.camera.far = 2.4e6;
+    this.camera.updateProjectionMatrix();
+    this.camera.position.set(posAbs.x - o.x, posAbs.y - o.y, posAbs.z - o.z);
+    this.camera.lookAt(lookAbs.x - o.x, lookAbs.y - o.y, lookAbs.z - o.z);
+    this.camera.updateMatrixWorld();
+    return this._camOut.copy(posAbs);
+  }
+
+  _setFov(deg) {
+    if (Math.abs(this.camera.fov - deg) > 1e-4) {
+      this.camera.fov = deg;
+      this.camera.updateProjectionMatrix();
+    }
+    this._padZoom = FOV / deg;
   }
 
   /** Place the camera for the flight-mode cameras that are not free orbit. */
-  _placeFlightCamera(st) {
-    const o = this.origin;
-    if (this.cameraMode !== "pad" && this.camera.fov !== FOV) {
-      this.camera.fov = FOV;
-      this._padZoom = 1;
-      this.camera.updateProjectionMatrix();
-    }
-    const len = (this.vehicle?.dims.totalLength || 60) / 1000; // km
-    const rel = (v) => new THREE.Vector3(v.x - o.x, v.y - o.y, v.z - o.z);
+  _placeFlightCamera(st, dt) {
+    const lenKm = (this.vehicle?.dims.totalLength || 60) / 1000;
+    const diaKm = (this.vehicle?.dims.maxDiameter || 4) / 1000;
+    const snap = this._lastCamMode !== this.cameraMode;
+    this._lastCamMode = this.cameraMode;
 
     if (this.cameraMode === "chase") {
-      // Uprange and above, framing the vehicle against the Earth.
-      //
-      // The offset is along the GROUND TRACK, not along the body axis. Early in the flight the
-      // vehicle is nearly vertical, so "behind" in body axis means directly underneath: the camera
-      // ends up below the rocket looking up its tail at empty sky, with the planet out of frame
-      // entirely. Offsetting uprange and lifting above keeps the ground in shot the whole way,
-      // which is what a chase view is for.
-      // The vertical offset swings with altitude, and that is a framing decision worth stating.
-      // Down low the camera sits slightly BELOW the vehicle, so the backdrop is horizon, air and
-      // space: that is the shot every launch is watched in, and it is the only one that works
-      // there, because the ground five kilometres under a rocket is a single texel of dark ocean
-      // however it is lit. High up the camera moves ABOVE, so the backdrop becomes the lit Earth,
-      // which by then is the thing worth looking at.
-      const f = Math.min(1, Math.max(0, (st.altM / 1000 - 3) / 90));
-      const up = st.up.clone().multiplyScalar(len * (-0.3 + 1.7 * f));
-      const back = st.horiz.clone().multiplyScalar(-len * 2.4);
-      const side = new THREE.Vector3().crossVectors(st.horiz, st.up).normalize().multiplyScalar(len * 1.3);
-      const cam = st.posKm.clone().add(back).add(up).add(side);
-      this.camera.near = Math.max(0.0015, len * 0.05);
-      this.camera.far = 2e6;
-      this.camera.updateProjectionMatrix();
-      this.camera.up.copy(st.up);
-      this.camera.position.copy(rel(cam));
-      const look = rel(st.posKm);
-      this.camera.lookAt(look.x, look.y, look.z);
-      return cam;
+      this._setFov(FOV);
+      // The camera rises with altitude: low down it sits just above the vehicle so the backdrop is
+      // sky and horizon, which is the only backdrop that works there, and higher up it climbs so
+      // the backdrop becomes the lit Earth, which by then is the thing worth seeing.
+      const f = Math.min(1, Math.max(0, (st.altM / 1000 - 4) / 70));
+      const elev = (10 + 30 * f) * (Math.PI / 180);
+      const dir = this._tmpA
+        .copy(st.horiz).multiplyScalar(-Math.cos(elev))
+        .addScaledVector(st.up, Math.sin(elev))
+        .normalize();
+      const side = this._tmpC.crossVectors(st.horiz, st.up).normalize();
+      // 0.34 of the frame height: big enough to read the stages, small enough to leave context.
+      const dist = this._framingDistance(lenKm, 0.34, FOV);
+      const off = this._tmpD.set(0, 0, 0).addScaledVector(dir, dist).addScaledVector(side, dist * 0.34);
+      const pos = this._easeOffset("chase", st.posKm, off, dt, snap, this._tmpF);
+      return this._aimCamera(pos, st.posKm, st.up, lenKm * 0.08);
     }
 
     if (this.cameraMode === "onboard") {
-      // At the nose, looking forward along the body axis, tilted down so the Earth stays in frame --
-      // which is what an onboard camera actually shows for most of an ascent.
-      const nose = st.posKm.clone().addScaledVector(st.axis, len * 0.55);
-      const aim = nose
-        .clone()
-        .addScaledVector(st.axis, len * 40)
-        .addScaledVector(st.up, -len * 14);
-      this.camera.near = Math.max(0.0015, len * 0.03);
-      this.camera.far = 2e6;
-      this.camera.updateProjectionMatrix();
-      this.camera.up.copy(st.up);
-      this.camera.position.copy(rel(nose));
-      const look = rel(aim);
-      this.camera.lookAt(look.x, look.y, look.z);
-      return nose;
+      // A camera on a boom off the upper stage, looking back down the body: you see the vehicle
+      // receding, the engines lit, and the Earth turning behind it. A nose camera pointing forward
+      // shows no rocket at all, which is what the previous one did.
+      this._setFov(64); // a wide lens, as these actually are
+      const side = this._tmpC.crossVectors(st.axis, st.up).normalize();
+      if (side.lengthSq() < 0.5) side.copy(st.horiz);
+      const off = this._tmpD
+        .set(0, 0, 0)
+        .addScaledVector(st.axis, lenKm * 0.34)
+        .addScaledVector(side, Math.max(diaKm * 2.4, lenKm * 0.085));
+      const lookOff = this._tmpE.set(0, 0, 0).addScaledVector(st.axis, -lenKm * 0.5);
+      const pos = this._easeOffset("obPos", st.posKm, off, dt, snap, this._tmpF);
+      const look = this._easeOffset("obLook", st.posKm, lookOff, dt, snap, this._tmpG);
+      return this._aimCamera(pos, look, st.axis, diaKm * 0.4);
     }
 
-    // "pad": a fixed tracking camera at the launch site, 2 km back, following the vehicle up.
+    // "pad": fixed at the launch site, tracking the vehicle with a very long lens.
     const d = this.traj;
-    const p = [0, 0, 0];
-    geodeticToEcef(d.lat_deg[0], d.lon_deg[0], d.alt_m[0], p);
-    const pad = new THREE.Vector3(p[0] / 1000, p[1] / 1000, p[2] / 1000);
-    const padBasis = enuBasis(d.lat_deg[0], d.lon_deg[0]);
-    const camPos = pad
-      .clone()
-      .addScaledVector(padBasis.east, -1.4)
-      .addScaledVector(padBasis.north, -1.6)
-      .addScaledVector(padBasis.up, 0.03);
+    geodeticToEcef(d.lat_deg[0], d.lon_deg[0], d.alt_m[0], this._padArr);
+    const pad = this._tmpD.set(this._padArr[0] / 1000, this._padArr[1] / 1000, this._padArr[2] / 1000);
+    const padBasis = this._padBasis || (this._padBasis = enuBasis(d.lat_deg[0], d.lon_deg[0]));
+    if (this._padFor !== d.id) {
+      this._padBasis = enuBasis(d.lat_deg[0], d.lon_deg[0]);
+      this._padFor = d.id;
+    }
+    const b = this._padBasis;
+    const camPos = this._tmpE
+      .copy(pad)
+      .addScaledVector(b.east, -0.9)
+      .addScaledVector(b.north, -1.1)
+      .addScaledVector(b.up, 0.02);
     void padBasis;
 
-    // A pad camera that does not zoom is useless after about twenty seconds: at T+90 the vehicle is
-    // forty kilometres away and a 65 m rocket is under two pixels wide. Real range-tracking cameras
-    // solve this with very long lenses, so this one does too -- the field of view narrows to keep
-    // the vehicle about a fifth of the frame, down to the equivalent of a 2,000 mm lens, and the
-    // telemetry reports the magnification so the view never silently lies about its scale.
+    // A fixed camera cannot move, so it solves the same framing equation for the lens instead.
+    // Capped at the equivalent of about a 2,400 mm lens: past that a real tracking camera loses the
+    // vehicle too, and the HUD reports the magnification so the view never understates the range.
     const dist = camPos.distanceTo(st.posKm);
-    const lenKm = (this.vehicle?.dims.totalLength || 60) / 1000;
-    const wantHalf = Math.atan(lenKm / 2 / Math.max(1e-6, dist) / 0.2);
-    const half = Math.max((0.6 * Math.PI) / 360, Math.min((FOV * Math.PI) / 360, wantHalf));
-    this.camera.fov = (half * 360) / Math.PI;
-    this._padZoom = FOV / this.camera.fov;
-    this.camera.near = Math.max(0.005, dist * 0.02);
-    this.camera.far = 2e6;
-    this.camera.updateProjectionMatrix();
-    this.camera.up.copy(padBasis.up);
-    this.camera.position.copy(rel(camPos));
-    const look = rel(st.posKm);
-    this.camera.lookAt(look.x, look.y, look.z);
-    return camPos;
+    const want = 2 * Math.atan(lenKm / 2 / Math.max(1e-6, dist) / 0.26) * (180 / Math.PI);
+    this._setFov(Math.max(0.9, Math.min(FOV, want)));
+    // No easing: the camera is bolted to the ground and a tracking mount does not lag its target.
+    return this._aimCamera(camPos, st.posKm, b.up, 0.004);
   }
 
   /** Render one frame and return the telemetry the panel and HUD display. */
@@ -719,18 +865,24 @@ export class Sim3D {
     if (this.mode === "flight" && st) {
       this._setOrigin(st.posKm.x, st.posKm.y, st.posKm.z);
       if (this.cameraMode === "orbit") {
-        this.cam.followPoint(() => this._vehicleState()?.posKm || null);
+        // Installed once per mode change: re-binding a fresh closure every frame allocated one
+        // function per frame and defeated the state cache behind it.
+        if (!this._followBound) {
+          this._followBound = () => this._vehicleState()?.posKm || null;
+          this.cam.followPoint(this._followBound);
+        }
+        this._setFov(FOV);
+        this._offs = null;
+        this._lastCamMode = null;
         this._camAbs.copy(this.cam.apply(this.origin, dt));
       } else {
-        this._camAbs.copy(this._placeFlightCamera(st));
+        this._camAbs.copy(this._placeFlightCamera(st, dt));
       }
     } else {
       this._setOrigin(0, 0, 0);
-      if (this.camera.fov !== FOV) {
-        this.camera.fov = FOV;
-        this._padZoom = 1;
-        this.camera.updateProjectionMatrix();
-      }
+      this._setFov(FOV);
+      this._offs = null;
+      this._lastCamMode = null;
       this._camAbs.copy(this.cam.apply(this.origin, dt));
     }
 
@@ -807,8 +959,14 @@ export class Sim3D {
       this.groundLine.visible = this.mode === "earth";
     }
 
+    this._resolveHover();
+
     this.renderer.render(this.scene, this.camera);
     this._everRendered = true;
+    this._adaptResolution(dt);
+
+    // Frame-time statistics for the HUD, so the cost of the scene is visible rather than guessed at.
+    this._fps = this._fps ? this._fps * 0.92 + (1 / Math.max(1e-4, dt)) * 0.08 : 1 / Math.max(1e-4, dt);
 
     // --- telemetry for the DOM
     const { h, w } = this._size();
@@ -825,6 +983,9 @@ export class Sim3D {
       vehicle: st,
       plume,
       closeUp,
+      fps: this._fps || 0,
+      pixelRatio: this.renderer.getPixelRatio(),
+      drawCalls: this.renderer.info.render.calls,
       padZoom: this.cameraMode === "pad" ? this._padZoom || 1 : 1,
       sunLit: st ? sun[0] * st.posKm.x + sun[1] * st.posKm.y + sun[2] * st.posKm.z > 0 : null,
     };

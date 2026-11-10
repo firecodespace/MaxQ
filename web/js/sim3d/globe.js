@@ -149,19 +149,19 @@ const SURFACE_FRAG = /* glsl */ `
     // the real brightness of a sunlit Earth comes from cloud and atmosphere this texture does not
     // carry. The ambient floor keeps the unlit side legible instead of a black hole.
     float shade = max(lambert, 0.0);
-    shade = shade * (1.25 - 0.3 * shade) + 0.16;   // lifted mid-tones, rolled-off highlights
-    vec3 lit = dayCol * shade * 1.5;
+    shade = shade * (1.3 - 0.3 * shade) + 0.22;   // lifted mid-tones, rolled-off highlights
+    vec3 lit = dayCol * shade * 2.05;
     vec3 col = mix(nightCol * nightGain, lit, day);
     col += vec3(0.68, 0.76, 0.86) * spec * 0.55;
 
     // Terminator warmth: sunlight through a long slant of atmosphere goes orange, and that band is
     // most of what makes a rendered globe look like a photograph of one.
-    float band = smoothstep(0.26, 0.0, abs(lambert - 0.03));
-    col += vec3(0.5, 0.26, 0.1) * band * 0.3;
+    float band = smoothstep(0.13, 0.0, abs(lambert - 0.02));
+    col += vec3(0.46, 0.27, 0.13) * band * 0.22;
 
     // Atmospheric pick-up at grazing view angles, warm toward the sun.
     float rim = pow(1.0 - max(dot(N, V), 0.0), 3.0);
-    col += mix(vec3(0.13, 0.18, 0.26), vec3(0.5, 0.34, 0.17), smoothstep(-0.2, 0.6, lambert)) * rim * day * 0.65;
+    col += mix(vec3(0.10, 0.20, 0.36), vec3(0.34, 0.55, 0.92), smoothstep(-0.2, 0.6, lambert)) * rim * day * 0.8;
 
     // Aerial perspective.
     //
@@ -183,7 +183,7 @@ const SURFACE_FRAG = /* glsl */ `
     float midAltKm = max(0.0, camAltKm * 0.5);
     float tau = (viewKm / hazeScaleKm) * exp(-midAltKm / 8.5);
     float haze = (1.0 - exp(-tau)) * day * (0.35 + 0.65 * max(lambert, 0.0));
-    col = mix(col, hazeColor * (0.45 + 0.55 * max(lambert, 0.0)), clamp(haze, 0.0, 0.86));
+    col = mix(col, hazeColor * (0.45 + 0.55 * max(lambert, 0.0)), clamp(haze, 0.0, 0.74));
 
     gl_FragColor = vec4(col, 1.0);
   }
@@ -253,13 +253,13 @@ export function createGlobe(opts = {}) {
     topoMap: { value: blank() },
     sunDir: { value: new THREE.Vector3(1, 0, 0) },
     cameraPosKm: { value: new THREE.Vector3() },
-    nightGain: { value: 1.9 },
+    nightGain: { value: 2.5 },
     bumpScale: { value: 0.0 },
     texelLon: { value: 1 / 2048 },
     // 32 km of sea-level air is about one optical depth: a clear day's visibility.
     hazeScaleKm: { value: 32 },
     camAltKm: { value: 1e6 },
-    hazeColor: { value: new THREE.Color(0.52, 0.65, 0.82) },
+    hazeColor: { value: new THREE.Color(0.34, 0.52, 0.84) },
   };
 
   let pending = 0;
@@ -307,8 +307,8 @@ export function createGlobe(opts = {}) {
   const atmoUniforms = {
     sunDir: uniforms.sunDir,
     cameraPosKm: uniforms.cameraPosKm,
-    tint: { value: new THREE.Color(0.42, 0.62, 0.86) },
-    strength: { value: 1.75 },
+    tint: { value: new THREE.Color(0.38, 0.64, 1.0) },
+    strength: { value: 2.15 },
   };
   const atmo = new THREE.Mesh(
     new THREE.SphereGeometry(1, 96, 64),
@@ -335,7 +335,14 @@ export function createGlobe(opts = {}) {
     update(sun, camKm, camAltKm) {
       uniforms.sunDir.value.set(sun[0], sun[1], sun[2]);
       uniforms.cameraPosKm.value.copy(camKm);
-      if (camAltKm != null) uniforms.camAltKm.value = camAltKm;
+      if (camAltKm != null) {
+        uniforms.camAltKm.value = camAltKm;
+        // Full strength once the whole shell is in front of the camera; a third of it from inside,
+        // where the shell is a stand-in for sky rather than a limb seen edge-on, and where the haze
+        // on the ground is already carrying most of the atmosphere's effect.
+        const outside = Math.min(1, Math.max(0, (camAltKm - 20) / 160));
+        atmoUniforms.strength.value = 0.72 + 1.43 * outside;
+      }
     },
     setOrigin(originKm) {
       group.position.set(-originKm.x, -originKm.y, -originKm.z);
@@ -390,12 +397,12 @@ export function createStars(count = 6200, seed = 20261110) {
     pos[i * 3 + 2] = R * z;
 
     const m = Math.pow(rnd(), 2.6); // most faint, a few bright
-    size[i] = 0.9 + 2.3 * m;
+    size[i] = 1.0 + 2.6 * m;
     // Slight colour spread around white, warm to cool.
-    const w = 0.84 + 0.16 * rnd();
-    tint[i * 3] = w + 0.1 * m;
-    tint[i * 3 + 1] = w;
-    tint[i * 3 + 2] = w + 0.09 * (1 - m);
+    const w = 0.88 + 0.12 * rnd();
+    tint[i * 3] = w * (0.9 + 0.1 * m);
+    tint[i * 3 + 1] = w * 0.97;
+    tint[i * 3 + 2] = Math.min(1, w * 1.06);
   }
 
   const g = new THREE.BufferGeometry();

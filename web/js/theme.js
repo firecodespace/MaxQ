@@ -5,65 +5,77 @@
  * here as plain hex and the stylesheet repeats it. tests/web/theme.test.mjs checks the two agree,
  * so a colour changed in one place and not the other fails the suite instead of drifting quietly.
  *
- * Palette: earthy. Warm charcoal and umber surfaces, bone text, ochre as the single primary accent,
- * sage / clay / rust for state. No saturated blues or greens anywhere.
+ * Palette: black, white and blue. Near-black blue-tinted surfaces, near-white text, one blue accent
+ * with a lighter and a deeper shade either side of it. The only colour outside that family is a
+ * single red, kept exclusively for danger -- DUMMY data and hard failures -- because a warning that
+ * shares its colour with the interface is not a warning.
  */
 
 export const C = {
-  bg: "#191511",
-  panel: "#262019",
-  panel2: "#332b22",
-  panel3: "#40362a",
-  line: "#4c4034",
-  line2: "#645443",
-  text: "#f4ecdf",
-  muted: "#b5a28a",
-  faint: "#897a65",
+  // Surfaces, darkest to lightest. Each carries a trace of blue so black reads as depth, not as a
+  // hole in the screen.
+  bg: "#04070e",
+  panel: "#0a0f1a",
+  panel2: "#111926",
+  panel3: "#192337",
+  line: "#1f2c42",
+  line2: "#304563",
 
-  ochre: "#efb455",
-  sage: "#a3bb89",
-  clay: "#d47e46",
-  rust: "#d15c45",
-  sand: "#e3d3b2",
-  slate: "#8fbdce",
+  // Type.
+  text: "#eaf1fb",
+  muted: "#8da3c2",
+  faint: "#5a6e8e",
+
+  // Blues.
+  blue: "#4d9fff",
+  sky: "#7cc6ff",
+  deep: "#2a6fd6",
+  ice: "#b9dcff",
+  steel: "#a3bcd9",
+
+  // The one non-blue, for danger only.
+  danger: "#ff5f6d",
+
+  white: "#ffffff",
 };
 
 /** Semantic aliases. Use these in UI code so a palette change does not need a search for hexes. */
 export const T = {
-  accent: C.ochre,
-  ok: C.sage,
-  warn: C.ochre,
-  bad: C.rust,
+  accent: C.blue,
+  ok: C.sky,
+  warn: C.ice,
+  bad: C.danger,
   grid: C.line,
-  gridFaint: "#2a231c",
+  gridFaint: "#15202f",
   axis: C.faint,
-  plotBg: "#1f1a15",
-  readout: C.sand,
+  plotBg: "#070c15",
+  readout: C.ice,
 };
 
 /** Catalog group colours, shared by the 2D map, the Sky scatter and the 3D view. */
 export const GROUP_COLORS = {
-  stations: C.ochre,
-  "gps-ops": C.sage,
-  geo: C.sand,
-  active: "#9bb2bd",
-  starlink: C.slate,
-  debris: "#b06a56",
+  stations: C.white,
+  "gps-ops": C.sky,
+  geo: C.blue,
+  active: C.steel,
+  starlink: C.deep,
+  debris: "#607796",
 };
 
 /** Per-quantity plot colours, so the panel graphs and the HUD agree. */
 export const SERIES = {
-  alt: C.slate,
-  speed: C.sage,
-  q: C.ochre,
-  mass: C.clay,
-  accel: C.sand,
+  alt: C.blue,
+  speed: C.sky,
+  q: C.white,
+  mass: C.steel,
+  accel: C.ice,
 };
 
-/** Colour for cluster number `rank`. Twenty-odd clusters genuinely need hue variety, so the hue
- * walks the golden angle, but saturation and lightness are held low and warm so the scatter still
- * sits inside the earthy palette instead of turning into a rainbow. */
-export const clusterColor = (rank) => `hsl(${(rank * 137.508) % 360} 40% 60%)`;
+/** Colour for cluster number `rank`. Twenty-odd clusters need to be told apart, so the hue walks the
+ * golden angle, but it is confined to the blue half of the wheel and held at low saturation so the
+ * scatter stays inside the palette instead of turning into a rainbow. */
+export const clusterColor = (rank) =>
+  `hsl(${(192 + ((rank * 137.508) % 56)) | 0} ${48 + ((rank * 17) % 34)}% ${46 + ((rank * 29) % 28)}%)`;
 
 /** "#rrggbb" -> 0xrrggbb, for three.js Color and material constructors. */
 export const hex = (s) => parseInt(String(s).replace("#", ""), 16);

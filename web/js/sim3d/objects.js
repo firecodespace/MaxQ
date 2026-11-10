@@ -98,7 +98,7 @@ export class SatelliteLayer {
     const c = new THREE.Color();
     for (let i = 0; i < n; i++) {
       const g = this.groups[this.groupIdx[i]];
-      c.setHex(hex(GROUP_COLORS[g] || "#b5a28a"));
+      c.setHex(hex(GROUP_COLORS[g] || "#8da3c2"));
       col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
       size[i] = MARKER_PX[g] ?? 2.2;
       alpha[i] = MARKER_ALPHA[g] ?? 0.8;
@@ -126,6 +126,12 @@ export class SatelliteLayer {
     this.points = new THREE.Points(g, this.material);
     this.points.name = "catalog";
     this.points.frustumCulled = false;
+    // The floating origin is carried by this group's transform, not by rewriting every vertex. In
+    // flight mode the origin moves with the vehicle, so the alternative is re-uploading the whole
+    // position buffer sixty times a second for no visual gain.
+    this.root = new THREE.Group();
+    this.root.name = "catalog-root";
+    this.root.add(this.points);
 
     // Absolute ECEF km, kept so picking and "go to object" do not need the floating origin undone.
     this.absolute = new Float64Array(n * 3);
@@ -135,45 +141,42 @@ export class SatelliteLayer {
   /** Feed a worker `positions` reply. lat/lon in degrees, alt in km. */
   setPositions(lat, lon, altKm) {
     const abs = this.absolute;
+    const attr = this.points.geometry.getAttribute("position");
+    const arr = attr.array;
+    const on = this.points.geometry.getAttribute("aOn").array;
     const p = [0, 0, 0];
     for (let i = 0; i < this.n; i++) {
       const la = lat[i];
       if (la !== la) { // NaN: SGP4 could not propagate this element
         abs[i * 3] = NaN;
+        on[i] = 0;
         continue;
       }
       geodeticToEcef(la, lon[i], altKm[i] * 1000, p);
-      abs[i * 3] = p[0] / 1000;
-      abs[i * 3 + 1] = p[1] / 1000;
-      abs[i * 3 + 2] = p[2] / 1000;
+      const x = p[0] / 1000, y = p[1] / 1000, z = p[2] / 1000;
+      abs[i * 3] = x; abs[i * 3 + 1] = y; abs[i * 3 + 2] = z;
+      // Absolute kilometres go straight into the buffer; the group transform supplies the offset.
+      arr[i * 3] = x; arr[i * 3 + 1] = y; arr[i * 3 + 2] = z;
+      if (this._groupsOn && !this._groupsOn.has(this.groups[this.groupIdx[i]])) on[i] = 0;
+      else on[i] = 1;
     }
+    attr.needsUpdate = true;
+    this.points.geometry.getAttribute("aOn").needsUpdate = true;
     this.hasPositions = true;
-    this.refresh();
   }
 
-  /** Rewrite the render positions relative to the floating origin. */
+  /** Move the whole layer to the current floating origin. One matrix, not 6,819 vertices. */
   refresh(originKm) {
     const ox = originKm ? originKm.x : 0;
     const oy = originKm ? originKm.y : 0;
     const oz = originKm ? originKm.z : 0;
     this._origin = { x: ox, y: oy, z: oz };
-    const attr = this.points.geometry.getAttribute("position");
-    const arr = attr.array;
-    const abs = this.absolute;
-    const on = this.points.geometry.getAttribute("aOn").array;
-    for (let i = 0; i < this.n; i++) {
-      const x = abs[i * 3];
-      if (x !== x) { on[i] = 0; continue; }
-      arr[i * 3] = x - ox;
-      arr[i * 3 + 1] = abs[i * 3 + 1] - oy;
-      arr[i * 3 + 2] = abs[i * 3 + 2] - oz;
-    }
-    attr.needsUpdate = true;
-    this.points.geometry.getAttribute("aOn").needsUpdate = true;
+    this.root.position.set(-ox, -oy, -oz);
   }
 
   /** Show or hide whole groups. `onSet` is a Set of group names. */
   setGroups(onSet) {
+    this._groupsOn = onSet;
     const on = this.points.geometry.getAttribute("aOn");
     const arr = on.array;
     const abs = this.absolute;
@@ -199,7 +202,7 @@ export class SatelliteLayer {
    */
   pick(ndcX, ndcY, camera, viewportPx, onSet, tolPx = 14) {
     if (!this.hasPositions) return -1;
-    const v = new THREE.Vector3();
+    const v = this._pickV || (this._pickV = new THREE.Vector3());
     const o = this._origin || { x: 0, y: 0, z: 0 };
     const tolX = (tolPx * 2) / viewportPx.w;
     const tolY = (tolPx * 2) / viewportPx.h;
@@ -235,7 +238,7 @@ export class SatelliteLayer {
  * drawn ellipse: it shows the real precession and the real eccentricity.
  */
 export class OrbitTrail {
-  constructor(color = "#efb455", maxPoints = 1024) {
+  constructor(color = "#4d9fff", maxPoints = 1024) {
     this.max = maxPoints;
     this.absolute = new Float64Array(maxPoints * 3);
     this.count = 0;
@@ -249,21 +252,29 @@ export class OrbitTrail {
     this.line.name = "orbit-trail";
     this.line.frustumCulled = false;
     this.line.visible = false;
+    // Same reasoning as the catalog layer: the floating origin rides on a transform rather than on
+    // a thousand vertices rewritten every frame.
+    this.root = new THREE.Group();
+    this.root.name = "orbit-trail-root";
+    this.root.add(this.line);
   }
 
   /** `pts` is a flat Float32Array of (lat, lon, altKm) triples. */
   set(pts) {
     const n = Math.min(this.max, Math.floor(pts.length / 3));
+    const attr = this.line.geometry.getAttribute("position");
+    const arr = attr.array;
     const p = [0, 0, 0];
     for (let i = 0; i < n; i++) {
       geodeticToEcef(pts[i * 3], pts[i * 3 + 1], pts[i * 3 + 2] * 1000, p);
-      this.absolute[i * 3] = p[0] / 1000;
-      this.absolute[i * 3 + 1] = p[1] / 1000;
-      this.absolute[i * 3 + 2] = p[2] / 1000;
+      const x = p[0] / 1000, y = p[1] / 1000, z = p[2] / 1000;
+      this.absolute[i * 3] = x; this.absolute[i * 3 + 1] = y; this.absolute[i * 3 + 2] = z;
+      arr[i * 3] = x; arr[i * 3 + 1] = y; arr[i * 3 + 2] = z;
     }
+    attr.needsUpdate = true;
     this.count = n;
     this.line.visible = n > 1;
-    this.refresh();
+    this.line.geometry.setDrawRange(0, n);
   }
 
   clear() {
@@ -272,19 +283,13 @@ export class OrbitTrail {
     this.line.geometry.setDrawRange(0, 0);
   }
 
+  /** Move the trail to the current floating origin: one transform, no vertex work. */
   refresh(originKm) {
-    const ox = originKm ? originKm.x : 0;
-    const oy = originKm ? originKm.y : 0;
-    const oz = originKm ? originKm.z : 0;
-    const attr = this.line.geometry.getAttribute("position");
-    const arr = attr.array;
-    for (let i = 0; i < this.count; i++) {
-      arr[i * 3] = this.absolute[i * 3] - ox;
-      arr[i * 3 + 1] = this.absolute[i * 3 + 1] - oy;
-      arr[i * 3 + 2] = this.absolute[i * 3 + 2] - oz;
-    }
-    attr.needsUpdate = true;
-    this.line.geometry.setDrawRange(0, this.count);
+    this.root.position.set(
+      originKm ? -originKm.x : 0,
+      originKm ? -originKm.y : 0,
+      originKm ? -originKm.z : 0,
+    );
   }
 
   dispose() {

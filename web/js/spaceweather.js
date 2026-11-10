@@ -34,10 +34,10 @@ export function gScale(kp) {
 
 /** Plain-language activity class used for colours. */
 export function kpClass(kp) {
-  if (kp >= 7) return { id: "severe", label: "severe storm", color: "#d15c45" };
-  if (kp >= 5) return { id: "storm", label: "storm", color: "#d47e46" };
-  if (kp >= 4) return { id: "active", label: "active", color: "#efb455" };
-  return { id: "quiet", label: "quiet", color: "#a3bb89" };
+  if (kp >= 7) return { id: "severe", label: "severe storm", color: "#ff5f6d" };
+  if (kp >= 5) return { id: "storm", label: "storm", color: "#2a6fd6" };
+  if (kp >= 4) return { id: "active", label: "active", color: "#4d9fff" };
+  return { id: "quiet", label: "quiet", color: "#7cc6ff" };
 }
 
 /** Latest non-predicted value at or before `nowMs`; falls back to the latest observed value. */
@@ -119,11 +119,11 @@ export function drawKpChart(canvas, points, nowMs = Date.now()) {
   canvas.height = Math.round(h * dpr);
   const ctx = canvas.getContext("2d");
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.fillStyle = "#1f1a15";
+  ctx.fillStyle = "#070c15";
   ctx.fillRect(0, 0, w, h);
   ctx.font = "11px system-ui, sans-serif";
   if (!points) {
-    ctx.fillStyle = "#b5a28a";
+    ctx.fillStyle = "#8da3c2";
     ctx.textAlign = "center";
     ctx.fillText("space weather unavailable", w / 2, h / 2);
     return;
@@ -133,14 +133,14 @@ export function drawKpChart(canvas, points, nowMs = Date.now()) {
   const t0 = pts[0].t, t1 = pts[pts.length - 1].t + 3 * 3600e3;
   const X = (t) => m.l + ((t - t0) / (t1 - t0)) * (w - m.l - m.r);
   const Y = (k) => m.t + (1 - k / 9) * (h - m.t - m.b);
-  ctx.strokeStyle = "rgba(181,162,138,.2)";
-  ctx.fillStyle = "#b5a28a";
+  ctx.strokeStyle = "rgba(141,163,194,.2)";
+  ctx.fillStyle = "#8da3c2";
   ctx.textAlign = "right";
   for (const k of [0, 3, 5, 7, 9]) {
     ctx.beginPath(); ctx.moveTo(m.l, Y(k)); ctx.lineTo(w - m.r, Y(k)); ctx.stroke();
     ctx.fillText(String(k), m.l - 4, Y(k) + 4);
   }
-  ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(198,112,60,.6)";
+  ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(42,111,214,.6)";
   ctx.beginPath(); ctx.moveTo(m.l, Y(5)); ctx.lineTo(w - m.r, Y(5)); ctx.stroke(); ctx.setLineDash([]);
   const bw = Math.max(2, ((w - m.l - m.r) * 3 * 3600e3) / (t1 - t0) - 1);
   for (const p of pts) {
@@ -154,10 +154,10 @@ export function drawKpChart(canvas, points, nowMs = Date.now()) {
     }
   }
   const nx = X(nowMs);
-  ctx.strokeStyle = "#f4ecdf"; ctx.beginPath(); ctx.moveTo(nx, m.t); ctx.lineTo(nx, h - m.b); ctx.stroke();
-  ctx.fillStyle = "#f4ecdf"; ctx.textAlign = "center";
+  ctx.strokeStyle = "#eaf1fb"; ctx.beginPath(); ctx.moveTo(nx, m.t); ctx.lineTo(nx, h - m.b); ctx.stroke();
+  ctx.fillStyle = "#eaf1fb"; ctx.textAlign = "center";
   ctx.fillText("now", nx, h - m.b + 12);
-  ctx.fillStyle = "#b5a28a";
+  ctx.fillStyle = "#8da3c2";
   ctx.textAlign = "left"; ctx.fillText("observed (filled)", m.l + 4, h - 6);
   ctx.textAlign = "right"; ctx.fillText("forecast (outline)", w - m.r, h - 6);
 }

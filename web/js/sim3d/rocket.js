@@ -371,7 +371,7 @@ class Plume {
 const bodyMat = () => new THREE.MeshStandardMaterial({ color: 0xd9d2c6, metalness: 0.45, roughness: 0.44 });
 const darkMat = () => new THREE.MeshStandardMaterial({ color: 0x2a241d, metalness: 0.5, roughness: 0.6 });
 const bellMat = () => new THREE.MeshStandardMaterial({ color: 0x8c7f70, metalness: 0.82, roughness: 0.32, side: THREE.DoubleSide });
-const bandMat = () => new THREE.MeshStandardMaterial({ color: hex("#c6703c"), metalness: 0.3, roughness: 0.55 });
+const bandMat = () => new THREE.MeshStandardMaterial({ color: hex("#2a6fd6"), metalness: 0.3, roughness: 0.55 });
 
 /**
  * Build a vehicle from a contract rocket object.

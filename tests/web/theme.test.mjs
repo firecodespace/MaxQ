@@ -35,12 +35,13 @@ test("every palette token in theme.js matches the stylesheet", () => {
     ["text", C.text],
     ["muted", C.muted],
     ["faint", C.faint],
-    ["ochre", C.ochre],
-    ["sage", C.sage],
-    ["clay", C.clay],
-    ["rust", C.rust],
-    ["sand", C.sand],
-    ["slate", C.slate],
+    ["blue", C.blue],
+    ["sky", C.sky],
+    ["deep", C.deep],
+    ["ice", C.ice],
+    ["steel", C.steel],
+    ["white", C.white],
+    ["danger", C.danger],
   ];
   for (const [name, value] of pairs) {
     const css = cssVar(name);
@@ -80,17 +81,41 @@ test("series colours exist for every plotted quantity", () => {
 });
 
 test("hex and rgba convert the way the shaders and canvases expect", () => {
-  assert.equal(hex("#efb455"), 0xefb455);
-  assert.equal(hex("efb455"), 0xefb455);
-  assert.equal(rgba("#efb455", 0.5), "rgba(239,180,85,0.5)");
+  assert.equal(hex("#4d9fff"), 0x4d9fff);
+  assert.equal(hex("4d9fff"), 0x4d9fff);
+  assert.equal(rgba("#4d9fff", 0.5), "rgba(77,159,255,0.5)");
 });
 
-test("cluster colours stay inside the earthy range and repeat for the same rank", () => {
+test("cluster colours stay inside the blue half of the wheel and repeat for the same rank", () => {
+  // Two dozen clusters have to be told apart, so the hue moves; it must not wander out of the
+  // palette while doing it, or the one scatter on the site becomes a rainbow among blue panels.
   assert.equal(clusterColor(7), clusterColor(7));
+  const seen = new Set();
   for (let i = 0; i < 30; i++) {
-    const m = clusterColor(i).match(/hsl\(([\d.]+) (\d+)% (\d+)%\)/);
+    const m = clusterColor(i).match(/hsl\((\d+) (\d+)% (\d+)%\)/);
     assert.ok(m, `cluster colour ${i} is not an hsl() triple`);
-    const sat = Number(m[2]);
-    assert.ok(sat <= 55, `cluster ${i} is too saturated for the palette (${sat}%)`);
+    const [hue, sat, light] = [Number(m[1]), Number(m[2]), Number(m[3])];
+    assert.ok(hue >= 185 && hue <= 255, `cluster ${i} hue ${hue} is outside the blue range`);
+    assert.ok(sat >= 40 && sat <= 85, `cluster ${i} saturation ${sat}`);
+    assert.ok(light >= 40 && light <= 80, `cluster ${i} lightness ${light}`);
+    seen.add(clusterColor(i));
   }
+  assert.ok(seen.size >= 24, `only ${seen.size} distinguishable cluster colours in 30`);
+});
+
+
+test("the stylesheet holds no colour from outside the black / white / blue palette", () => {
+  // One red is allowed, for danger. Everything else must be a near-neutral or a blue, which means
+  // its blue channel is at least as strong as its red. This is what stops a stray warm accent from
+  // creeping back in one rule at a time.
+  const allowedRed = new Set(["#ff5f6d"]);
+  const offenders = [];
+  for (const m of CSS.matchAll(/#([0-9a-f]{6})\b/gi)) {
+    const v = m[0].toLowerCase();
+    if (allowedRed.has(v)) continue;
+    const r = parseInt(v.slice(1, 3), 16);
+    const b = parseInt(v.slice(5, 7), 16);
+    if (r > b + 6) offenders.push(v);
+  }
+  assert.deepEqual(offenders, [], `warm colours in style.css: ${offenders.join(", ")}`);
 });

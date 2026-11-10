@@ -238,12 +238,28 @@ export class MissionPanel {
 
   /* ---------------------------------------------------------------- per-frame */
 
-  /** Update the live readouts. `tel` is what Sim3D.frame() returned. */
-  tick(tel, replayT) {
+  /**
+   * Update the live readouts. `tel` is what Sim3D.frame() returned.
+   *
+   * Throttled to about 15 Hz and diffed before writing. This used to run every frame: nine tiles
+   * rebuilt with replaceChildren, a HUD rebuilt, three canvases redrawn and a scale bar restyled,
+   * sixty times a second. That is a full style and layout pass per frame for numbers a person
+   * cannot read that fast, and it was costing more than the 3D scene it sat beside. Numbers still
+   * change smoothly enough to read as live; the renderer keeps the whole frame budget.
+   */
+  tick(tel, replayT, force) {
+    const now = performance.now();
+    if (!force && this._lastTick && now - this._lastTick < 66) return;
+    this._lastTick = now;
+
     const st = tel && tel.vehicle;
+    const cache = this._vals || (this._vals = {});
     const set = (id, value, unit) => {
       const t = this.tiles[id];
       if (!t) return;
+      const key = value + "\u0000" + (unit || "");
+      if (cache[id] === key) return; // nothing changed: do not touch the DOM
+      cache[id] = key;
       t.value.replaceChildren(document.createTextNode(value));
       if (unit) t.value.append(el("small", { text: unit }));
     };
@@ -294,7 +310,8 @@ export class MissionPanel {
         this.tlDone.style.width = `${(T / this.tlMax) * 100}%`;
         for (const e of this.tlEvents) e.node.classList.toggle("past", T >= e.t);
       }
-      $("sim-scrub").value = String(Math.round(T));
+      const scrub = $("sim-scrub");
+      if (document.activeElement !== scrub) scrub.value = String(Math.round(T));
       Object.values(this.plots).forEach((p) => p.setCursor(T));
     }
 
@@ -320,20 +337,31 @@ export class MissionPanel {
         }
       }
     }
-    hud.replaceChildren();
-    for (const [k, v] of rows) hud.append(el("b", { text: k }), el("span", { text: v }));
     const ev = this._currentEvent(replayT);
-    if (ev) hud.append(el("div", { class: "ev", text: ev.toUpperCase().replace("_", " ") }));
+    const perf = tel && tel.fps
+      ? `${tel.fps.toFixed(0)} fps · ${tel.drawCalls} draws · ${tel.pixelRatio.toFixed(2)}x`
+      : "";
+    const key = rows.map((r) => r.join("=")).join("|") + "|" + (ev || "") + "|" + perf;
+    if (key !== this._hudKey) {
+      this._hudKey = key;
+      hud.replaceChildren();
+      for (const [k, v] of rows) hud.append(el("b", { text: k }), el("span", { text: v }));
+      if (ev) hud.append(el("div", { class: "ev", text: ev.toUpperCase().replace("_", " ") }));
+      if (perf) hud.append(el("div", { class: "perf", text: perf }));
+    }
 
     // Scale bar.
-    if (tel && tel.scaleBar) {
+    if (tel && tel.scaleBar && tel.scaleBar.label !== this._scaleKey) {
+      this._scaleKey = tel.scaleBar.label;
       const bar = $("sim-scale");
       bar.firstElementChild.style.width = `${Math.max(14, Math.min(190, tel.scaleBar.px))}px`;
       bar.lastElementChild.textContent = tel.scaleBar.label;
     }
 
     // Camera buttons that belong to this mode.
-    if (tel) {
+    const modeKey = tel ? `${tel.mode}/${tel.cameraMode}` : "";
+    if (tel && modeKey !== this._modeKey) {
+      this._modeKey = modeKey;
       for (const [id, b] of Object.entries(this.camButtons)) {
         const shown = b.dataset.modes.split(",").includes(tel.mode);
         b.hidden = !shown;

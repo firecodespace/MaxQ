@@ -96,7 +96,7 @@ export class MapView {
   draw(s) {
     const { ctx, dpr, w, h } = this;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#0d0a07";
+    ctx.fillStyle = "#02040a";
     ctx.fillRect(0, 0, w, h);
     this._graticule();
     this._land();
@@ -105,13 +105,13 @@ export class MapView {
     if (s.issTrack) this._track(s.issTrack);
     if (s.traj) this._trajectory(s.traj, s.replayT, s.eventsOn);
     if (s.pos) this._points(s);
-    if (s.pos && s.highlight != null) this._highlight(s.pos, s.highlight, s.highlightLabel, "#efb455");
-    if (s.pos && s.selected != null) this._highlight(s.pos, s.selected, s.selectedLabel, "#f4ecdf");
+    if (s.pos && s.highlight != null) this._highlight(s.pos, s.highlight, s.highlightLabel, "#4d9fff");
+    if (s.pos && s.selected != null) this._highlight(s.pos, s.selected, s.selectedLabel, "#eaf1fb");
   }
 
   _graticule() {
     const { ctx } = this;
-    ctx.strokeStyle = "rgba(181,162,138,.14)";
+    ctx.strokeStyle = "rgba(141,163,194,.14)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     const step = this.view.zoom > 6 ? 5 : this.view.zoom > 2.5 ? 15 : 30;
@@ -130,8 +130,8 @@ export class MapView {
     if (!this.land) return;
     const { ctx } = this;
     const s = this.scale;
-    ctx.fillStyle = "#2b231a";
-    ctx.strokeStyle = "#645443";
+    ctx.fillStyle = "#111926";
+    ctx.strokeStyle = "#304563";
     ctx.lineWidth = 1;
     const offsets = this.view.zoom > 1 ? [-360, 0, 360] : [0];
     for (const off of offsets) {
@@ -165,7 +165,7 @@ export class MapView {
     }
     const pole = decl > 0 ? -90 : 90;
     const s = this.scale;
-    ctx.fillStyle = "rgba(10,8,5,.42)";
+    ctx.fillStyle = "rgba(2,4,10,.5)";
     for (const off of this.view.zoom > 1 ? [-360, 0, 360] : [0]) {
       ctx.beginPath();
       pts.forEach(([lon, lat], i) => {
@@ -183,8 +183,8 @@ export class MapView {
   _site(site) {
     const { ctx } = this;
     const [x, y] = this.project(site.lon_deg, site.lat_deg);
-    ctx.strokeStyle = "#a3bb89";
-    ctx.fillStyle = "#a3bb89";
+    ctx.strokeStyle = "#7cc6ff";
+    ctx.fillStyle = "#7cc6ff";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, y - 8); ctx.lineTo(x + 6, y + 5); ctx.lineTo(x - 6, y + 5); ctx.closePath();
@@ -210,26 +210,26 @@ export class MapView {
   }
 
   _track(track) {
-    this._polyline(track, "rgba(239,180,85,.65)", [4, 4]);
+    this._polyline(track, "rgba(77,159,255,.65)", [4, 4]);
   }
 
   _trajectory(traj, replayT, eventsOn) {
     const { ctx } = this;
     const flat = new Float32Array(traj.t_s.length * 2);
     for (let i = 0; i < traj.t_s.length; i++) { flat[2 * i] = traj.lon_deg[i]; flat[2 * i + 1] = traj.lat_deg[i]; }
-    this._polyline(flat, "#d15c45");
+    this._polyline(flat, "#ff5f6d");
     if (eventsOn) {
       ctx.font = "10px system-ui, sans-serif";
       for (const ev of traj.events || []) {
         const [x, y] = this.project(interpLon(traj.t_s, traj.lon_deg, ev.t_s), interp(traj.t_s, traj.lat_deg, ev.t_s));
-        ctx.fillStyle = "#efb455";
+        ctx.fillStyle = "#4d9fff";
         ctx.fillRect(x - 3, y - 3, 6, 6);
         if (this.view.zoom > 1.5) ctx.fillText(ev.name, x + 6, y - 4);
       }
     }
     const [x, y] = this.project(interpLon(traj.t_s, traj.lon_deg, replayT), interp(traj.t_s, traj.lat_deg, replayT));
-    ctx.fillStyle = "#f4ecdf";
-    ctx.strokeStyle = "#d15c45";
+    ctx.fillStyle = "#eaf1fb";
+    ctx.strokeStyle = "#ff5f6d";
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
   }
@@ -241,7 +241,7 @@ export class MapView {
     const size = this.view.zoom > 4 ? 3 : this.w < 500 ? 1.3 : 2;
     for (let g = 0; g < groups.length; g++) {
       if (!groupsOn.has(groups[g])) continue;
-      ctx.fillStyle = GROUP_COLORS[groups[g]] || "#b5a28a";
+      ctx.fillStyle = GROUP_COLORS[groups[g]] || "#8da3c2";
       ctx.globalAlpha = groups[g] === "debris" ? 0.6 : 0.9;
       for (let i = 0; i < n; i++) {
         if (groupIdx[i] !== g) continue;
