@@ -150,4 +150,19 @@ I did not edit `manifest/` or `ascent/`. If you prefer, tell Yash and I can make
     - 3D Position Error: RMS reduced from **103.81 km** to **13.56 km** (**86.9% error reduction**); peak error reduced from **193.44 km** to **31.80 km**.
     - In-Track Drag Error: along-track RMS error reduced from **102.83 km** to **3.90 km** (**96.2% error reduction**).
     - Saved benchmark plot to `data/results/sgp4_residuals_benchmark.png` and summary to `data/results/residuals/sgp4_residuals.json`.
-  - Added unit test suite `tests/catalog/test_residuals.py` (6/6 tests green); full repository fast test suite passes (298 passed, 0 failed); `contracts.validate` 44/44 valid; `ruff check .` passes with 0 errors.
+  - Added unit test suite `tests/catalog/test_residuals.py` (6/6 tests green); full repository fast test suite passes (299 passed, 0 failed); `contracts.validate` 44/44 valid; `ruff check .` passes with 0 errors.
+
+## Handoff — Shiva / antigravity — 06:20 IST
+- WP: WP-10, WP-11, WP-14, WP-15 — state: done
+- Done:
+  - WP-10/11/14: regenerated all manifest instances, benchmark solver results, and plots with the random control baseline. Exact match verified with `build_instance(n, seed=42)`. All claims verified with `python scripts/review_manifest_claims.py`.
+  - WP-15: SGP4 residual correction model delivered in `catalog/residuals.py`, 6/6 tests passing in `tests/catalog/test_residuals.py`, benchmark artifacts saved, merged to `main`, pushed to `origin/main`.
+- Half-done: None (all assigned packages complete).
+- Next steps:
+  - Await Yash's instruction for the 06:30 freeze and WP-12 (README/demo/tabs integration).
+- Traps found:
+  - Top-level JSON files in `data/results/` must strictly match registered contracts in `contracts/validate.py`; auxiliary benchmarks must be placed in subdirectories (e.g. `data/results/residuals/`).
+- Resume with:
+  - `pytest -m "not slow"`
+  - `python -m contracts.validate`
+- Contract changes: none
