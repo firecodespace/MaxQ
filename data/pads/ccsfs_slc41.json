@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "ccsfs_slc41",
+  "name": "Cape Canaveral SLC-41",
+  "site": "Cape Canaveral Space Force Station",
+  "lat_deg": 28.58333,
+  "lon_deg": -80.58306,
+  "supported_rocket_ids": [
+    "atlas_v_401"
+  ],
+  "azimuth_range_deg": null,
+  "sources": [
+    {
+      "title": "Wikipedia: Cape Canaveral Space Launch Complex 41",
+      "url": "https://en.wikipedia.org/wiki/Cape_Canaveral_Space_Launch_Complex_41",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "coordinates 28.58333 N, 80.58306 W; current rockets Vulcan, Atlas V; orbital inclination range 28-57 deg"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "Inclination range given (28-57 deg), not azimuth: azimuth_range_deg is null."
+}

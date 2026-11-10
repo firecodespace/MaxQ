@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "id": "falcon9_block5",
+  "name": "Falcon 9 Block 5 (expendable)",
+  "kind": "real",
+  "crew_rated": true,
+  "profile": "crew_iss",
+  "max_q_limit_kpa": null,
+  "stages": [
+    {
+      "name": "First stage, 9 x Merlin 1D",
+      "engines": 9,
+      "dry_kg": 25600.0,
+      "prop_kg": 395700.0,
+      "thrust_n": 7917000,
+      "isp_s": 297.5,
+      "cd": 0.3,
+      "area_m2": 10.752
+    },
+    {
+      "name": "Second stage, 1 x Merlin 1D Vacuum",
+      "engines": 1,
+      "dry_kg": 3900.0,
+      "prop_kg": 92670.0,
+      "thrust_n": 981000.0,
+      "isp_s": 348.0,
+      "cd": 0.3,
+      "area_m2": 10.752
+    }
+  ],
+  "payload_to_leo_kg_published": 22800.0,
+  "sources": [
+    {
+      "title": "SpaceX: Falcon 9 vehicle page",
+      "url": "https://www.spacex.com/vehicles/falcon-9/",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "mass 549,054 kg, payload to LEO 22,800 kg, second-stage thrust 981 kN, burn 397 s, diameter 3.7 m"
+    },
+    {
+      "title": "Wikipedia: Falcon 9 (stage specification tables)",
+      "url": "https://en.wikipedia.org/wiki/Falcon_9",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "stage empty and propellant masses, sea-level/vacuum thrust and Isp, burn times"
+    },
+    {
+      "title": "Wevolver: Falcon 9 v1.2 / Block 5 specs",
+      "url": "https://www.wevolver.com/specs/falcon-9-v12-or-full-thrust-block-5",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "same stage table; independent copy used as a cross-check"
+    },
+    {
+      "title": "Wikipedia: Falcon 9 Block 5",
+      "url": "https://en.wikipedia.org/wiki/Falcon_9_Block_5",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "payload to LEO at 28.5 deg: 22,800 kg expended, 18,500 kg reusable"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "Crew-capable class: SpaceX describes Falcon 9 as transporting people, and it launches Crew Dragon. Conflicts between sources: second-stage thrust is 981 kN on spacex.com and in the stage table but 934 kN inthe Wikipedia infobox (981 kN used, manufacturer value). The stage masses sum to 517,870 kg against a published lift-off mass of 549,054 kg; the difference (about 31 t) is consistent with payload plus fairingbut is not itemised by any source. The published 22,800 kg is the expendable figure to a 28.5 deg orbit; no altitude is stated. No source publishes a max-q limit. Modelling conventions (assumptions, not data): first-stage thrust and Isp are the mean of the published sea-level and vacuum values because the simulator has one of each per stage; cd = 0.3 is assumed; area is the circle of the published core diameter; fairing mass and jettison are not modelled.",
+  "sim_validation": {
+    "payload_to_leo_kg_sim": 26790.0,
+    "error_pct": 17.5,
+    "tolerance_pct": 35.0,
+    "pass": true,
+    "sim_version": "ascent-48604317e4d6",
+    "note": "Heaviest payload reaching perigee >= 160 km, due east from ccsfs_slc40 (resolved to +/- 712 kg; pitch program [6.683, 15.138, 7.468, 0.99, 0.604] found by CMA-ES seed 7). Orbit reached: 166 x 196 km, max q 37.0 kPa. Published figure: 22800 kg."
+  }
+}

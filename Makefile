@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export contracts env bench agent server
+.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export contracts env bench agent server rockets
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -58,6 +58,10 @@ web: web-export  ## WP-03: export data, then serve web/ at http://localhost:8765
 # ---------------------------------------------------------------- Phase 2 (HANDOFF_PHASE2.md)
 contracts:  ## validate every contract file (dummy, results, rockets, pads, attempts, sessions)
 	$(PY) -m contracts.validate
+
+rockets:  ## WP2-01: rebuild the cited vehicle/pad library, then measure payload-to-LEO vs published
+	$(PY) scripts/build_rocket_library.py
+	$(PY) scripts/validate_rocket_library.py
 
 env:  ## WP2-02: run one mission through MissionEnv (Shiva)
 	@echo "not implemented yet (WP2-02, Shiva): env/ MissionEnv" && exit 1

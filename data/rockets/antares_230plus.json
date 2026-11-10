@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "id": "antares_230plus",
+  "name": "Antares 230+ (retired 2023)",
+  "kind": "real",
+  "crew_rated": false,
+  "profile": "cargo_iss",
+  "max_q_limit_kpa": null,
+  "stages": [
+    {
+      "name": "First stage, 2 x RD-181",
+      "engines": 2,
+      "dry_kg": 20600.0,
+      "prop_kg": 242000.0,
+      "thrust_n": 3844000.0,
+      "isp_s": 325.55,
+      "cd": 0.3,
+      "area_m2": 11.946
+    },
+    {
+      "name": "Castor 30XL (solid)",
+      "engines": 1,
+      "dry_kg": 2100.0,
+      "prop_kg": 24200.0,
+      "thrust_n": 474000.0,
+      "isp_s": 311.6,
+      "cd": 0.3,
+      "area_m2": 11.946
+    }
+  ],
+  "payload_to_leo_kg_published": 8000.0,
+  "sources": [
+    {
+      "title": "Wikipedia: Antares (rocket)",
+      "url": "https://en.wikipedia.org/wiki/Antares_(rocket)",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "200-series first stage empty 20,600 kg, gross 262,600 kg, thrust 3,844 kN, Isp 311.9 / 339.2 s, burn 215 s; Castor 30XL gross 26,300 kg, propellant 24,200 kg, thrust 474 kN, burn 156 s; payload to LEO 8,000 kg; diameter 3.9 m; launch site MARS LP-0A; 230+ last flew 2 August 2023"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "Single source, so nothing here is cross-checked. Derived, not published: first-stage propellant = gross - empty (242,000 kg); second-stage dry = gross - propellant (2,100 kg); second-stage Isp = thrust x burn time/ (propellant x g0) = 311.6 s, which treats the quoted MAXIMUM thrust as constant and is therefore an upperestimate for a solid motor. The source gives one first-stage thrust figure (3,844 kN) without saying sea-level or vacuum, so it is used as is rather than averaged. The 8,000 kg figure has no stated orbit. The vehicle is retired; it is in the library as a real cargo-to-ISS launcher with a different pad and latitude from the other two. Modelling conventions (assumptions, not data): first-stage thrust and Isp are the mean of the published sea-level and vacuum values because the simulator has one of each per stage; cd = 0.3 is assumed; area is the circle of the published core diameter; fairing mass and jettison are not modelled.",
+  "sim_validation": {
+    "payload_to_leo_kg_sim": 10600.0,
+    "error_pct": 32.5,
+    "tolerance_pct": 35.0,
+    "pass": true,
+    "sim_version": "ascent-48604317e4d6",
+    "note": "Heaviest payload reaching perigee >= 160 km, due east from mars_lp0a (resolved to +/- 250 kg; pitch program [4.263, 9.523, -7.63, 0.78, 0.549] found by CMA-ES seed 7). Orbit reached: 162 x 187 km, max q 41.7 kPa. Published figure: 8000 kg."
+  }
+}

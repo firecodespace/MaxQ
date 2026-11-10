@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "ksc_lc39a",
+  "name": "Kennedy Space Center LC-39A",
+  "site": "Kennedy Space Center",
+  "lat_deg": 28.60833,
+  "lon_deg": -80.60444,
+  "supported_rocket_ids": [
+    "falcon9_block5"
+  ],
+  "azimuth_range_deg": null,
+  "sources": [
+    {
+      "title": "Wikipedia: Kennedy Space Center Launch Complex 39A",
+      "url": "https://en.wikipedia.org/wiki/Kennedy_Space_Center_Launch_Complex_39A",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "coordinates 28.60833 N, 80.60444 W; current rockets Falcon 9, Falcon Heavy; orbital inclination range 28.5-55 and 66-145 deg"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "The source gives an orbital INCLINATION range (28.5-55, 66-145 deg), not a launch azimuth range, so azimuth_range_deg is null rather than converted."
+}

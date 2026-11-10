@@ -30,7 +30,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | WP | Title | Owner | Agent/tool | Tier | State | Blocker |
 |----|-------|-------|------------|------|-------|---------|
 | WP2-00 | Scaffold, contracts, dummy data | shared | claude-code (Yash) | A | done: 8 schemas, dummies, validator, tests | - |
-| WP2-01 | Real rocket and pad library (cited) | Yash | - | A | not started | - |
+| WP2-01 | Real rocket and pad library (cited) | Yash | claude-code | A | done: 3 real vehicles + 4 pads, cited; payload-to-LEO measured and recorded per vehicle | - |
 | WP2-02 | MissionEnv core (plan + step mode) | Shiva | - | A | not started | - |
 | WP2-03 | Phasing and rendezvous physics (HCW) | Shiva | - | A/B | not started | WP2-02 |
 | WP2-04 | Verifier and cost (gated) | Shiva | - | A | not started | - |

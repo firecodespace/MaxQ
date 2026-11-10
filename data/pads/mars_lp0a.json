@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "mars_lp0a",
+  "name": "Mid-Atlantic Regional Spaceport LP-0A",
+  "site": "Wallops Island, Virginia",
+  "lat_deg": 37.84333,
+  "lon_deg": -75.47806,
+  "supported_rocket_ids": [
+    "antares_230plus"
+  ],
+  "azimuth_range_deg": null,
+  "sources": [
+    {
+      "title": "Wikipedia: Mid-Atlantic Regional Spaceport",
+      "url": "https://en.wikipedia.org/wiki/Mid-Atlantic_Regional_Spaceport",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "spaceport coordinates 37.84333 N, 75.47806 W; LP-0A associated rockets: Antares 100- and 200-series (retired); status 'undergoing renovation'"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "Coordinates are the SPACEPORT's, not the pad's own: the page lists several pad coordinates without labelling which is LP-0A (they differ by about 1 km). No azimuth or inclination range is given. There are no v1 launch windows for this site yet."
+}

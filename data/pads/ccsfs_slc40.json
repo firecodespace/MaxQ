@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "id": "ccsfs_slc40",
+  "name": "Cape Canaveral SLC-40",
+  "site": "Cape Canaveral Space Force Station",
+  "lat_deg": 28.5619,
+  "lon_deg": -80.5772,
+  "supported_rocket_ids": [
+    "falcon9_block5"
+  ],
+  "azimuth_range_deg": null,
+  "sources": [
+    {
+      "title": "Wikipedia: Cape Canaveral Space Launch Complex 40",
+      "url": "https://en.wikipedia.org/wiki/Cape_Canaveral_Space_Launch_Complex_40",
+      "retrieved_utc": "2026-11-11T00:00:00Z",
+      "note": "coordinates 28.5619 N, 80.5772 W; current rocket Falcon 9; orbital inclination range 28.5-55 and 66-145 deg"
+    }
+  ],
+  "confidence": "approximate",
+  "notes": "Same coordinates as the v1 'Cape Canaveral' site in mission/sites.py, so the existing ISS windows apply.Inclination range given, not azimuth: azimuth_range_deg is null."
+}
