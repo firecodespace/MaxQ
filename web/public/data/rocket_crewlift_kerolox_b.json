@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "crewlift_kerolox_b",
+  "name": "CrewLift-B (fictional archetype)",
+  "profile": "crew_iss",
+  "payload_kg": 9500.0,
+  "stages": [
+    {
+      "dry_kg": 25000.0,
+      "prop_kg": 410000.0,
+      "thrust_n": 7600000.0,
+      "isp_s": 292.0,
+      "cd": 0.32,
+      "area_m2": 11.5
+    },
+    {
+      "dry_kg": 4500.0,
+      "prop_kg": 102000.0,
+      "thrust_n": 980000.0,
+      "isp_s": 348.0,
+      "cd": 0.32,
+      "area_m2": 11.5
+    }
+  ]
+}

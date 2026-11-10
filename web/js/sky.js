@@ -1,14 +1,14 @@
 // Sky view (WP-09): orbit map coloured by cluster + congestion by altitude. Data: clusters.json (contract).
 import { badge, el } from "./util.js";
 import { getJSON } from "./data.js";
+import { clusterColor as rankColor } from "./theme.js";
 
-const NOISE_COLOR = "#6b7280";
+const NOISE_COLOR = "#897a65";
 const M = { l: 46, r: 12, t: 12, b: 34 };
 const X_MIN = Math.log10(130);
 const X_MAX = Math.log10(100000);
 const X_TICKS = [200, 500, 1000, 2000, 5000, 10000, 20000, 50000];
 const fmtKm = (v) => (v >= 1000 ? `${v / 1000}k` : String(v));
-const rankColor = (rank) => `hsl(${(rank * 137.508) % 360} 70% 62%)`;
 const num = (v, d = 0) => Number(v).toLocaleString(undefined, { maximumFractionDigits: d });
 
 export function pickClustersFile(manifest) {
@@ -220,11 +220,11 @@ export class SkyView {
     const { w, h, dpr } = sizeCanvas(c);
     const ctx = c.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#070b18";
+    ctx.fillStyle = "#0d0a07";
     ctx.fillRect(0, 0, w, h);
     ctx.font = "11px system-ui, sans-serif";
-    ctx.strokeStyle = "rgba(141,155,199,.18)";
-    ctx.fillStyle = "#8d9bc7";
+    ctx.strokeStyle = "rgba(181,162,138,.18)";
+    ctx.fillStyle = "#b5a28a";
     ctx.textAlign = "center";
     for (const a of X_TICKS) {
       const [x] = this._px(Math.log10(a), 0, w, h);
@@ -246,16 +246,16 @@ export class SkyView {
     ctx.restore();
     // GEO and ISS landmarks
     const [gx] = this._px(Math.log10(35786), 0, w, h);
-    ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(255,209,102,.5)";
+    ctx.setLineDash([4, 4]); ctx.strokeStyle = "rgba(239,180,85,.5)";
     ctx.beginPath(); ctx.moveTo(gx, M.t); ctx.lineTo(gx, h - M.b); ctx.stroke(); ctx.setLineDash([]);
-    ctx.fillStyle = "rgba(255,209,102,.8)"; ctx.textAlign = "right";
+    ctx.fillStyle = "rgba(239,180,85,.8)"; ctx.textAlign = "right";
     ctx.fillText("GEO 35,786 km", gx - 4, M.t + 12);
     const [ix, iy] = this._px(Math.log10(420), 51.64, w, h);
-    ctx.strokeStyle = "#ffd166"; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = "#efb455"; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(ix, iy, 6, 0, 2 * Math.PI); ctx.stroke(); ctx.lineWidth = 1;
     ctx.textAlign = "left"; ctx.fillText("ISS", ix + 9, iy - 7);
     if (!this.data) {
-      ctx.fillStyle = "#8d9bc7"; ctx.textAlign = "center";
+      ctx.fillStyle = "#b5a28a"; ctx.textAlign = "center";
       ctx.fillText("no clusters data", (w + M.l) / 2, h / 2);
       return;
     }
@@ -278,7 +278,7 @@ export class SkyView {
         if (c2.label === -1 || c2.count < 150 || !this.visible.has(c2.label)) continue;
         const [x, y] = this._px(Math.log10(Math.max(c2.alt_km_median || 100, 100)), c2.incl_deg_median ?? 0, w, h);
         const t = c2.name.split(" · ")[0];
-        ctx.fillStyle = "rgba(7,11,24,.7)";
+        ctx.fillStyle = "rgba(20,17,13,.8)";
         ctx.fillRect(x + 5, y - 15, ctx.measureText(t).width + 6, 13);
         ctx.fillStyle = this.color.get(c2.label);
         ctx.fillText(t, x + 8, y - 5);
@@ -287,7 +287,7 @@ export class SkyView {
     if (this.hover) {
       const b = this.buckets.get(this.hover.lab);
       const [x, y] = this._px(b.xs[this.hover.i], b.ys[this.hover.i], w, h);
-      ctx.strokeStyle = "#fff"; ctx.lineWidth = 2;
+      ctx.strokeStyle = "#f4ecdf"; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(x, y, 6, 0, 2 * Math.PI); ctx.stroke(); ctx.lineWidth = 1;
     }
   }
@@ -321,16 +321,16 @@ export class SkyView {
     const { w, h, dpr } = sizeCanvas(c);
     const ctx = c.getContext("2d");
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#0e1630";
+    ctx.fillStyle = "#1f1a15";
     ctx.fillRect(0, 0, w, h);
     ctx.font = "11px system-ui, sans-serif";
     if (!this.data || !this.data.congestion) {
-      ctx.fillStyle = "#8d9bc7"; ctx.textAlign = "center";
+      ctx.fillStyle = "#b5a28a"; ctx.textAlign = "center";
       ctx.fillText("no congestion profile in this file", w / 2, h / 2);
       return;
     }
     const { cg, vals, ymax, e, X, Y } = this._congGeom(w, h);
-    ctx.strokeStyle = "rgba(141,155,199,.2)"; ctx.fillStyle = "#8d9bc7"; ctx.textAlign = "right";
+    ctx.strokeStyle = "rgba(181,162,138,.2)"; ctx.fillStyle = "#b5a28a"; ctx.textAlign = "right";
     for (let i = 0; i <= 4; i++) {
       const v = (ymax * i) / 4, y = Y(v);
       ctx.beginPath(); ctx.moveTo(M.l, y); ctx.lineTo(w - M.r, y); ctx.stroke();
@@ -341,11 +341,11 @@ export class SkyView {
     ctx.fillText("altitude (km)", (w + M.l) / 2, h - 4);
     for (let i = 0; i < vals.length; i++) {
       const x0 = X(e[i]), x1 = X(e[i + 1]);
-      ctx.fillStyle = this.congHover === i ? "#ffd166" : "#4cc9f0";
+      ctx.fillStyle = this.congHover === i ? "#efb455" : "#8fbdce";
       ctx.fillRect(x0 + 0.5, Y(vals[i]), Math.max(1, x1 - x0 - 1), h - M.b - Y(vals[i]));
     }
     ctx.save();
-    ctx.translate(11, (h - M.b) / 2); ctx.rotate(-Math.PI / 2); ctx.fillStyle = "#8d9bc7"; ctx.textAlign = "center";
+    ctx.translate(11, (h - M.b) / 2); ctx.rotate(-Math.PI / 2); ctx.fillStyle = "#b5a28a"; ctx.textAlign = "center";
     ctx.fillText(this.metric === "density" ? "objects per million km³" : "objects per 25 km shell", 0, 0);
     ctx.restore();
   }

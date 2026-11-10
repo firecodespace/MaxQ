@@ -26,13 +26,22 @@ import numpy as np
 REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT))
 
+from ascent.rockets import Rocket, list_archetypes  # noqa: E402
+from ascent.sim import DEFAULT_PITCH_PARAMS  # noqa: E402
 from catalog.fetch import OUT_PATH, build_catalog, load_catalog, sources_from_sample  # noqa: E402
 from catalog.omm import is_missing, row_to_tle  # noqa: E402
-from contracts.validate import ContractError, kind_for_path, validate_file  # noqa: E402
+from contracts.validate import ContractError, kind_for_path, validate, validate_file  # noqa: E402
 
 DEFAULT_OUT = REPO_ROOT / "web" / "public" / "data"
 DATA_DIRS = (REPO_ROOT / "data" / "dummy", REPO_ROOT / "data" / "results")
 EXPORT_KINDS = {"windows", "trajectory", "risk", "clusters", "rocket", "result", "manifest_instance"}
+# Which archetype's tuned pitch program a design-search rocket borrows, by mission profile.
+PROFILE_ARCHETYPE = {
+    "cargo_iss": "medlift_kerolox_a",
+    "crew_iss": "crewlift_kerolox_b",
+    "geo_comm": "heavylift_hydrolox_c",
+    "meo_gps": "heavylift_hydrolox_c",
+}
 GROUP_ORDER = ["stations", "gps-ops", "geo", "active", "starlink", "debris"]
 # Per-group caps for the default (git-friendly) export; None = keep all.
 DEFAULT_CAPS = {"stations": None, "gps-ops": None, "geo": None, "active": 2000, "starlink": 3000, "debris": 1200}
@@ -55,6 +64,55 @@ def export_json_files(out: Path) -> list[dict]:
             shutil.copyfile(p, out / p.name)
             entries.append({"name": p.name, "kind": kind, "dummy": _is_dummy(p, obj), "bytes": p.stat().st_size})
     return entries
+
+
+def export_archetypes(out: Path) -> list[dict]:
+    """Write the three fictional archetypes as contract-valid rocket.json files.
+
+    They live in ``ascent/rockets.py`` as code, so until now nothing on the site could see them. The
+    browser ascent simulator (``web/js/sim3d/ascent.js``) flies whatever rocket it is handed, and the
+    specs it flies must be the same ones Python flies, so they are exported rather than retyped in
+    JavaScript.
+    """
+    entries = []
+    for rocket in list_archetypes():
+        obj = rocket.to_dict()
+        validate("rocket", obj)
+        name = f"rocket_{rocket.id}.json"
+        path = out / name
+        path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+        entries.append({"name": name, "kind": "rocket", "dummy": False, "bytes": path.stat().st_size})
+    return entries
+
+
+def _vehicle_meta(entry: dict, out: Path) -> dict:
+    """Numbers the vehicle picker needs, so it does not have to fetch all twelve rocket files.
+
+    ``pitch_program`` is the tuned program from ``ascent.sim.DEFAULT_PITCH_PARAMS``. The nine
+    design-search rockets have no program of their own, so they borrow their profile's archetype
+    program and are flagged ``pitch_tuned: false`` -- the UI says so rather than implying the ascent
+    was optimised for that design.
+    """
+    obj = json.loads((out / entry["name"]).read_text(encoding="utf-8"))
+    if "stages" not in obj:  # rocket_dummy.json and anything else not vehicle-shaped
+        return {}
+    rocket = Rocket.from_dict(obj)
+    archetype_id = PROFILE_ARCHETYPE.get(rocket.profile)
+    tuned = rocket.id in DEFAULT_PITCH_PARAMS
+    pitch = DEFAULT_PITCH_PARAMS.get(rocket.id) or DEFAULT_PITCH_PARAMS.get(archetype_id)
+    return {
+        "rocket_id": rocket.id,
+        "label": rocket.name,
+        "profile": rocket.profile,
+        "archetype": tuned,
+        "payload_kg": rocket.payload_kg,
+        "liftoff_kg": rocket.liftoff_mass_kg,
+        "ideal_dv_mps": round(rocket.ideal_delta_v(), 1),
+        "stages": len(rocket.stages),
+        "pitch_program": pitch,
+        "pitch_tuned": tuned,
+        "pitch_from": rocket.id if tuned else archetype_id,
+    }
 
 
 def _subsample(df, cap):
@@ -111,9 +169,15 @@ def main(argv: list[str] | None = None) -> int:
     args.out.mkdir(parents=True, exist_ok=True)
     try:
         files = export_json_files(args.out)
+        files += export_archetypes(args.out)
     except ContractError as e:
         print(f"ERROR: refusing to export an invalid file:\n{e}", file=sys.stderr)
         return 1
+    # Fold the vehicle numbers into each rocket entry so the 3D view's picker is one fetch.
+    for entry in files:
+        if entry["kind"] == "rocket" and not entry["dummy"]:
+            entry.update(_vehicle_meta(entry, args.out))
+    files.sort(key=lambda f: (f["kind"], f["dummy"], f["name"]))
     cat = export_catalog(args.out, args.all)
     manifest = {
         "files": files,

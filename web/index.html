@@ -6,6 +6,7 @@
   <title>MaxQ - launch mission planner</title>
   <meta name="description" content="Live satellite catalog, real ISS launch windows and ascent replay. Educational, reduced-fidelity.">
   <link rel="icon" href="data:,">
+  <link rel="preload" href="vendor/inter/inter-latin-variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -31,11 +32,78 @@
   <div id="banners" class="banners" role="status"></div>
 
   <nav class="viewtabs" role="tablist" aria-label="Views">
-    <button type="button" role="tab" id="tab-mission" data-view="mission" aria-selected="true">Mission</button>
+    <button type="button" role="tab" id="tab-sim" data-view="sim" aria-selected="true">Simulator</button>
+    <button type="button" role="tab" id="tab-mission" data-view="mission" aria-selected="false">Mission</button>
     <button type="button" role="tab" id="tab-sky" data-view="sky" aria-selected="false">Sky</button>
   </nav>
 
-  <main class="grid" id="view-mission">
+  <!-- ============================================================ 3D simulator -->
+  <main class="simview" id="view-sim">
+    <section class="stage" aria-label="Three-dimensional simulator viewport">
+      <canvas id="sim-canvas" tabindex="0" aria-label="3D view of Earth, the satellite catalog and the launch vehicle. Arrow keys orbit, plus and minus zoom."></canvas>
+
+      <div class="stage-top">
+        <div class="seg" role="group" aria-label="View mode">
+          <button type="button" id="mode-earth" aria-pressed="true">Show Earth</button>
+          <button type="button" id="mode-flight" aria-pressed="false">Show flight</button>
+        </div>
+        <div class="hud glass mono" id="sim-hud" aria-live="off"></div>
+      </div>
+
+      <div class="stage-bottom">
+        <div class="stage-hint glass" id="sim-hint">Drag to orbit &middot; wheel zooms on whatever is under the cursor &middot; double-click flies in &middot; shift-drag pans &middot; click an object to select it</div>
+        <div class="cam-tools glass" id="cam-tools" role="group" aria-label="Camera"></div>
+        <div class="scalebar glass" id="sim-scale"><div class="bar"></div><span class="mono">&mdash;</span></div>
+      </div>
+
+      <div class="pin" id="sim-pin" hidden></div>
+    </section>
+
+    <aside class="mc" aria-label="Mission control">
+      <section class="panel" id="flight-panel" aria-label="Vehicle and launch">
+        <div class="panel-head">
+          <h2>Vehicle</h2>
+          <span class="badge sim">FICTIONAL</span>
+          <select id="veh-profile" aria-label="Mission profile"></select>
+        </div>
+        <div class="vehlist" id="veh-list" role="group" aria-label="Launch vehicle"></div>
+        <div id="veh-note" class="note"></div>
+        <div class="runbar">
+          <button type="button" id="btn-launch" class="primary">Launch</button>
+          <button type="button" id="btn-replay">Play</button>
+          <label>Speed
+            <select id="sim-speed" aria-label="Replay speed">
+              <option value="1">1x</option><option value="5" selected>5x</option>
+              <option value="20">20x</option><option value="60">60x</option>
+            </select>
+          </label>
+          <span class="grow"></span>
+          <span id="sim-status"></span>
+        </div>
+        <input id="sim-scrub" type="range" min="0" max="500" step="1" value="0" aria-label="Flight time" style="width:100%;margin-top:8px">
+      </section>
+
+      <section class="panel" id="tel-panel" aria-label="Telemetry">
+        <div class="panel-head"><h2>Telemetry</h2><div id="tel-badges" class="badges"></div></div>
+        <div class="tiles" id="tel-tiles"></div>
+        <div class="timeline" id="tel-timeline"></div>
+        <div class="mcplots">
+          <canvas id="mc-alt" aria-label="Altitude versus time"></canvas>
+          <canvas id="mc-speed" aria-label="Speed versus time"></canvas>
+          <canvas id="mc-q" aria-label="Dynamic pressure versus time"></canvas>
+        </div>
+        <div id="tel-note" class="note"></div>
+      </section>
+
+      <section class="panel" id="cat-panel" aria-label="Catalog layers and selection">
+        <div class="panel-head"><h2>Catalog</h2><span id="cat-count" class="note"></span></div>
+        <div class="layers" id="sim-layers" role="group" aria-label="Object groups"></div>
+        <div id="sim-sel" class="info note">Click an object in the view.</div>
+      </section>
+    </aside>
+  </main>
+
+  <main class="grid" id="view-mission" hidden>
     <section class="panel mapwrap" aria-label="World map with live satellites">
       <div class="panel-head">
         <h2>Live satellites</h2>
@@ -145,7 +213,14 @@
     <strong>Fidelity.</strong> Real: the public CelesTrak catalog and ISS orbit (TLEs, kilometre-level position error) and the
     orbital-mechanics math for windows and azimuth. Approximate: ascent is a 2D point-mass model with a simple atmosphere;
     rockets are fictional archetypes; rendezvous hours are impulsive estimates; screening thresholds are illustrative.
-    MaxQ is an educational and portfolio project, not an operational planning tool. Anything marked
+    <strong>In the 3D view</strong>, positions are to scale and computed, never drawn: Earth is the WGS-84 ellipsoid, satellites
+    sit where SGP4 puts them, and a vehicle sits where the simulator puts it. Sizes are not all to scale &mdash; an object
+    smaller than a pixel is drawn as a marker at a minimum on-screen size so it stays visible, and the panel says when
+    something is drawn larger than life. Shapes are schematic: the catalog carries no geometry, so satellites, stations and
+    debris are one model per class, and rocket dimensions are derived from each stage's own propellant mass, thrust and
+    reference area rather than from any real vehicle. Earth imagery is NASA Blue Marble and night lights (public domain,
+    4,096 px wide, so about 10 km per pixel at the equator &mdash; it blurs on close approach). The star field is decorative
+    and not a star catalog. MaxQ is an educational and portfolio project, not an operational planning tool. Anything marked
     <span class="badge dummy">DUMMY</span> is placeholder data.
   </footer>
 

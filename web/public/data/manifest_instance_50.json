@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Realistic launch manifest with 50 tasks and 217 physical conflicts",
+  "_note": "Realistic launch manifest with 50 tasks (50 from real windows, 0 synthetic, 0%) and 211 physical conflicts. Inputs: risk_cargo_iss_cape_canaveral.json:5283b9ea, risk_cargo_iss_cape_canaveral_optimized.json:6bea18f7, windows_cargo_iss_cape_canaveral.json:4457e63a, windows_crew_iss_cape_canaveral.json:e4e22f33, windows_geo_comm_cape_canaveral.json:4a1d2dfa, windows_meo_gps_cape_canaveral.json:f511cb84. Note: no-go risk windows are discounted (x0.30 value) rather than excluded.",
   "id": "manifest_50_tasks",
   "pads": [
     "LC-39A",
@@ -16,453 +16,453 @@
   "tasks": [
     {
       "id": 0,
-      "mission": "crew_iss",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-41",
       "start_unix": 1794267690,
-      "end_unix": 1794271743,
-      "value": 13.8,
+      "end_unix": 1794270402,
+      "value": 8.97,
       "window_id": "w0_t0"
     },
     {
       "id": 1,
-      "mission": "meo_gps",
+      "mission": "crew_iss",
       "pad": "SLC-41",
       "start_unix": 1794267690,
-      "end_unix": 1794272478,
-      "value": 9.23,
-      "window_id": "w0_t14"
+      "end_unix": 1794270135,
+      "value": 14.04,
+      "window_id": "w0_t15"
     },
     {
       "id": 2,
-      "mission": "crew_iss",
+      "mission": "meo_gps",
       "pad": "SLC-41",
       "start_unix": 1794271826,
-      "end_unix": 1794276281,
-      "value": 11.99,
-      "window_id": "w0_t35"
+      "end_unix": 1794276752,
+      "value": 7.58,
+      "window_id": "w0_t37"
     },
     {
       "id": 3,
-      "mission": "meo_gps",
+      "mission": "geo_comm",
       "pad": "SLC-41",
       "start_unix": 1794288139,
-      "end_unix": 1794291998,
-      "value": 7.88,
-      "window_id": "w0_t28"
+      "end_unix": 1794295205,
+      "value": 7.97,
+      "window_id": "w0_t30"
     },
     {
       "id": 4,
       "mission": "cargo_iss",
-      "pad": "SLC-41",
+      "pad": "SLC-40",
       "start_unix": 1794298225,
-      "end_unix": 1794300864,
-      "value": 2.39,
+      "end_unix": 1794302031,
+      "value": 2.03,
       "window_id": "w1_t1"
     },
     {
       "id": 5,
-      "mission": "geo_comm",
-      "pad": "LC-39A",
+      "mission": "crew_iss",
+      "pad": "SLC-41",
       "start_unix": 1794298225,
-      "end_unix": 1794302212,
-      "value": 2.16,
-      "window_id": "w1_t15"
+      "end_unix": 1794304754,
+      "value": 2.75,
+      "window_id": "w1_t16"
     },
     {
       "id": 6,
-      "mission": "crew_iss",
-      "pad": "SLC-40",
+      "mission": "meo_gps",
+      "pad": "SLC-41",
       "start_unix": 1794304265,
-      "end_unix": 1794308584,
-      "value": 2.79,
-      "window_id": "w1_t36"
+      "end_unix": 1794310399,
+      "value": 1.68,
+      "window_id": "w1_t38"
     },
     {
       "id": 7,
-      "mission": "crew_iss",
+      "mission": "cargo_iss",
       "pad": "SLC-41",
       "start_unix": 1794352681,
-      "end_unix": 1794357937,
-      "value": 11.63,
+      "end_unix": 1794355320,
+      "value": 9.14,
       "window_id": "w2_t2"
     },
     {
       "id": 8,
       "mission": "crew_iss",
-      "pad": "SLC-41",
+      "pad": "LC-39A",
       "start_unix": 1794352681,
-      "end_unix": 1794359682,
-      "value": 11.74,
-      "window_id": "w2_t16"
+      "end_unix": 1794354856,
+      "value": 12.13,
+      "window_id": "w2_t17"
     },
     {
       "id": 9,
-      "mission": "cargo_iss",
-      "pad": "SLC-41",
+      "mission": "meo_gps",
+      "pad": "SLC-40",
       "start_unix": 1794357980,
-      "end_unix": 1794360425,
-      "value": 8.67,
-      "window_id": "w2_t37"
+      "end_unix": 1794360718,
+      "value": 7.65,
+      "window_id": "w2_t39"
     },
     {
       "id": 10,
-      "mission": "crew_iss",
+      "mission": "geo_comm",
       "pad": "SLC-41",
       "start_unix": 1794374539,
-      "end_unix": 1794377277,
-      "value": 12.15,
-      "window_id": "w1_t29"
+      "end_unix": 1794377482,
+      "value": 7.8,
+      "window_id": "w1_t31"
     },
     {
       "id": 11,
-      "mission": "crew_iss",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-41",
       "start_unix": 1794383208,
-      "end_unix": 1794386913,
-      "value": 3.0,
+      "end_unix": 1794385720,
+      "value": 2.32,
       "window_id": "w3_t3"
     },
     {
       "id": 12,
-      "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "mission": "crew_iss",
+      "pad": "SLC-41",
       "start_unix": 1794383208,
-      "end_unix": 1794388794,
-      "value": 2.15,
-      "window_id": "w3_t17"
+      "end_unix": 1794385661,
+      "value": 3.28,
+      "window_id": "w3_t18"
     },
     {
       "id": 13,
       "mission": "meo_gps",
-      "pad": "LC-39A",
+      "pad": "SLC-41",
       "start_unix": 1794390419,
-      "end_unix": 1794396582,
-      "value": 2.09,
-      "window_id": "w3_t38"
+      "end_unix": 1794397469,
+      "value": 1.75,
+      "window_id": "w3_t40"
     },
     {
       "id": 14,
-      "mission": "crew_iss",
-      "pad": "SLC-41",
+      "mission": "cargo_iss",
+      "pad": "LC-39A",
       "start_unix": 1794437686,
-      "end_unix": 1794441114,
-      "value": 12.17,
+      "end_unix": 1794439730,
+      "value": 8.67,
       "window_id": "w4_t4"
     },
     {
       "id": 15,
-      "mission": "cargo_iss",
-      "pad": "SLC-41",
+      "mission": "crew_iss",
+      "pad": "LC-39A",
       "start_unix": 1794437686,
-      "end_unix": 1794442142,
-      "value": 9.27,
-      "window_id": "w4_t18"
+      "end_unix": 1794442599,
+      "value": 11.82,
+      "window_id": "w4_t19"
     },
     {
       "id": 16,
-      "mission": "cargo_iss",
+      "mission": "meo_gps",
       "pad": "SLC-41",
       "start_unix": 1794444134,
-      "end_unix": 1794449827,
-      "value": 9.36,
-      "window_id": "w4_t39"
+      "end_unix": 1794449495,
+      "value": 7.23,
+      "window_id": "w4_t41"
     },
     {
       "id": 17,
       "mission": "geo_comm",
       "pad": "SLC-41",
       "start_unix": 1794460939,
-      "end_unix": 1794465525,
-      "value": 7.69,
-      "window_id": "w2_t30"
+      "end_unix": 1794467527,
+      "value": 7.94,
+      "window_id": "w2_t32"
     },
     {
       "id": 18,
-      "mission": "meo_gps",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794468221,
-      "end_unix": 1794473700,
-      "value": 1.95,
+      "end_unix": 1794474160,
+      "value": 2.33,
       "window_id": "w5_t5"
     },
     {
       "id": 19,
       "mission": "crew_iss",
-      "pad": "LC-39A",
+      "pad": "SLC-41",
       "start_unix": 1794468221,
-      "end_unix": 1794470283,
-      "value": 3.24,
-      "window_id": "w5_t19"
+      "end_unix": 1794471353,
+      "value": 2.9,
+      "window_id": "w5_t20"
     },
     {
       "id": 20,
-      "mission": "cargo_iss",
+      "mission": "meo_gps",
       "pad": "SLC-40",
       "start_unix": 1794476573,
-      "end_unix": 1794482695,
-      "value": 2.55,
-      "window_id": "w5_t40"
+      "end_unix": 1794480530,
+      "value": 2.25,
+      "window_id": "w5_t42"
     },
     {
       "id": 21,
-      "mission": "crew_iss",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-41",
       "start_unix": 1794522677,
-      "end_unix": 1794527939,
-      "value": 11.87,
+      "end_unix": 1794526105,
+      "value": 9.17,
       "window_id": "w6_t6"
     },
     {
       "id": 22,
-      "mission": "meo_gps",
-      "pad": "SLC-40",
+      "mission": "crew_iss",
+      "pad": "LC-39A",
       "start_unix": 1794522677,
-      "end_unix": 1794525019,
-      "value": 7.27,
-      "window_id": "w6_t20"
+      "end_unix": 1794526664,
+      "value": 12.16,
+      "window_id": "w6_t21"
     },
     {
       "id": 23,
       "mission": "meo_gps",
-      "pad": "LC-39A",
+      "pad": "SLC-40",
       "start_unix": 1794530289,
-      "end_unix": 1794536506,
-      "value": 7.7,
-      "window_id": "w6_t41"
+      "end_unix": 1794536247,
+      "value": 7.83,
+      "window_id": "w6_t43"
     },
     {
       "id": 24,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
+      "mission": "geo_comm",
+      "pad": "SLC-41",
       "start_unix": 1794547339,
-      "end_unix": 1794552855,
-      "value": 7.1,
-      "window_id": "w3_t31"
+      "end_unix": 1794552104,
+      "value": 7.78,
+      "window_id": "w3_t33"
     },
     {
       "id": 25,
       "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "pad": "SLC-41",
       "start_unix": 1794553204,
-      "end_unix": 1794557761,
-      "value": 1.93,
+      "end_unix": 1794559468,
+      "value": 2.19,
       "window_id": "w7_t7"
     },
     {
       "id": 26,
-      "mission": "geo_comm",
+      "mission": "crew_iss",
       "pad": "LC-39A",
       "start_unix": 1794553204,
-      "end_unix": 1794560373,
-      "value": 2.0,
-      "window_id": "w7_t21"
+      "end_unix": 1794559994,
+      "value": 3.11,
+      "window_id": "w7_t22"
     },
     {
       "id": 27,
-      "mission": "cargo_iss",
+      "mission": "meo_gps",
       "pad": "SLC-41",
       "start_unix": 1794562727,
-      "end_unix": 1794567080,
-      "value": 2.17,
-      "window_id": "w7_t42"
+      "end_unix": 1794569761,
+      "value": 1.88,
+      "window_id": "w7_t44"
     },
     {
       "id": 28,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
       "start_unix": 1794607683,
-      "end_unix": 1794612423,
-      "value": 9.78,
+      "end_unix": 1794614310,
+      "value": 10.82,
       "window_id": "w8_t8"
     },
     {
       "id": 29,
-      "mission": "meo_gps",
+      "mission": "crew_iss",
       "pad": "LC-39A",
       "start_unix": 1794607683,
-      "end_unix": 1794611652,
-      "value": 9.21,
-      "window_id": "w8_t22"
+      "end_unix": 1794610821,
+      "value": 13.97,
+      "window_id": "w8_t23"
     },
     {
       "id": 30,
-      "mission": "geo_comm",
+      "mission": "meo_gps",
       "pad": "SLC-40",
       "start_unix": 1794616443,
-      "end_unix": 1794622482,
-      "value": 7.96,
-      "window_id": "w8_t43"
+      "end_unix": 1794619495,
+      "value": 7.4,
+      "window_id": "w8_t45"
     },
     {
       "id": 31,
       "mission": "geo_comm",
-      "pad": "SLC-41",
+      "pad": "SLC-40",
       "start_unix": 1794633739,
-      "end_unix": 1794637002,
-      "value": 8.01,
-      "window_id": "w4_t32"
+      "end_unix": 1794639713,
+      "value": 7.99,
+      "window_id": "w4_t34"
     },
     {
       "id": 32,
-      "mission": "geo_comm",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794638217,
-      "end_unix": 1794643780,
-      "value": 2.03,
+      "end_unix": 1794641324,
+      "value": 2.41,
       "window_id": "w9_t9"
     },
     {
       "id": 33,
-      "mission": "geo_comm",
+      "mission": "crew_iss",
       "pad": "SLC-41",
       "start_unix": 1794638217,
-      "end_unix": 1794644805,
-      "value": 1.94,
-      "window_id": "w9_t23"
+      "end_unix": 1794645259,
+      "value": 3.15,
+      "window_id": "w9_t24"
     },
     {
       "id": 34,
-      "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "mission": "meo_gps",
+      "pad": "SLC-40",
       "start_unix": 1794648882,
-      "end_unix": 1794651206,
-      "value": 2.12,
-      "window_id": "w9_t44"
+      "end_unix": 1794655100,
+      "value": 2.24,
+      "window_id": "w9_t46"
     },
     {
       "id": 35,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
       "start_unix": 1794692673,
-      "end_unix": 1794698995,
-      "value": 7.33,
+      "end_unix": 1794696749,
+      "value": 8.72,
       "window_id": "w10_t10"
     },
     {
       "id": 36,
-      "mission": "meo_gps",
-      "pad": "SLC-40",
+      "mission": "crew_iss",
+      "pad": "LC-39A",
       "start_unix": 1794692673,
-      "end_unix": 1794696269,
-      "value": 7.9,
-      "window_id": "w10_t24"
+      "end_unix": 1794697129,
+      "value": 12.27,
+      "window_id": "w10_t25"
     },
     {
       "id": 37,
-      "mission": "cargo_iss",
-      "pad": "SLC-41",
+      "mission": "meo_gps",
+      "pad": "SLC-40",
       "start_unix": 1794702597,
-      "end_unix": 1794706201,
-      "value": 8.61,
-      "window_id": "w10_t45"
+      "end_unix": 1794709303,
+      "value": 7.36,
+      "window_id": "w10_t47"
     },
     {
       "id": 38,
-      "mission": "crew_iss",
-      "pad": "SLC-41",
+      "mission": "geo_comm",
+      "pad": "SLC-40",
       "start_unix": 1794720139,
-      "end_unix": 1794724383,
-      "value": 12.27,
-      "window_id": "w5_t33"
+      "end_unix": 1794722837,
+      "value": 7.72,
+      "window_id": "w5_t35"
     },
     {
       "id": 39,
-      "mission": "geo_comm",
-      "pad": "SLC-41",
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
       "start_unix": 1794723200,
-      "end_unix": 1794726575,
-      "value": 2.16,
+      "end_unix": 1794725837,
+      "value": 1.92,
       "window_id": "w11_t11"
     },
     {
       "id": 40,
-      "mission": "cargo_iss",
-      "pad": "SLC-41",
+      "mission": "crew_iss",
+      "pad": "LC-39A",
       "start_unix": 1794723200,
-      "end_unix": 1794729042,
-      "value": 1.92,
-      "window_id": "w11_t25"
+      "end_unix": 1794726876,
+      "value": 3.26,
+      "window_id": "w11_t26"
     },
     {
       "id": 41,
-      "mission": "crew_iss",
-      "pad": "LC-39A",
+      "mission": "meo_gps",
+      "pad": "SLC-40",
       "start_unix": 1794735036,
-      "end_unix": 1794737388,
-      "value": 3.32,
-      "window_id": "w11_t46"
+      "end_unix": 1794737752,
+      "value": 2.22,
+      "window_id": "w11_t48"
     },
     {
       "id": 42,
-      "mission": "crew_iss",
-      "pad": "SLC-41",
+      "mission": "cargo_iss",
+      "pad": "LC-39A",
       "start_unix": 1794777679,
-      "end_unix": 1794781345,
-      "value": 12.22,
+      "end_unix": 1794782419,
+      "value": 9.28,
       "window_id": "w12_t12"
     },
     {
       "id": 43,
       "mission": "crew_iss",
-      "pad": "LC-39A",
+      "pad": "SLC-41",
       "start_unix": 1794777679,
-      "end_unix": 1794780731,
-      "value": 12.1,
-      "window_id": "w12_t26"
+      "end_unix": 1794782765,
+      "value": 11.81,
+      "window_id": "w12_t27"
     },
     {
       "id": 44,
-      "mission": "geo_comm",
-      "pad": "LC-39A",
+      "mission": "meo_gps",
+      "pad": "SLC-41",
       "start_unix": 1794788752,
-      "end_unix": 1794794763,
-      "value": 7.79,
-      "window_id": "w12_t47"
+      "end_unix": 1794792513,
+      "value": 7.15,
+      "window_id": "w12_t49"
     },
     {
       "id": 45,
-      "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "mission": "geo_comm",
+      "pad": "SLC-40",
       "start_unix": 1794806539,
-      "end_unix": 1794811402,
-      "value": 9.21,
-      "window_id": "w6_t34"
+      "end_unix": 1794811797,
+      "value": 8.08,
+      "window_id": "w6_t36"
     },
     {
       "id": 46,
-      "mission": "crew_iss",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-41",
       "start_unix": 1794808213,
-      "end_unix": 1794810840,
-      "value": 2.9,
+      "end_unix": 1794812179,
+      "value": 2.5,
       "window_id": "w13_t13"
     },
     {
       "id": 47,
-      "mission": "meo_gps",
-      "pad": "SLC-41",
+      "mission": "crew_iss",
+      "pad": "LC-39A",
       "start_unix": 1794808213,
-      "end_unix": 1794810533,
-      "value": 1.78,
-      "window_id": "w13_t27"
+      "end_unix": 1794814659,
+      "value": 3.3,
+      "window_id": "w13_t28"
     },
     {
       "id": 48,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
-      "start_unix": 1794821191,
-      "end_unix": 1794827408,
-      "value": 1.58,
-      "window_id": "w13_t48"
+      "mission": "cargo_iss",
+      "pad": "SLC-41",
+      "start_unix": 1794862668,
+      "end_unix": 1794868231,
+      "value": 9.03,
+      "window_id": "w14_t14"
     },
     {
       "id": 49,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
-      "start_unix": 1794872490,
-      "end_unix": 1794878164,
-      "value": 9.75,
-      "window_id": "w0_t49"
+      "mission": "crew_iss",
+      "pad": "SLC-41",
+      "start_unix": 1794862668,
+      "end_unix": 1794866209,
+      "value": 10.32,
+      "window_id": "w14_t29"
     }
   ],
   "conflicts": [
@@ -476,6 +476,10 @@
     ],
     [
       0,
+      3
+    ],
+    [
+      0,
       4
     ],
     [
@@ -485,6 +489,14 @@
     [
       0,
       6
+    ],
+    [
+      0,
+      7
+    ],
+    [
+      0,
+      10
     ],
     [
       0,
@@ -512,19 +524,31 @@
     ],
     [
       1,
+      5
+    ],
+    [
+      1,
+      6
+    ],
+    [
+      1,
       7
     ],
     [
       1,
-      8
-    ],
-    [
-      1,
-      9
-    ],
-    [
-      1,
       10
+    ],
+    [
+      1,
+      11
+    ],
+    [
+      1,
+      12
+    ],
+    [
+      1,
+      13
     ],
     [
       2,
@@ -532,7 +556,7 @@
     ],
     [
       2,
-      4
+      5
     ],
     [
       2,
@@ -544,19 +568,27 @@
     ],
     [
       2,
-      8
-    ],
-    [
-      2,
-      9
-    ],
-    [
-      2,
       10
     ],
     [
+      2,
+      11
+    ],
+    [
+      2,
+      12
+    ],
+    [
+      2,
+      13
+    ],
+    [
       3,
-      4
+      5
+    ],
+    [
+      3,
+      6
     ],
     [
       3,
@@ -564,15 +596,19 @@
     ],
     [
       3,
-      8
-    ],
-    [
-      3,
-      9
-    ],
-    [
-      3,
       10
+    ],
+    [
+      3,
+      11
+    ],
+    [
+      3,
+      12
+    ],
+    [
+      3,
+      13
     ],
     [
       4,
@@ -580,22 +616,18 @@
     ],
     [
       4,
+      9
+    ],
+    [
+      5,
       6
     ],
     [
-      4,
+      5,
       7
     ],
     [
-      4,
-      8
-    ],
-    [
-      4,
-      9
-    ],
-    [
-      4,
+      5,
       10
     ],
     [
@@ -611,15 +643,31 @@
       13
     ],
     [
+      6,
+      7
+    ],
+    [
+      6,
+      10
+    ],
+    [
+      6,
+      11
+    ],
+    [
+      6,
+      12
+    ],
+    [
+      6,
+      13
+    ],
+    [
       7,
       8
     ],
     [
       7,
-      9
-    ],
-    [
-      7,
       10
     ],
     [
@@ -632,115 +680,83 @@
     ],
     [
       7,
-      14
-    ],
-    [
-      7,
-      15
-    ],
-    [
-      7,
-      16
-    ],
-    [
-      7,
-      17
-    ],
-    [
-      8,
-      9
-    ],
-    [
-      8,
-      10
-    ],
-    [
-      8,
-      11
-    ],
-    [
-      8,
-      12
-    ],
-    [
-      8,
-      14
-    ],
-    [
-      8,
-      15
-    ],
-    [
-      8,
-      16
-    ],
-    [
-      8,
-      17
-    ],
-    [
-      9,
-      10
-    ],
-    [
-      9,
-      11
-    ],
-    [
-      9,
-      12
-    ],
-    [
-      9,
-      14
-    ],
-    [
-      9,
-      15
-    ],
-    [
-      9,
-      16
-    ],
-    [
-      9,
-      17
-    ],
-    [
-      10,
-      11
-    ],
-    [
-      10,
-      12
-    ],
-    [
-      10,
-      14
-    ],
-    [
-      10,
-      15
-    ],
-    [
-      10,
-      16
-    ],
-    [
-      10,
-      17
-    ],
-    [
-      11,
-      12
-    ],
-    [
-      11,
       13
     ],
     [
-      11,
+      7,
+      16
+    ],
+    [
+      7,
+      17
+    ],
+    [
+      7,
+      19
+    ],
+    [
+      8,
+      11
+    ],
+    [
+      8,
+      12
+    ],
+    [
+      8,
+      14
+    ],
+    [
+      8,
+      15
+    ],
+    [
+      8,
       18
+    ],
+    [
+      9,
+      20
+    ],
+    [
+      10,
+      11
+    ],
+    [
+      10,
+      12
+    ],
+    [
+      10,
+      13
+    ],
+    [
+      10,
+      16
+    ],
+    [
+      10,
+      17
+    ],
+    [
+      10,
+      19
+    ],
+    [
+      11,
+      12
+    ],
+    [
+      11,
+      13
+    ],
+    [
+      11,
+      16
+    ],
+    [
+      11,
+      17
     ],
     [
       11,
@@ -752,7 +768,11 @@
     ],
     [
       12,
-      18
+      16
+    ],
+    [
+      12,
+      17
     ],
     [
       12,
@@ -760,7 +780,11 @@
     ],
     [
       13,
-      18
+      16
+    ],
+    [
+      13,
+      17
     ],
     [
       13,
@@ -772,11 +796,7 @@
     ],
     [
       14,
-      16
-    ],
-    [
-      14,
-      17
+      18
     ],
     [
       14,
@@ -784,19 +804,15 @@
     ],
     [
       14,
-      20
+      22
     ],
     [
       14,
-      27
+      26
     ],
     [
       15,
-      16
-    ],
-    [
-      15,
-      17
+      18
     ],
     [
       15,
@@ -804,11 +820,11 @@
     ],
     [
       15,
-      20
+      22
     ],
     [
       15,
-      27
+      26
     ],
     [
       16,
@@ -820,11 +836,35 @@
     ],
     [
       16,
-      20
+      21
+    ],
+    [
+      16,
+      24
+    ],
+    [
+      16,
+      25
     ],
     [
       16,
       27
+    ],
+    [
+      17,
+      19
+    ],
+    [
+      17,
+      21
+    ],
+    [
+      17,
+      24
+    ],
+    [
+      17,
+      25
     ],
     [
       17,
@@ -836,19 +876,7 @@
     ],
     [
       18,
-      21
-    ],
-    [
-      18,
-      23
-    ],
-    [
-      18,
-      24
-    ],
-    [
-      18,
-      25
+      22
     ],
     [
       18,
@@ -856,15 +884,7 @@
     ],
     [
       19,
-      20
-    ],
-    [
-      19,
       21
-    ],
-    [
-      19,
-      23
     ],
     [
       19,
@@ -876,19 +896,15 @@
     ],
     [
       19,
-      26
+      27
     ],
     [
       20,
-      22
-    ],
-    [
-      21,
-      22
-    ],
-    [
-      21,
       23
+    ],
+    [
+      21,
+      22
     ],
     [
       21,
@@ -908,47 +924,35 @@
     ],
     [
       21,
-      28
-    ],
-    [
-      21,
-      29
-    ],
-    [
-      21,
-      32
-    ],
-    [
-      21,
-      34
+      33
     ],
     [
       22,
+      25
+    ],
+    [
+      22,
+      26
+    ],
+    [
+      22,
+      29
+    ],
+    [
+      22,
+      32
+    ],
+    [
+      23,
+      28
+    ],
+    [
+      23,
       30
     ],
     [
       23,
-      24
-    ],
-    [
-      23,
-      25
-    ],
-    [
-      23,
-      26
-    ],
-    [
-      23,
-      28
-    ],
-    [
-      23,
-      29
-    ],
-    [
-      23,
-      32
+      31
     ],
     [
       23,
@@ -960,23 +964,11 @@
     ],
     [
       24,
-      26
+      27
     ],
     [
       24,
-      28
-    ],
-    [
-      24,
-      29
-    ],
-    [
-      24,
-      32
-    ],
-    [
-      24,
-      34
+      33
     ],
     [
       25,
@@ -988,23 +980,7 @@
     ],
     [
       25,
-      28
-    ],
-    [
-      25,
-      29
-    ],
-    [
-      25,
-      32
-    ],
-    [
-      25,
-      34
-    ],
-    [
-      26,
-      28
+      33
     ],
     [
       26,
@@ -1013,34 +989,50 @@
     [
       26,
       32
-    ],
-    [
-      26,
-      34
     ],
     [
       27,
+      33
+    ],
+    [
+      28,
+      29
+    ],
+    [
+      28,
+      30
+    ],
+    [
+      28,
       31
     ],
     [
-      27,
+      28,
+      32
+    ],
+    [
+      28,
       33
     ],
     [
       28,
-      29
-    ],
-    [
-      28,
-      32
-    ],
-    [
-      28,
       34
     ],
     [
       28,
       35
+    ],
+    [
+      28,
+      37
+    ],
+    [
+      28,
+      38
+    ],
+    [
+      28,
+      39
     ],
     [
       28,
@@ -1052,70 +1044,86 @@
     ],
     [
       29,
-      34
+      33
     ],
     [
       29,
-      35
+      36
     ],
     [
       29,
-      41
+      40
     ],
     [
       30,
-      36
+      31
     ],
     [
-      31,
-      33
-    ],
-    [
-      31,
-      37
-    ],
-    [
-      31,
-      38
-    ],
-    [
-      31,
-      39
-    ],
-    [
-      31,
-      40
-    ],
-    [
-      32,
-      33
-    ],
-    [
-      32,
+      30,
       34
     ],
     [
-      32,
+      30,
       35
     ],
     [
-      32,
-      41
-    ],
-    [
-      33,
+      30,
       37
     ],
     [
-      33,
+      30,
       38
     ],
     [
-      33,
+      30,
       39
     ],
     [
-      33,
+      30,
+      41
+    ],
+    [
+      31,
+      32
+    ],
+    [
+      31,
+      33
+    ],
+    [
+      31,
+      34
+    ],
+    [
+      31,
+      35
+    ],
+    [
+      31,
+      37
+    ],
+    [
+      31,
+      38
+    ],
+    [
+      31,
+      39
+    ],
+    [
+      31,
+      41
+    ],
+    [
+      32,
+      33
+    ],
+    [
+      32,
+      36
+    ],
+    [
+      32,
       40
     ],
     [
@@ -1124,11 +1132,19 @@
     ],
     [
       34,
-      41
+      37
     ],
     [
       34,
-      43
+      38
+    ],
+    [
+      34,
+      39
+    ],
+    [
+      34,
+      41
     ],
     [
       35,
@@ -1136,27 +1152,43 @@
     ],
     [
       35,
+      37
+    ],
+    [
+      35,
+      38
+    ],
+    [
+      35,
+      39
+    ],
+    [
+      35,
+      40
+    ],
+    [
+      35,
       41
-    ],
-    [
-      35,
-      43
-    ],
-    [
-      35,
-      44
     ],
     [
       35,
       45
     ],
     [
-      35,
-      46
+      36,
+      39
     ],
     [
-      35,
-      48
+      36,
+      40
+    ],
+    [
+      36,
+      42
+    ],
+    [
+      36,
+      47
     ],
     [
       37,
@@ -1168,19 +1200,11 @@
     ],
     [
       37,
-      40
-    ],
-    [
-      37,
       41
     ],
     [
       37,
-      42
-    ],
-    [
-      37,
-      47
+      45
     ],
     [
       38,
@@ -1188,19 +1212,11 @@
     ],
     [
       38,
-      40
-    ],
-    [
-      38,
       41
     ],
     [
       38,
-      42
-    ],
-    [
-      38,
-      47
+      45
     ],
     [
       39,
@@ -1208,17 +1224,13 @@
     ],
     [
       39,
-      42
-    ],
-    [
-      39,
-      47
-    ],
-    [
-      40,
       41
     ],
     [
+      39,
+      45
+    ],
+    [
       40,
       42
     ],
@@ -1228,35 +1240,11 @@
     ],
     [
       41,
-      42
-    ],
-    [
-      41,
-      43
-    ],
-    [
-      41,
-      44
-    ],
-    [
-      41,
       45
-    ],
-    [
-      41,
-      46
-    ],
-    [
-      41,
-      48
     ],
     [
       42,
       43
-    ],
-    [
-      42,
-      45
     ],
     [
       42,
@@ -1272,11 +1260,11 @@
     ],
     [
       43,
-      45
+      46
     ],
     [
       43,
-      46
+      47
     ],
     [
       43,
@@ -1285,10 +1273,6 @@
     [
       43,
       49
-    ],
-    [
-      44,
-      45
     ],
     [
       44,
@@ -1309,14 +1293,6 @@
     [
       45,
       47
-    ],
-    [
-      45,
-      48
-    ],
-    [
-      45,
-      49
     ],
     [
       46,

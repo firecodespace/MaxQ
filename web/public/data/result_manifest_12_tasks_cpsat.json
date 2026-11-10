@@ -5,11 +5,13 @@
   "solver": "cpsat",
   "selected": [
     0,
+    3,
     4,
+    6,
     8,
-    11
+    10
   ],
-  "score": 33.93,
-  "runtime_s": 0.008162,
+  "score": 48.91,
+  "runtime_s": 0.128359,
   "seed": 42
 }

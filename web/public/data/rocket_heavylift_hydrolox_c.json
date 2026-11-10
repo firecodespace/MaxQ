@@ -1,0 +1,25 @@
+{
+  "schema_version": 1,
+  "id": "heavylift_hydrolox_c",
+  "name": "HeavyLift-C (fictional archetype)",
+  "profile": "geo_comm",
+  "payload_kg": 20000.0,
+  "stages": [
+    {
+      "dry_kg": 48000.0,
+      "prop_kg": 820000.0,
+      "thrust_n": 15000000.0,
+      "isp_s": 300.0,
+      "cd": 0.35,
+      "area_m2": 22.0
+    },
+    {
+      "dry_kg": 11000.0,
+      "prop_kg": 150000.0,
+      "thrust_n": 1600000.0,
+      "isp_s": 445.0,
+      "cd": 0.35,
+      "area_m2": 22.0
+    }
+  ]
+}

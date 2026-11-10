@@ -1,14 +1,10 @@
 // 2D equirectangular map on a canvas: land, graticule, day/night, satellites, ground tracks, launch site, ascent path.
 import { clamp, interp, interpLon } from "./util.js";
 
-export const GROUP_COLORS = {
-  stations: "#ffd166",
-  "gps-ops": "#80ed99",
-  geo: "#f78fb3",
-  active: "#b8c0ff",
-  starlink: "#4cc9f0",
-  debris: "#ef476f",
-};
+// Group colours live in theme.js (shared with the Sky scatter and the 3D view); re-exported here so
+// the long-standing `import { GROUP_COLORS } from "./map.js"` call sites keep working unchanged.
+import { GROUP_COLORS } from "./theme.js";
+export { GROUP_COLORS };
 
 export class MapView {
   constructor(canvas, hooks = {}) {
@@ -100,7 +96,7 @@ export class MapView {
   draw(s) {
     const { ctx, dpr, w, h } = this;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#070b18";
+    ctx.fillStyle = "#0d0a07";
     ctx.fillRect(0, 0, w, h);
     this._graticule();
     this._land();
@@ -109,13 +105,13 @@ export class MapView {
     if (s.issTrack) this._track(s.issTrack);
     if (s.traj) this._trajectory(s.traj, s.replayT, s.eventsOn);
     if (s.pos) this._points(s);
-    if (s.pos && s.highlight != null) this._highlight(s.pos, s.highlight, s.highlightLabel, "#ffd166");
-    if (s.pos && s.selected != null) this._highlight(s.pos, s.selected, s.selectedLabel, "#ffffff");
+    if (s.pos && s.highlight != null) this._highlight(s.pos, s.highlight, s.highlightLabel, "#efb455");
+    if (s.pos && s.selected != null) this._highlight(s.pos, s.selected, s.selectedLabel, "#f4ecdf");
   }
 
   _graticule() {
     const { ctx } = this;
-    ctx.strokeStyle = "rgba(141,155,199,.14)";
+    ctx.strokeStyle = "rgba(181,162,138,.14)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     const step = this.view.zoom > 6 ? 5 : this.view.zoom > 2.5 ? 15 : 30;
@@ -134,8 +130,8 @@ export class MapView {
     if (!this.land) return;
     const { ctx } = this;
     const s = this.scale;
-    ctx.fillStyle = "#16224a";
-    ctx.strokeStyle = "#3b4d8f";
+    ctx.fillStyle = "#2b231a";
+    ctx.strokeStyle = "#645443";
     ctx.lineWidth = 1;
     const offsets = this.view.zoom > 1 ? [-360, 0, 360] : [0];
     for (const off of offsets) {
@@ -169,7 +165,7 @@ export class MapView {
     }
     const pole = decl > 0 ? -90 : 90;
     const s = this.scale;
-    ctx.fillStyle = "rgba(0,0,10,.38)";
+    ctx.fillStyle = "rgba(10,8,5,.42)";
     for (const off of this.view.zoom > 1 ? [-360, 0, 360] : [0]) {
       ctx.beginPath();
       pts.forEach(([lon, lat], i) => {
@@ -187,8 +183,8 @@ export class MapView {
   _site(site) {
     const { ctx } = this;
     const [x, y] = this.project(site.lon_deg, site.lat_deg);
-    ctx.strokeStyle = "#80ed99";
-    ctx.fillStyle = "#80ed99";
+    ctx.strokeStyle = "#a3bb89";
+    ctx.fillStyle = "#a3bb89";
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.moveTo(x, y - 8); ctx.lineTo(x + 6, y + 5); ctx.lineTo(x - 6, y + 5); ctx.closePath();
@@ -214,26 +210,26 @@ export class MapView {
   }
 
   _track(track) {
-    this._polyline(track, "rgba(255,209,102,.65)", [4, 4]);
+    this._polyline(track, "rgba(239,180,85,.65)", [4, 4]);
   }
 
   _trajectory(traj, replayT, eventsOn) {
     const { ctx } = this;
     const flat = new Float32Array(traj.t_s.length * 2);
     for (let i = 0; i < traj.t_s.length; i++) { flat[2 * i] = traj.lon_deg[i]; flat[2 * i + 1] = traj.lat_deg[i]; }
-    this._polyline(flat, "#ef476f");
+    this._polyline(flat, "#d15c45");
     if (eventsOn) {
       ctx.font = "10px system-ui, sans-serif";
       for (const ev of traj.events || []) {
         const [x, y] = this.project(interpLon(traj.t_s, traj.lon_deg, ev.t_s), interp(traj.t_s, traj.lat_deg, ev.t_s));
-        ctx.fillStyle = "#ffd166";
+        ctx.fillStyle = "#efb455";
         ctx.fillRect(x - 3, y - 3, 6, 6);
         if (this.view.zoom > 1.5) ctx.fillText(ev.name, x + 6, y - 4);
       }
     }
     const [x, y] = this.project(interpLon(traj.t_s, traj.lon_deg, replayT), interp(traj.t_s, traj.lat_deg, replayT));
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#ef476f";
+    ctx.fillStyle = "#f4ecdf";
+    ctx.strokeStyle = "#d15c45";
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(x, y, 5, 0, 2 * Math.PI); ctx.fill(); ctx.stroke();
   }
@@ -245,7 +241,7 @@ export class MapView {
     const size = this.view.zoom > 4 ? 3 : this.w < 500 ? 1.3 : 2;
     for (let g = 0; g < groups.length; g++) {
       if (!groupsOn.has(groups[g])) continue;
-      ctx.fillStyle = GROUP_COLORS[groups[g]] || "#ccc";
+      ctx.fillStyle = GROUP_COLORS[groups[g]] || "#b5a28a";
       ctx.globalAlpha = groups[g] === "debris" ? 0.6 : 0.9;
       for (let i = 0; i < n; i++) {
         if (groupIdx[i] !== g) continue;

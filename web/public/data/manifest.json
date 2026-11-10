@@ -1,10 +1,40 @@
 {
   "files": [
     {
+      "name": "clusters.json",
+      "kind": "clusters",
+      "dummy": false,
+      "bytes": 1002668
+    },
+    {
       "name": "clusters_dummy.json",
       "kind": "clusters",
       "dummy": true,
       "bytes": 2239
+    },
+    {
+      "name": "manifest_instance_1000.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 271218
+    },
+    {
+      "name": "manifest_instance_12.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 3549
+    },
+    {
+      "name": "manifest_instance_200.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 70291
+    },
+    {
+      "name": "manifest_instance_50.json",
+      "kind": "manifest_instance",
+      "dummy": false,
+      "bytes": 18303
     },
     {
       "name": "manifest_instance_dummy.json",
@@ -13,148 +43,94 @@
       "bytes": 2238
     },
     {
-      "name": "result_dummy.json",
-      "kind": "result",
-      "dummy": true,
-      "bytes": 206
-    },
-    {
-      "name": "risk_dummy.json",
-      "kind": "risk",
-      "dummy": true,
-      "bytes": 1330
-    },
-    {
-      "name": "rocket_dummy.json",
-      "kind": "rocket",
-      "dummy": true,
-      "bytes": 506
-    },
-    {
-      "name": "trajectory_dummy.json",
-      "kind": "trajectory",
-      "dummy": true,
-      "bytes": 42846
-    },
-    {
-      "name": "windows_dummy.json",
-      "kind": "windows",
-      "dummy": true,
-      "bytes": 2155
-    },
-    {
-      "name": "clusters.json",
-      "kind": "clusters",
-      "dummy": false,
-      "bytes": 1002668
-    },
-    {
-      "name": "manifest_instance_1000.json",
-      "kind": "manifest_instance",
-      "dummy": false,
-      "bytes": 259421
-    },
-    {
-      "name": "manifest_instance_12.json",
-      "kind": "manifest_instance",
-      "dummy": false,
-      "bytes": 3497
-    },
-    {
-      "name": "manifest_instance_200.json",
-      "kind": "manifest_instance",
-      "dummy": false,
-      "bytes": 60591
-    },
-    {
-      "name": "manifest_instance_50.json",
-      "kind": "manifest_instance",
-      "dummy": false,
-      "bytes": 18099
-    },
-    {
       "name": "result_manifest_1000_tasks_cpsat.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 5211
+      "bytes": 4714
     },
     {
       "name": "result_manifest_1000_tasks_greedy.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 5127
+      "bytes": 4582
     },
     {
       "name": "result_manifest_1000_tasks_sa.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 5063
+      "bytes": 4556
     },
     {
       "name": "result_manifest_12_tasks_cpsat.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 246
+      "bytes": 262
     },
     {
       "name": "result_manifest_12_tasks_greedy.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 241
+      "bytes": 257
     },
     {
       "name": "result_manifest_12_tasks_qaoa_p1.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 272
+      "bytes": 290
     },
     {
       "name": "result_manifest_12_tasks_qaoa_p2.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 282
+      "bytes": 290
     },
     {
       "name": "result_manifest_12_tasks_sa.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 246
+      "bytes": 262
     },
     {
       "name": "result_manifest_200_tasks_cpsat.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 869
+      "bytes": 735
     },
     {
       "name": "result_manifest_200_tasks_greedy.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 835
+      "bytes": 675
     },
     {
       "name": "result_manifest_200_tasks_sa.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 859
+      "bytes": 716
     },
     {
       "name": "result_manifest_50_tasks_cpsat.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 292
+      "bytes": 299
     },
     {
       "name": "result_manifest_50_tasks_greedy.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 278
+      "bytes": 287
     },
     {
       "name": "result_manifest_50_tasks_sa.json",
       "kind": "result",
       "dummy": false,
-      "bytes": 301
+      "bytes": 291
+    },
+    {
+      "name": "result_dummy.json",
+      "kind": "result",
+      "dummy": true,
+      "bytes": 206
     },
     {
       "name": "risk_cargo_iss_cape_canaveral.json",
@@ -169,58 +145,292 @@
       "bytes": 5633
     },
     {
+      "name": "risk_dummy.json",
+      "kind": "risk",
+      "dummy": true,
+      "bytes": 1330
+    },
+    {
+      "name": "rocket_crewlift_kerolox_b.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 504,
+      "rocket_id": "crewlift_kerolox_b",
+      "label": "CrewLift-B (fictional archetype)",
+      "profile": "crew_iss",
+      "archetype": true,
+      "payload_kg": 9500.0,
+      "liftoff_kg": 551000.0,
+      "ideal_dv_mps": 11119.2,
+      "stages": 2,
+      "pitch_program": [
+        11.215,
+        19.623,
+        -0.962,
+        0.782,
+        0.822
+      ],
+      "pitch_tuned": true,
+      "pitch_from": "crewlift_kerolox_b"
+    },
+    {
+      "name": "rocket_heavylift_hydrolox_c.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 511,
+      "rocket_id": "heavylift_hydrolox_c",
+      "label": "HeavyLift-C (fictional archetype)",
+      "profile": "geo_comm",
+      "archetype": true,
+      "payload_kg": 20000.0,
+      "liftoff_kg": 1049000.0,
+      "ideal_dv_mps": 12177.6,
+      "stages": 2,
+      "pitch_program": [
+        13.224,
+        12.145,
+        -1.126,
+        0.742,
+        0.864
+      ],
+      "pitch_tuned": true,
+      "pitch_from": "heavylift_hydrolox_c"
+    },
+    {
+      "name": "rocket_medlift_kerolox_a.json",
+      "kind": "rocket",
+      "dummy": false,
+      "bytes": 500,
+      "rocket_id": "medlift_kerolox_a",
+      "label": "MedLift-A (fictional archetype)",
+      "profile": "cargo_iss",
+      "archetype": true,
+      "payload_kg": 8000.0,
+      "liftoff_kg": 521200.0,
+      "ideal_dv_mps": 11339.7,
+      "stages": 2,
+      "pitch_program": [
+        11.865,
+        18.262,
+        -1.0,
+        0.81,
+        0.747
+      ],
+      "pitch_tuned": true,
+      "pitch_from": "medlift_kerolox_a"
+    },
+    {
       "name": "rocket_search_cargo_iss_balanced.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 515
+      "bytes": 515,
+      "rocket_id": "search_cargo_iss_balanced",
+      "label": "Balanced Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "archetype": false,
+      "payload_kg": 13475.0,
+      "liftoff_kg": 439864.19999999995,
+      "ideal_dv_mps": 9245.0,
+      "stages": 2,
+      "pitch_program": [
+        11.865,
+        18.262,
+        -1.0,
+        0.81,
+        0.747
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "medlift_kerolox_a"
     },
     {
       "name": "rocket_search_cargo_iss_heavyweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 522
+      "bytes": 522,
+      "rocket_id": "search_cargo_iss_heavyweight",
+      "label": "Heavyweight Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "archetype": false,
+      "payload_kg": 15980.9,
+      "liftoff_kg": 532550.2,
+      "ideal_dv_mps": 9308.2,
+      "stages": 2,
+      "pitch_program": [
+        11.865,
+        18.262,
+        -1.0,
+        0.81,
+        0.747
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "medlift_kerolox_a"
     },
     {
       "name": "rocket_search_cargo_iss_lightweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 520
+      "bytes": 520,
+      "rocket_id": "search_cargo_iss_lightweight",
+      "label": "Lightweight Design (CARGO_ISS Archetype)",
+      "profile": "cargo_iss",
+      "archetype": false,
+      "payload_kg": 9502.4,
+      "liftoff_kg": 339244.2,
+      "ideal_dv_mps": 9390.7,
+      "stages": 2,
+      "pitch_program": [
+        11.865,
+        18.262,
+        -1.0,
+        0.81,
+        0.747
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "medlift_kerolox_a"
     },
     {
       "name": "rocket_search_crew_iss_balanced.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 513
+      "bytes": 513,
+      "rocket_id": "search_crew_iss_balanced",
+      "label": "Balanced Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "archetype": false,
+      "payload_kg": 8968.2,
+      "liftoff_kg": 300520.5,
+      "ideal_dv_mps": 9202.3,
+      "stages": 2,
+      "pitch_program": [
+        11.215,
+        19.623,
+        -0.962,
+        0.782,
+        0.822
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "crewlift_kerolox_b"
     },
     {
       "name": "rocket_search_crew_iss_heavyweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 519
+      "bytes": 519,
+      "rocket_id": "search_crew_iss_heavyweight",
+      "label": "Heavyweight Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "archetype": false,
+      "payload_kg": 9275.9,
+      "liftoff_kg": 307597.80000000005,
+      "ideal_dv_mps": 9208.8,
+      "stages": 2,
+      "pitch_program": [
+        11.215,
+        19.623,
+        -0.962,
+        0.782,
+        0.822
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "crewlift_kerolox_b"
     },
     {
       "name": "rocket_search_crew_iss_lightweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 519
+      "bytes": 519,
+      "rocket_id": "search_crew_iss_lightweight",
+      "label": "Lightweight Design (CREW_ISS Archetype)",
+      "profile": "crew_iss",
+      "archetype": false,
+      "payload_kg": 8732.8,
+      "liftoff_kg": 292310.8,
+      "ideal_dv_mps": 9205.5,
+      "stages": 2,
+      "pitch_program": [
+        11.215,
+        19.623,
+        -0.962,
+        0.782,
+        0.822
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "crewlift_kerolox_b"
     },
     {
       "name": "rocket_search_geo_comm_balanced.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 516
+      "bytes": 516,
+      "rocket_id": "search_geo_comm_balanced",
+      "label": "Balanced Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "archetype": false,
+      "payload_kg": 24679.4,
+      "liftoff_kg": 508218.6,
+      "ideal_dv_mps": 9806.3,
+      "stages": 2,
+      "pitch_program": [
+        13.224,
+        12.145,
+        -1.126,
+        0.742,
+        0.864
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "heavylift_hydrolox_c"
     },
     {
       "name": "rocket_search_geo_comm_heavyweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 523
+      "bytes": 523,
+      "rocket_id": "search_geo_comm_heavyweight",
+      "label": "Heavyweight Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "archetype": false,
+      "payload_kg": 27840.1,
+      "liftoff_kg": 587133.2999999999,
+      "ideal_dv_mps": 9860.5,
+      "stages": 2,
+      "pitch_program": [
+        13.224,
+        12.145,
+        -1.126,
+        0.742,
+        0.864
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "heavylift_hydrolox_c"
     },
     {
       "name": "rocket_search_geo_comm_lightweight.json",
       "kind": "rocket",
       "dummy": false,
-      "bytes": 520
+      "bytes": 520,
+      "rocket_id": "search_geo_comm_lightweight",
+      "label": "Lightweight Design (GEO_COMM Archetype)",
+      "profile": "geo_comm",
+      "archetype": false,
+      "payload_kg": 16073.9,
+      "liftoff_kg": 474049.0,
+      "ideal_dv_mps": 10794.1,
+      "stages": 2,
+      "pitch_program": [
+        13.224,
+        12.145,
+        -1.126,
+        0.742,
+        0.864
+      ],
+      "pitch_tuned": false,
+      "pitch_from": "heavylift_hydrolox_c"
+    },
+    {
+      "name": "rocket_dummy.json",
+      "kind": "rocket",
+      "dummy": true,
+      "bytes": 506
     },
     {
       "name": "trajectory_cargo_iss_w0.json",
@@ -233,6 +443,12 @@
       "kind": "trajectory",
       "dummy": false,
       "bytes": 42830
+    },
+    {
+      "name": "trajectory_dummy.json",
+      "kind": "trajectory",
+      "dummy": true,
+      "bytes": 42846
     },
     {
       "name": "windows_cargo_iss_cape_canaveral.json",
@@ -257,6 +473,12 @@
       "kind": "windows",
       "dummy": false,
       "bytes": 5311
+    },
+    {
+      "name": "windows_dummy.json",
+      "kind": "windows",
+      "dummy": true,
+      "bytes": 2155
     }
   ],
   "catalog": {

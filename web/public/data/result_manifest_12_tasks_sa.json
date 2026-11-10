@@ -5,11 +5,13 @@
   "solver": "sa",
   "selected": [
     0,
+    3,
     4,
+    6,
     8,
-    11
+    10
   ],
-  "score": 33.93,
-  "runtime_s": 0.021445,
+  "score": 48.91,
+  "runtime_s": 0.067442,
   "seed": 42
 }

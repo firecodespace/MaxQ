@@ -51,10 +51,10 @@ export class Plot {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     ctx.font = "11px system-ui, sans-serif";
-    ctx.fillStyle = "#dbe4ff";
+    ctx.fillStyle = "#f4ecdf";
     ctx.fillText(`${this.opt.title} (${this.opt.unit})`, M.l, 13);
     if (!this.data) {
-      ctx.fillStyle = "#8d9bc7";
+      ctx.fillStyle = "#b5a28a";
       ctx.fillText("no data", M.l, h / 2);
       return;
     }
@@ -62,8 +62,8 @@ export class Plot {
     const pw = w - M.l - M.r, ph = h - M.t - M.b;
     const X = (x) => M.l + (x / xmax) * pw;
     const Y = (y) => M.t + ph - (y / ymax) * ph;
-    ctx.strokeStyle = "rgba(141,155,199,.2)";
-    ctx.fillStyle = "#8d9bc7";
+    ctx.strokeStyle = "rgba(181,162,138,.2)";
+    ctx.fillStyle = "#b5a28a";
     ctx.lineWidth = 1;
     ctx.textAlign = "right";
     for (let i = 0; i <= 4; i++) {
@@ -75,7 +75,7 @@ export class Plot {
     for (let i = 0; i <= 4; i++) ctx.fillText(Math.round((xmax * i) / 4) + "s", X((xmax * i) / 4), h - 5);
     ctx.textAlign = "left";
     ctx.setLineDash([3, 3]);
-    ctx.strokeStyle = "rgba(255,209,102,.55)";
+    ctx.strokeStyle = "rgba(239,180,85,.55)";
     for (const ev of events) {
       const x = X(ev.t_s);
       ctx.beginPath(); ctx.moveTo(x, M.t); ctx.lineTo(x, M.t + ph); ctx.stroke();
@@ -91,14 +91,14 @@ export class Plot {
     ctx.stroke();
     // cursor + dot
     const cx = X(Math.min(this.cursor, xmax));
-    ctx.strokeStyle = "#fff";
+    ctx.strokeStyle = "#f4ecdf";
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx, M.t); ctx.lineTo(cx, M.t + ph); ctx.stroke();
     let lo = 0;
     while (lo < xs.length - 2 && xs[lo + 1] <= this.cursor) lo++;
     const f = xs[lo + 1] > xs[lo] ? (this.cursor - xs[lo]) / (xs[lo + 1] - xs[lo]) : 0;
     const v = ys[lo] + Math.min(1, Math.max(0, f)) * ((ys[lo + 1] ?? ys[lo]) - ys[lo]);
-    ctx.fillStyle = "#fff";
+    ctx.fillStyle = "#f4ecdf";
     ctx.beginPath(); ctx.arc(cx, Y(v), 3.5, 0, 2 * Math.PI); ctx.fill();
   }
 }

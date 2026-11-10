@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "_note": "Realistic launch manifest with 12 tasks and 23 physical conflicts",
+  "_note": "Realistic launch manifest with 12 tasks (12 from real windows, 0 synthetic, 0%) and 12 physical conflicts. Inputs: risk_cargo_iss_cape_canaveral.json:5283b9ea, risk_cargo_iss_cape_canaveral_optimized.json:6bea18f7, windows_cargo_iss_cape_canaveral.json:4457e63a, windows_crew_iss_cape_canaveral.json:e4e22f33, windows_geo_comm_cape_canaveral.json:4a1d2dfa, windows_meo_gps_cape_canaveral.json:f511cb84. Note: no-go risk windows are discounted (x0.30 value) rather than excluded.",
   "id": "manifest_12_tasks",
   "pads": [
     "LC-39A",
@@ -15,11 +15,11 @@
   "tasks": [
     {
       "id": 0,
-      "mission": "crew_iss",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794267690,
-      "end_unix": 1794271743,
-      "value": 13.8,
+      "end_unix": 1794269694,
+      "value": 9.54,
       "window_id": "w0_t0"
     },
     {
@@ -27,97 +27,97 @@
       "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794298225,
-      "end_unix": 1794304492,
-      "value": 1.92,
+      "end_unix": 1794301853,
+      "value": 1.96,
       "window_id": "w1_t1"
     },
     {
       "id": 2,
-      "mission": "meo_gps",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794352681,
-      "end_unix": 1794354725,
-      "value": 7.17,
+      "end_unix": 1794358948,
+      "value": 8.67,
       "window_id": "w2_t2"
     },
     {
       "id": 3,
       "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "pad": "SLC-40",
       "start_unix": 1794383208,
-      "end_unix": 1794389605,
-      "value": 2.01,
+      "end_unix": 1794385268,
+      "value": 1.87,
       "window_id": "w3_t3"
     },
     {
       "id": 4,
-      "mission": "meo_gps",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794437686,
-      "end_unix": 1794443165,
-      "value": 7.57,
+      "end_unix": 1794441391,
+      "value": 9.0,
       "window_id": "w4_t4"
     },
     {
       "id": 5,
-      "mission": "crew_iss",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794468221,
-      "end_unix": 1794473483,
-      "value": 2.87,
+      "end_unix": 1794474618,
+      "value": 2.01,
       "window_id": "w5_t5"
     },
     {
       "id": 6,
       "mission": "cargo_iss",
-      "pad": "LC-39A",
+      "pad": "SLC-40",
       "start_unix": 1794522677,
-      "end_unix": 1794527234,
-      "value": 8.68,
+      "end_unix": 1794526282,
+      "value": 8.96,
       "window_id": "w6_t6"
     },
     {
       "id": 7,
-      "mission": "meo_gps",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
       "start_unix": 1794553204,
-      "end_unix": 1794557944,
-      "value": 2.15,
+      "end_unix": 1794555057,
+      "value": 2.46,
       "window_id": "w7_t7"
     },
     {
       "id": 8,
-      "mission": "geo_comm",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794607683,
-      "end_unix": 1794613246,
-      "value": 10.03,
+      "end_unix": 1794612945,
+      "value": 10.87,
       "window_id": "w8_t8"
     },
     {
       "id": 9,
-      "mission": "meo_gps",
+      "mission": "cargo_iss",
       "pad": "LC-39A",
       "start_unix": 1794638217,
-      "end_unix": 1794644539,
-      "value": 1.71,
+      "end_unix": 1794641780,
+      "value": 2.62,
       "window_id": "w9_t9"
     },
     {
       "id": 10,
-      "mission": "geo_comm",
-      "pad": "LC-39A",
+      "mission": "cargo_iss",
+      "pad": "SLC-40",
       "start_unix": 1794692673,
-      "end_unix": 1794695042,
-      "value": 7.64,
+      "end_unix": 1794695310,
+      "value": 8.67,
       "window_id": "w10_t10"
     },
     {
       "id": 11,
       "mission": "cargo_iss",
-      "pad": "SLC-40",
+      "pad": "LC-39A",
       "start_unix": 1794723200,
-      "end_unix": 1794725653,
+      "end_unix": 1794727940,
       "value": 2.53,
       "window_id": "w11_t11"
     }
@@ -132,18 +132,10 @@
       2
     ],
     [
-      0,
-      3
-    ],
-    [
       1,
       2
     ],
     [
-      1,
-      3
-    ],
-    [
       2,
       3
     ],
@@ -156,52 +148,12 @@
       5
     ],
     [
-      3,
-      4
-    ],
-    [
-      3,
-      5
-    ],
-    [
       4,
       5
     ],
     [
-      4,
-      6
-    ],
-    [
-      4,
-      7
-    ],
-    [
-      5,
-      6
-    ],
-    [
-      5,
-      7
-    ],
-    [
       6,
       7
-    ],
-    [
-      6,
-      8
-    ],
-    [
-      6,
-      9
-    ],
-    [
-      7,
-      8
-    ],
-    [
-      7,
-      9
     ],
     [
       8,
@@ -209,11 +161,15 @@
     ],
     [
       8,
-      10
+      11
     ],
     [
       9,
-      10
+      11
+    ],
+    [
+      10,
+      11
     ]
   ]
 }
