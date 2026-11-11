@@ -36,3 +36,7 @@ outcmaes/
 # Vercel CLI link state and local env files
 .vercel/
 .env.local
+
+# Phase 2 (WP2-06) run artifacts: session logs and attempt files from local API runs
+data/sessions/
+data/attempts/

@@ -72,5 +72,5 @@ bench:  ## WP2-05/12: best-known runner and benchmark suite
 agent:  ## WP2-11: run the agent on a mission_request
 	@echo "not implemented yet (WP2-11, Yash): agent/" && exit 1
 
-server:  ## WP2-06: API + session streaming
-	@echo "not implemented yet (WP2-06, Yash): server/" && exit 1
+server:  ## WP2-06: mission API + live streaming + replay at http://127.0.0.1:8000 (docs at /docs)
+	$(PY) -m uvicorn server.app:app --host 127.0.0.1 --port 8000 --reload

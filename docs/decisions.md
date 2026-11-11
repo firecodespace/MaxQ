@@ -67,4 +67,29 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
 - WP2-01 tolerance is a single stated +/-35 % for every vehicle, not tuned per rocket after seeing the result. It is a bar that catches a broken model, a vehicle that cannot reach orbit, or a stale record - NOT a claim that the simulator is accurate to 35 %. The honest number is the per-vehicle `error_pct`, and the UI should show it wherever a vehicle's payload is quoted - by yash / claude-code - reversible: yes - status: PROVISIONAL (revisit when WP2-02 replaces the ascent wrapper)
 - WP2-01 method note, found by measurement: feasibility is NOT monotonic in payload for these vehicles. Atlas V 401 fails at 980 kg and succeeds at 4,900 kg, because a lighter payload leaves more excess delta-v and this pitch-program family spends it climbing - the vehicle lofts to 780 km with its perigee underground. A bisection on payload therefore concludes "cannot reach orbit" for a vehicle that plainly can, so the validator scans a payload grid instead and keeps every success. The pitch bounds also had to be widened well past ascent/optimize.py's, which were fitted around the three fictional archetypes and are too narrow for vehicles carrying 12.6-15.1 km/s of ideal delta-v - by yash / claude-code - status: FINAL
 - GPU decision (charter addition 10, kickoff checklist): a local NVIDIA RTX 4050 Laptop GPU with 6 GB of VRAM is available on Yash's machine. 6 GB is enough to serve a small open-weight model (roughly 7B at 4-bit) and to LoRA-fine-tune at that size, and is not enough for a larger model or full fine-tuning. The OptimizerAgent path therefore remains the one that must work unaided, per the Risks table, and WP2-13 is planned at 7B-class 4-bit from the start. Model and licence choice is still a Red item and not yet made - by yash - status: FINAL
+- WP2-06 server design: the live stream and the replay are THE SAME BYTES. `optimize_mission` already
+  writes a contract-valid `session.jsonl` as it runs, so the server tails that file for live viewers
+  and serves it for replay instead of maintaining a second event path. WP2-06's acceptance criterion
+  ("a live session and its replay produce the same UI") then holds by construction, and
+  `tests/server/test_api.py::test_live_stream_and_replay_carry_the_same_events` asserts it anyway,
+  because a property guaranteed by a design is exactly the kind that quietly stops being guaranteed
+  - by yash / claude-code - reversible: yes - status: FINAL
+- WP2-06 runs are SUBPROCESSES, not threads. Charter addition 9 requires `max_wall_s` enforced in
+  code; a Python thread cannot be stopped from outside, so a thread-based runner could only ask the
+  optimizer to stop and hope it checked. The store terminates the process instead, and
+  `test_wall_clock_budget_terminates_the_run` holds it to a 1 s budget. Each run writes into
+  `data/sessions/<run_id>/`, so runs cannot overwrite each other and tests can use a temp root. The
+  one seam into Shiva's lane is rebinding `optimize.cma_optimizer.ROOT` per run; nothing in
+  `optimize/` is edited - by yash / claude-code - reversible: yes - status: FINAL
+- WP2-06 new pinned dependencies (Yellow): fastapi, uvicorn, starlette, websockets, httpx. Local
+  development tool only: CORS is open and there is no authentication, so it must not be exposed to
+  the internet as it stands. The static site keeps working with no backend at all through the replay
+  endpoints, which is the public-demo path in HANDOFF_PHASE2 section 4 - by yash / claude-code - status: FINAL
+- WP2-06 integration finding (Shiva's lane, reported in status/shiva.md with a repro script):
+  `crew_iss` is INFEASIBLE at any payload because `ascent/sim.py` burns each stage to depletion at
+  constant thrust, so peak acceleration (4.38-4.64 g measured at 12-20 t) sits above the 4.0 g crew
+  limit and no pitch program moves it. `cargo_iss` at the 6 g limit is feasible, cost 1.084. Also,
+  `optimize/cma_optimizer.py` clips the pitch program to the archetype bounds, which alone makes C01
+  unreachable for real vehicles. Reproduce: `python scripts/probe_feasibility.py` - by yash /
+  claude-code - status: OPEN (needs Shiva: throttling, and wider optimizer bounds)
 

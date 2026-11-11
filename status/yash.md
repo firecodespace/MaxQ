@@ -25,3 +25,27 @@
 **Blocked / needs**
 - Model and licence choice for the LLM planner is still Red and unmade. GPU is settled: RTX 4050,
   6 GB, so 7B-class at 4-bit.
+
+## 2026-11-11 - WP2-06 (mission API, streaming, replay)
+
+**Done**
+- `server/`: FastAPI app with the mission lifecycle (create, launch, abort), attempts, a WebSocket
+  live stream, and replay of any recorded session. `make server` runs it; docs at `/docs`.
+- The live stream and the recording are the same file: the optimizer writes `session.jsonl`, the
+  server tails it live and serves it for replay. Asserted by test, not just by design.
+- Budgets are real: runs are subprocesses, so `max_wall_s` terminates one. A 1 s budget is honoured.
+- Library endpoints for the wizard serve the cited vehicles and pads WITH each vehicle's measured
+  `sim_validation`, so a card can never quote a published payload without the measured gap.
+- 14 server tests (6 fast, 8 slow). Whole suite green.
+
+**Found while integrating (reported to Shiva with `scripts/probe_feasibility.py`)**
+- crew_iss cannot be feasible at any payload: no throttling, so peak g is 4.38-4.64 against a 4.0 g
+  limit. cargo_iss is feasible (cost 1.084), so the chain itself is sound.
+- `optimize/cma_optimizer.py` clips the pitch program to the archetype bounds, which alone keeps C01
+  unreachable for real vehicles.
+
+**Next**
+- WP2-07 wizard and WP2-08 mission control, both against this API. The wizard's constraints step can
+  use `/api/library/windows` and should show the crew-mission limitation above rather than offering a
+  mission that cannot pass.
+

@@ -19,3 +19,9 @@ pennylane-lightning==0.45.0
 matplotlib==3.11.2
 scikit-learn==1.9.1
 
+# Yash lane, Phase 2 WP2-06 (mission API, session streaming, replay)
+fastapi==0.162.4
+uvicorn==0.54.0
+starlette==1.10.0
+websockets==17.4
+httpx==0.28.1

@@ -175,3 +175,37 @@ Full detail: `docs/reviews/shiva-wp10-11-14.md` (Round 2). **Accepted:** regener
 - **WP2-03 (Phasing & Rendezvous Physics):** Shipped `rendezvous/phasing.py` (Hohmann transfer, 200 km -> 410 km yields 121.36 m/s, strictly inside 119–124 m/s target) and `rendezvous/hcw.py` (Hill-Clohessy-Wiltshire state transition matrix in LVLH, validated against numerical two-body Keplerian propagation within <0.001% error). 2/2 tests passing in `tests/rendezvous/test_phasing.py`.
 - **Suite Status:** All 20 Phase 2 unit tests passing; all 59 repository contracts valid; ruff checks clean across all 4 new packages.
 
+## Integration report from Yash's agent (claude-code) - WP2-06, 2026-11-11
+M1 hangs together: I wired the mission API to your `MissionEnv` + `verifier` + `optimize_mission` and
+a mission runs end to end, streams, records and replays. One evaluate_plan is ~106 ms. Two things
+came out of it that are in YOUR lane, both reproducible with `python scripts/probe_feasibility.py`
+(read-only, writes nothing).
+
+**1. The optimizer's pitch bounds are too narrow for real vehicles, so C01 never passes.**
+`optimize/cma_optimizer.py` clips the candidate to `p_meco [5, 40]` and `p_final [-5, 5]`. Those are
+`ascent/optimize.py`'s bounds, fitted around the three fictional archetypes. Real vehicles carry far
+more delta-v (Falcon 9 ~13.6 km/s ideal at this payload against the archetypes' ~11.3), and inside
+those bounds every candidate flies too steep: four attempts through the API all came back with
+perigee below zero and `C01` failing. Widen to about `p_meco [0, 45]`, `p_final [-25, 25]` (letting
+it pitch below the horizon is the part that matters) and C01 is reachable: the probe finds
+perigee 171 km, ecc 0.005 for crew_iss at 12 t. Same trap I hit in WP2-01; details in `status/yash.md`.
+
+**2. No crew mission can be feasible at any payload, because the simulator cannot throttle.**
+With the bounds widened, `C03 max_acceleration` is the only remaining blocker and it does not move:
+
+    crew_iss  12 t -> 4.64 g      crew_iss  16 t -> 4.53 g      crew_iss  20 t -> 4.38 g
+    (crew limit 4.0 g)                                          cargo_iss 12 t -> 5.49 g, FEASIBLE, cost 1.084
+
+Peak g is set by the vehicle, not by the flight plan: `ascent/sim.py` burns each stage to depletion
+at constant thrust, so acceleration peaks just before MECO at the lightest mass and no pitch program
+changes that. Real vehicles throttle down through that point for exactly this reason. So `crew_iss`
+-- the headline mission of Phase 2 -- is infeasible by construction today, while `cargo_iss` works.
+
+Options, your call: (a) add first-stage throttling to `ascent/sim.py` (a throttle fraction in the
+plan would also give the agent a real parameter to optimise); (b) early cutoff; (c) revisit the 4.0 g
+limit, though 4 g is a defensible crew figure and I would not move a limit to make a model pass.
+Until one of those lands, I would not spend optimizer budget on crew missions.
+
+Nothing of yours was edited. The verifier's handling of unevaluated constraints is right, by the way:
+C05/C09/C10 report `pass=False` with "not evaluated" and correctly do NOT block feasibility.
+
