@@ -253,6 +253,20 @@ def _check_catalog(obj: dict) -> list[str]:
     return errs
 
 
+#: How the verifier marks a constraint it could not check. Matching on the note is not elegant; the
+#: clean fix is an explicit `evaluated` boolean on each constraint, which means editing `verifier/`
+#: and bumping `verifier_version` (Red -- needs Yash). Recorded in docs/decisions.md.
+_UNEVALUATED_NOTE = "not evaluated"
+
+
+def _is_unevaluated(constraint: dict) -> bool:
+    """True when the verifier reported this constraint as not checked rather than as failed."""
+    if constraint.get("evaluated") is False:
+        return True
+    note = constraint.get("note") or ""
+    return not constraint["pass"] and note.strip().lower().startswith(_UNEVALUATED_NOTE)
+
+
 def _check_attempt(obj: dict) -> list[str]:
     errs = []
     report = obj["constraint_report"]
@@ -260,9 +274,19 @@ def _check_attempt(obj: dict) -> list[str]:
     if len(set(ids)) != len(ids):
         errs.append("constraint_report: duplicate constraint id")
     # The verifier decides feasibility; the file may not disagree with its own report.
-    all_pass = all(c["pass"] for c in report)
+    #
+    # A constraint the verifier could not evaluate reports pass=False with a note saying so, and
+    # by design it does NOT block feasibility -- reporting it as passing would be the dishonest
+    # option, and dropping it from the report would hide that it was never checked. So a feasible
+    # attempt may legitimately carry failed-but-unevaluated constraints, and only the constraints
+    # that were actually evaluated may contradict `feasible`.
+    evaluated = [c for c in report if not _is_unevaluated(c)]
+    all_pass = all(c["pass"] for c in evaluated)
     if obj["status"] == "finished" and obj["feasible"] != all_pass:
-        errs.append(f"feasible: is {obj['feasible']} but constraint_report says all-pass = {all_pass}")
+        errs.append(
+            f"feasible: is {obj['feasible']} but the evaluated constraints say all-pass = "
+            f"{all_pass} (unevaluated: {[c['id'] for c in report if _is_unevaluated(c)] or 'none'})"
+        )
     if obj["feasible"] and obj["status"] != "finished":
         errs.append(f"feasible: true is only allowed for status 'finished', got {obj['status']!r}")
     prev_end = None

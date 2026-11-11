@@ -93,4 +93,31 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   archetype bounds, which alone makes C01
   unreachable for real vehicles. Reproduce: `python scripts/probe_feasibility.py` - by yash /
   claude-code - status: OPEN (needs Shiva: throttling, and wider optimizer bounds)
-
+- Charter items 11 and 12 added to AGENTS.md (names must match implementations; unimplemented
+  things are labelled `placeholder` and unmeasured metrics are null, not 0). Prompted by the WP2-05
+  search being named and reported as CMA-ES while implementing none of it - by yash / claude-code -
+  reversible: yes - status: FINAL
+- WP2-05 search replaced with real CMA-ES (`cma==4.5.0`, already pinned, so no new dependency). The
+  non-adaptive baseline is kept as `optimize/fixed_sigma_es.py` so the comparison test runs the real
+  algorithms rather than reimplementations. Measured on a rotated condition-1e6 6-D quadratic:
+  CMA-ES 1.96e-14 against the baseline's 3.85e3. Measured on cargo_iss/falcon9 at 100 attempts,
+  seed 42: feasible attempts 13/100 -> 38/100 (same bounds, so this is the algorithm), best cost
+  unchanged at 1.082 - by yash / claude-code - reversible: yes - status: FINAL
+- CMA-ES uses wider pitch bounds than the baseline (p_meco [0,45], p_final [-25,25]) because the
+  baseline's archetype-fitted bounds exclude every feasible solution for some real vehicles. MEASURED
+  COST of that choice on cargo_iss: feasible 38/100 -> 34/100, best cost unchanged. Kept for
+  generality, not because it helped here - by yash / claude-code - reversible: yes - status: FINAL
+- contracts/validate.py `_check_attempt` required `feasible == all(constraint.pass)`, which
+  contradicts the verifier's design: a constraint it cannot evaluate reports pass=False with a note
+  and does not block feasibility. No feasible attempt had ever reached the validator before, so the
+  conflict was latent; the first feasible CMA-ES attempt failed validation on C05/C09/C10. The
+  validator now excludes constraints the verifier marked unevaluated. Matching on the note prefix is
+  not elegant - the clean fix is an explicit `evaluated` boolean per constraint, which means editing
+  `verifier/` and bumping `verifier_version` - by yash / claude-code - reversible: yes -
+  status: OPEN (needs Yash: 🔴 verifier change for an explicit `evaluated` field)
+- MEASUREMENT, not a decision: across 100 CMA-ES attempts on cargo_iss, every feasible attempt's
+  objective lies within 0.213% (prop_used 503,269-504,406 kg; time_to_dock 13,037-13,042 s). Stages
+  burn to depletion at constant thrust and phasing is a fixed coast, so the quantity being minimised
+  barely varies with the plan. Until throttling and a real approach exist (WP2-03, Shiva), a better
+  optimiser cannot show a better result because there is almost nothing to optimise - by yash /
+  claude-code - status: OPEN (needs Shiva)

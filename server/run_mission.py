@@ -41,14 +41,14 @@ def main(argv: list[str] | None = None) -> int:
     max_attempts = args.max_attempts or int(budget.get("max_attempts", 10))
     seed = args.seed if args.seed is not None else int(request.get("seed", 42))
 
-    # optimize.fixed_sigma_es writes its attempt files under its own module-level ROOT. Point that at
+    # The search module writes its attempt files under its own module-level ROOT. Point that at
     # this run's directory so a run cannot overwrite another run's attempts, and so tests do not
     # write into the repository. This is the one seam between the server and the search module.
-    from optimize import fixed_sigma_es
+    from optimize import cma_optimizer
 
-    fixed_sigma_es.ROOT = args.out_dir
+    cma_optimizer.ROOT = args.out_dir
 
-    from optimize.fixed_sigma_es import optimize_mission
+    from optimize.cma_optimizer import optimize_mission
 
     try:
         optimize_mission(
