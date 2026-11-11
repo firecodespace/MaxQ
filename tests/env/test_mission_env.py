@@ -79,3 +79,65 @@ def test_attempt_and_trajectory_validate_against_contracts():
     # Validate against Phase 2 schemas
     validate("attempt", att)
     validate("mission_trajectory", traj)
+
+
+def test_step_mode_matches_plan_mode():
+    """Gym-style reset/step produces the same deterministic outcome as evaluate_plan."""
+    req = _sample_request()
+    env_plan = MissionEnv(copy.deepcopy(req))
+    env_step = MissionEnv(copy.deepcopy(req))
+
+    plan = {
+        "launch_t_unix": 1794372400,
+        "pitch_program": [11.215, 19.623, -0.962, 0.782, 0.822],
+        "parking_alt_km": 200.0,
+        "max_g_limit": 3.6,
+        "phasing_revs": 8,
+        "final_tof_s": 800.0,
+    }
+    att_plan, traj_plan = env_plan.evaluate_plan(plan, attempt_id="att_cmp")
+
+    obs = env_step.reset(seed=42)
+    assert obs["phase_name"] == "ascent"
+    obs, rew, term, trunc, _ = env_step.step(plan)
+    assert not term and not trunc and rew == 0.0
+    assert obs["phase_name"] == "parking"
+    obs, _, term, _, _ = env_step.step(plan)
+    assert not term and obs["phase_name"] == "phasing"
+    obs, _, term, _, _ = env_step.step(plan)
+    assert not term and obs["phase_name"] == "approach"
+    obs, rew, term, trunc, info = env_step.step(plan, attempt_id="att_cmp")
+    assert term and not trunc and obs["phase_name"] == "dock"
+
+    att_step = info["attempt"]
+    traj_step = info["trajectory"]
+    validate("attempt", att_step)
+    validate("mission_trajectory", traj_step)
+    assert rew == -float(att_step["cost"])
+    assert att_step["cost"] == att_plan["cost"]
+    assert att_step["metrics"] == att_plan["metrics"]
+    assert traj_step["t_s"] == traj_plan["t_s"]
+
+
+def test_env_evaluates_c09_c10_and_populates_rel_state():
+    """Approach and docking constraints C09/C10 and LVLH rel_pos_m/rel_vel_mps are active."""
+    env = MissionEnv(_sample_request())
+    plan = {
+        "launch_t_unix": 1794372400,
+        "pitch_program": [11.215, 19.623, -0.962, 0.782, 0.822],
+        "parking_alt_km": 200.0,
+        "max_g_limit": 3.6,
+        "phasing_revs": 8,
+        "final_tof_s": 800.0,
+    }
+    att, traj = env.evaluate_plan(plan, attempt_id="att_c09_c10")
+    cr = {c["id"]: c for c in att["constraint_report"]}
+    assert cr["C09"]["pass"] is True and cr["C09"]["value"] is not None
+    assert cr["C10"]["pass"] is True and cr["C10"]["value"] is not None
+    assert "orbital_reserve_frac" in att["metrics"]
+    assert "approach" in traj["phase"]
+    assert "dock" in traj["phase"]
+    dock_idx = traj["phase"].index("dock")
+    assert traj["rel_pos_m"][dock_idx] == [0.0, 0.0, 0.0]
+    assert traj["rel_vel_mps"][dock_idx] is not None
+    assert traj["rel_pos_m"][0] is None

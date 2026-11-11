@@ -106,3 +106,26 @@ def test_all_archetypes_reach_parking_orbit(rocket_id):
     assert res.perigee_km >= 160.0, f"{rocket_id} perigee {res.perigee_km:.1f} < 160 km"
     assert res.eccentricity < 0.01, f"{rocket_id} ecc {res.eccentricity:.5f} >= 0.01"
     assert 7.70 <= res.insertion_speed_mps / 1000.0 <= 7.90
+
+
+def test_throttling_caps_peak_accel_and_tracks_propellant():
+    """Throttling / max_g_limit keeps peak acceleration within cap without losing Stage-2 bookkeeping."""
+    rocket = get_rocket("crewlift_kerolox_b")
+    uncapped = simulate_ascent(rocket=rocket)
+    capped = simulate_ascent(rocket=rocket, max_g_limit=3.6)
+
+    assert capped.max_accel_g <= 3.61
+    assert uncapped.s1_prop_used_kg > 0.0
+    assert capped.s2_prop_remaining_kg >= 0.0
+    assert capped.perigee_km >= 160.0
+
+
+def test_s2_coast_increases_insertion_time_deterministically():
+    """Stage-2 multi-burn coast extends timeline cleanly and remains deterministic."""
+    rocket = get_rocket("medlift_kerolox_a")
+    r1 = simulate_ascent(rocket=rocket, coast_s2_s=60.0, s2_burn1_frac=0.5)
+    r2 = simulate_ascent(rocket=rocket, coast_s2_s=60.0, s2_burn1_frac=0.5)
+    no_coast = simulate_ascent(rocket=rocket, coast_s2_s=0.0, s2_burn1_frac=1.0)
+
+    assert r1.t_insertion_s == r2.t_insertion_s
+    assert r1.t_insertion_s > no_coast.t_insertion_s + 50.0
