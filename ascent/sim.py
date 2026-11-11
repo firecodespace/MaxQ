@@ -29,6 +29,7 @@ import numpy as np
 
 from ascent.atmosphere import density
 from ascent.geo import (
+    G0,
     MU_EARTH,
     OMEGA_EARTH,
     R_EARTH,
@@ -62,6 +63,11 @@ class SimResult:
     drag_loss_mps: float
     total_loss_mps: float
     t_insertion_s: float
+    s1_prop_used_kg: float = 0.0
+    s2_prop_used_kg: float = 0.0
+    s2_prop_remaining_kg: float = 0.0
+    max_accel_g: float = 0.0
+    t_meco_s: float = 0.0
 
     def export(self, path: Path | str, indent: int = 2) -> None:
         """Save trajectory JSON."""
@@ -112,6 +118,11 @@ def simulate_ascent(
     dt_substep: float = 0.05,
     target_parking_alt_m: float = 200000.0,
     is_dummy: bool = False,
+    throttle_s1: float = 1.0,
+    throttle_s2: float = 1.0,
+    max_g_limit: float | None = None,
+    coast_s2_s: float = 0.0,
+    s2_burn1_frac: float = 1.0,
 ) -> SimResult:
     """Execute 2D point-mass rocket ascent simulation.
 
@@ -143,6 +154,16 @@ def simulate_ascent(
         Nominal parking orbit altitude in meters (default 200 km).
     is_dummy : bool
         If True, marks "_note": "dummy" in trajectory output.
+    throttle_s1 : float
+        Stage-1 throttle fraction in [0.25, 1.0].
+    throttle_s2 : float
+        Stage-2 throttle fraction in [0.25, 1.0].
+    max_g_limit : float | None
+        Optional axial acceleration throttle cap in g (throttles engines continuously).
+    coast_s2_s : float
+        Optional coast duration (s) between Stage-2 burn 1 and burn 2.
+    s2_burn1_frac : float
+        Fraction of Stage-2 propellant expended before coast_s2_s when coast_s2_s > 0.
 
     Returns
     -------
@@ -154,21 +175,26 @@ def simulate_ascent(
 
     s1, s2 = rocket.stages[0], rocket.stages[1]
 
-    # Staging schedule
-    t_burn1 = s1.burn_time_s
+    thr1_cmd = min(1.0, max(0.25, float(throttle_s1)))
+    thr2_cmd = min(1.0, max(0.25, float(throttle_s2)))
+    coast2_dur = max(0.0, float(coast_s2_s))
+    burn1_frac = min(1.0, max(0.05, float(s2_burn1_frac)))
+
+    # Nominal staging schedule for pitch curve scaling
     t_sep_coast = 5.0
-    t_meco = t_burn1
-    t_sep = t_meco + t_sep_coast
-    t_ign2 = t_sep
-    t_burn2 = s2.burn_time_s
-    t_max_sim = t_ign2 + t_burn2 + 10.0
+    t_meco_nom = s1.burn_time_s / thr1_cmd
+    t_ign2_nom = t_meco_nom + t_sep_coast
+    t_burn2_nom = s2.burn_time_s / thr2_cmd
+    t_max_sim = (s1.burn_time_s / 0.25) + t_sep_coast + coast2_dur + (s2.burn_time_s / 0.25) + 20.0
 
     if pitch_params is None:
         pitch_params = DEFAULT_PITCH_PARAMS.get(
             rocket.id, [11.865, 18.262, -1.0, 0.81, 0.747]
         )
 
-    pitch_evaluator = build_pitch_evaluator(pitch_params, t_meco, t_ign2, t_ign2 + t_burn2)
+    pitch_evaluator = build_pitch_evaluator(
+        pitch_params, t_meco_nom, t_ign2_nom, t_ign2_nom + t_burn2_nom
+    )
 
     # Earth rotation initial velocity
     v_boost = earth_rotation_boost(site_lat_deg)
@@ -180,9 +206,16 @@ def simulate_ascent(
     vd = v_boost
     m = rocket.liftoff_mass_kg
 
+    prop1_rem = float(s1.prop_kg)
+    prop2_rem = float(s2.prop_kg)
+    use_s2_coast = coast2_dur > 0.0 and burn1_frac < 0.999
+    s2_burn1_budget = float(s2.prop_kg) * burn1_frac if use_s2_coast else float(s2.prop_kg)
+    s2_prop_used = 0.0
+
     t = 0.0
     max_q = 0.0
     t_max_q = 0.0
+    max_accel_g = 0.0
     dv_drag = 0.0
     dv_grav = 0.0
     ideal_dv = 0.0
@@ -197,6 +230,9 @@ def simulate_ascent(
     mass_kg_list: list[float] = []
 
     next_record_t = 0.0
+    t_meco = t_meco_nom
+    t_sep = t_ign2_nom
+    t_ign2 = t_ign2_nom
     t_insertion = 0.0
     insertion_reached = False
     v_ins_speed = 0.0
@@ -206,7 +242,15 @@ def simulate_ascent(
     ecc_final = 0.0
     stage1_separated = False
 
+    stage_state = "s1"  # s1 -> sep_coast -> s2_burn1 -> s2_coast -> s2_burn2 -> done
+    s2_coast_start_t = 0.0
+    s2_coast_elapsed = 0.0
+    depleted_at_t: float | None = None
+
     while t <= t_max_sim:
+        if depleted_at_t is not None and t >= depleted_at_t + 5.0:
+            break
+
         h = r - R_EARTH
         speed = math.sqrt(vr**2 + vd**2)
         v_circ = math.sqrt(MU_EARTH / r)
@@ -257,7 +301,7 @@ def simulate_ascent(
         eps_current = 0.5 * speed**2 - MU_EARTH / r
         a_semi = -MU_EARTH / (2.0 * eps_current) if eps_current < 0 else 1e9
         if (
-            t > t_ign2
+            stage_state in ("s2_burn1", "s2_burn2")
             and h >= 160000.0
             and (a_semi >= (R_EARTH + target_parking_alt_m) or speed >= v_circ)
             and not insertion_reached
@@ -281,33 +325,129 @@ def simulate_ascent(
         if insertion_reached and t >= t_insertion + 5.0:
             break
 
-        # Stage parameters
-        if insertion_reached:
-            thrust = 0.0
-            cd = 0.0
-            area = 0.0
-            mdot = 0.0
-        elif t <= t_meco:
-            thrust = s1.thrust_n
-            cd = s1.cd
-            area = s1.area_m2
-            mdot = s1.mass_flow_rate_kgps
-        elif t < t_ign2:
-            thrust = 0.0
-            cd = s1.cd
-            area = s1.area_m2
-            mdot = 0.0
+        # Stage state transitions & parameters
+        is_default_mode = (
+            thr1_cmd == 1.0
+            and thr2_cmd == 1.0
+            and max_g_limit is None
+            and not use_s2_coast
+        )
+        if is_default_mode:
+            if insertion_reached or prop2_rem <= 1e-6 and t >= t_ign2_nom:
+                if not insertion_reached and prop2_rem <= 1e-6:
+                    stage_state = "depleted"
+                    if depleted_at_t is None:
+                        depleted_at_t = t
+                thrust = 0.0
+                cd = 0.0
+                area = 0.0
+                mdot = 0.0
+            elif t <= t_meco_nom:
+                stage_state = "s1"
+                thrust = s1.thrust_n
+                cd = s1.cd
+                area = s1.area_m2
+                mdot = s1.mass_flow_rate_kgps
+            elif t < t_ign2_nom:
+                stage_state = "sep_coast"
+                thrust = 0.0
+                cd = s1.cd
+                area = s1.area_m2
+                mdot = 0.0
+            else:
+                stage_state = "s2_burn1"
+                thrust = s2.thrust_n
+                cd = s2.cd
+                area = s2.area_m2
+                mdot = s2.mass_flow_rate_kgps
+            if t >= t_meco_nom and not stage1_separated:
+                m -= s1.dry_kg
+                stage1_separated = True
         else:
-            thrust = s2.thrust_n
-            cd = s2.cd
-            area = s2.area_m2
-            mdot = s2.mass_flow_rate_kgps
+            if stage_state == "s1" and prop1_rem <= 1e-6:
+                stage_state = "sep_coast"
+                t_meco = t
+                t_sep = t_meco + t_sep_coast
+                t_ign2 = t_sep
+                if not stage1_separated:
+                    m -= s1.dry_kg
+                    stage1_separated = True
 
-        # Stage separation drop of dry mass
-        if t >= t_meco and not stage1_separated:
-            m -= s1.dry_kg
-            stage1_separated = True
-            stage1_separated = True
+            if stage_state == "sep_coast" and t >= t_ign2:
+                stage_state = "s2_burn1"
+
+            if (
+                stage_state == "s2_burn1"
+                and use_s2_coast
+                and s2_prop_used >= s2_burn1_budget - 1e-6
+            ):
+                stage_state = "s2_coast"
+                s2_coast_start_t = t
+
+            if stage_state == "s2_coast" and t >= s2_coast_start_t + coast2_dur:
+                s2_coast_elapsed += t - s2_coast_start_t
+                stage_state = "s2_burn2"
+
+            if (
+                stage_state in ("s2_burn1", "s2_burn2")
+                and prop2_rem <= 1e-6
+                and not insertion_reached
+            ):
+                stage_state = "depleted"
+                if depleted_at_t is None:
+                    depleted_at_t = t
+
+            if insertion_reached or stage_state in ("s2_coast", "depleted"):
+                thrust = 0.0
+                cd = 0.0
+                area = 0.0
+                mdot = 0.0
+            elif stage_state == "s1":
+                eff_thr = thr1_cmd
+                if max_g_limit is not None and max_g_limit > 0.0:
+                    g_cap_thr = (max_g_limit * m * G0) / max(1.0, s1.thrust_n)
+                    eff_thr = max(0.15, min(eff_thr, g_cap_thr))
+                mdot_full = eff_thr * s1.mass_flow_rate_kgps
+                max_mdot = prop1_rem / dt_substep
+                if mdot_full > max_mdot:
+                    scale = max(0.0, max_mdot / max(1e-9, mdot_full))
+                    thrust = eff_thr * s1.thrust_n * scale
+                    mdot = max_mdot
+                else:
+                    thrust = eff_thr * s1.thrust_n
+                    mdot = mdot_full
+                cd = s1.cd
+                area = s1.area_m2
+            elif stage_state == "sep_coast":
+                thrust = 0.0
+                cd = s1.cd
+                area = s1.area_m2
+                mdot = 0.0
+            else:
+                eff_thr = thr2_cmd
+                if max_g_limit is not None and max_g_limit > 0.0:
+                    g_cap_thr = (max_g_limit * m * G0) / max(1.0, s2.thrust_n)
+                    eff_thr = max(0.15, min(eff_thr, g_cap_thr))
+                mdot_full = eff_thr * s2.mass_flow_rate_kgps
+                rem_budget = prop2_rem
+                if stage_state == "s2_burn1" and use_s2_coast:
+                    rem_budget = min(rem_budget, max(0.0, s2_burn1_budget - s2_prop_used))
+                max_mdot = rem_budget / dt_substep
+                if mdot_full > max_mdot:
+                    scale = max(0.0, max_mdot / max(1e-9, mdot_full))
+                    thrust = eff_thr * s2.thrust_n * scale
+                    mdot = max_mdot
+                else:
+                    thrust = eff_thr * s2.thrust_n
+                    mdot = mdot_full
+                cd = s2.cd
+                area = s2.area_m2
+
+        pitch_time_offset = s2_coast_elapsed if stage_state == "s2_burn2" else 0.0
+        if thrust > 0.0:
+            accel_inst_g = thrust / (max(1.0, m) * G0)
+            if accel_inst_g > max_accel_g:
+                max_accel_g = accel_inst_g
 
         # Dynamics derivatives function
         def derivatives(
@@ -327,7 +467,7 @@ def simulate_ascent(
             drag_r = f_drag_c * (vr_c / v_air_c) if v_air_c > 0 else 0.0
             drag_d = f_drag_c * (v_air_d_c / v_air_c) if v_air_c > 0 else 0.0
 
-            psi_c = math.radians(pitch_evaluator(t_c))
+            psi_c = math.radians(pitch_evaluator(t_c - pitch_time_offset))
             ft_r = thrust * math.sin(psi_c)
             ft_d = thrust * math.cos(psi_c)
 
@@ -368,7 +508,7 @@ def simulate_ascent(
 
         # Loss integration
         dv_drag += (f_d1 / m) * dt_substep
-        psi_current = math.radians(pitch_evaluator(t))
+        psi_current = math.radians(pitch_evaluator(t - pitch_time_offset))
         dv_grav += (MU_EARTH / (r * r)) * math.sin(psi_current) * dt_substep
         ideal_dv += (thrust / m) * dt_substep
 
@@ -377,6 +517,14 @@ def simulate_ascent(
         vr += (dt_substep / 6.0) * (k1_vr + 2 * k2_vr + 2 * k3_vr + k4_vr)
         vd += (dt_substep / 6.0) * (k1_vd + 2 * k2_vd + 2 * k3_vd + k4_vd)
         m += (dt_substep / 6.0) * (k1_m + 2 * k2_m + 2 * k3_m + k4_m)
+
+        dm_step = mdot * dt_substep
+        if stage_state == "s1":
+            prop1_rem = max(0.0, prop1_rem - dm_step)
+        elif stage_state in ("s2_burn1", "s2_burn2") and not insertion_reached:
+            used_dm = min(prop2_rem, dm_step)
+            prop2_rem = max(0.0, prop2_rem - used_dm)
+            s2_prop_used += used_dm
 
         t += dt_substep
 
@@ -450,6 +598,11 @@ def simulate_ascent(
         drag_loss_mps=dv_drag,
         total_loss_mps=dv_grav + dv_drag,
         t_insertion_s=t_insertion,
+        s1_prop_used_kg=max(0.0, float(s1.prop_kg) - prop1_rem),
+        s2_prop_used_kg=s2_prop_used,
+        s2_prop_remaining_kg=prop2_rem,
+        max_accel_g=max_accel_g,
+        t_meco_s=t_meco,
     )
 
 

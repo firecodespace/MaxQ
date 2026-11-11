@@ -11,8 +11,8 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 from ascent.geo import MU_EARTH, R_EARTH
-from rendezvous.hcw import propagate_hcw
-from rendezvous.phasing import hohmann_transfer
+from rendezvous.hcw import propagate_hcw, simulate_approach, solve_hcw_transfer
+from rendezvous.phasing import hohmann_transfer, solve_phasing_orbit
 
 
 def test_hohmann_200_to_410km():
@@ -85,3 +85,31 @@ def test_hcw_vs_kepler():
 
     rel_error = np.linalg.norm(r_hcw - r_kepler_lvlh) / np.linalg.norm(r_kepler_lvlh)
     assert rel_error < 0.01, f"Expected HCW vs Kepler error < 1%, got {rel_error:.4%}"
+
+
+def test_solve_phasing_orbit_trades_time_for_dv():
+    """Higher phasing revs trade longer transfer time for lower delta-v."""
+    fast = solve_phasing_orbit(200.0, 410.0, phase_angle_deg=120.0, n_revs=2)
+    slow = solve_phasing_orbit(200.0, 410.0, phase_angle_deg=120.0, n_revs=8)
+    assert fast["total_time_s"] < slow["total_time_s"]
+    assert slow["total_dv_mps"] < fast["total_dv_mps"]
+    assert slow["hohmann_dv_mps"] >= 119.0
+
+
+def test_hcw_transfer_and_approach_corridor():
+    """Two-impulse HCW transfer reaches waypoint and V-bar approach meets C09/C10 bounds."""
+    r0 = np.array([0.0, -1000.0, 0.0])
+    v0 = np.zeros(3)
+    target = np.array([0.0, -200.0, 0.0])
+    dv1, dv2, total_dv = solve_hcw_transfer(r0, v0, target, tof_s=600.0)
+    r_arr, v_arr = propagate_hcw(r0, v0 + dv1, 600.0)
+    assert np.allclose(r_arr, target, atol=1e-4)
+    assert np.allclose(v_arr + dv2, np.zeros(3), atol=1e-4)
+    assert total_dv > 0.0
+
+    approach = simulate_approach(final_tof_s=800.0)
+    tel = approach["approach_telemetry"]
+    assert tel["max_cone_error_deg"] <= 15.0
+    assert tel["closing_speed_mps"] <= 0.1
+    assert tel["lateral_offset_m"] <= 0.1
+    assert approach["samples"][-1]["phase"] == "dock"

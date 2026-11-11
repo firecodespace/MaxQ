@@ -13,16 +13,8 @@ replay rather than asserted here.
 What it does NOT buy, and what no search can:
   - The simulator's own error against published payload figures is in the tens of percent. A better
     search finds a better optimum *of this model*, which is not the same as a better mission.
-  - There is still no best-known benchmark (WP2-12), so `best_known_gap_pct` is null.
-  - There is still no approach or docking phase (WP2-03), so `time_to_dock_s` is the end of
-    phasing. Half the objective measures something other than what its name says.
-  - This searches six ascent parameters. It is not a mission planner, and there is no agent.
-
-Bounds note: this uses wider pitch bounds than the baseline did. The baseline inherited
-`ascent/optimize.py`'s bounds, which were fitted around the three fictional archetypes, and inside
-them no real vehicle could satisfy C01 at all (reproduce with `python scripts/probe_feasibility.py`).
-Searching real vehicles inside bounds that exclude every feasible solution would measure the
-bounds, not the optimiser.
+  - A live search run does not assume an external benchmark, so `best_known_gap_pct` remains null
+    on streamed session attempts (see `optimize/best_known.py` for multi-seed long-budget runs).
 
 Owner: Yash (lane: optimize/, by Yash's direction -- see status/yash.md).
 """
@@ -42,18 +34,17 @@ from optimize.search_core import cma_minimize
 ROOT = Path(__file__).resolve().parents[1]
 
 AGENT_ID = "search-cma-es"
-AGENT_VERSION = "0.1.0"
+AGENT_VERSION = "0.2.0"
 
-#: [t_start_s, p_meco_deg, p_final_deg, alpha1, alpha2, parking_alt_km].
-#: Pitch bounds are the wide ones from scripts/probe_feasibility.py, inside which real vehicles can
-#: actually reach orbit; letting p_final go well below the horizon is the part that matters.
-LOWER = [4.0, 0.0, -25.0, 0.3, 0.3, 160.0]
-UPPER = [30.0, 45.0, 25.0, 1.8, 1.8, 400.0]
-X0 = [11.215, 19.623, -0.962, 0.782, 0.822, 200.0]
+#: [t_start_s, p_meco_deg, p_final_deg, alpha1, alpha2, parking_alt_km,
+#:  max_g_limit, coast_s2_s, phasing_revs, final_tof_s].
+LOWER = [4.0, 0.0, -25.0, 0.3, 0.3, 160.0, 2.5, 0.0, 1.0, 500.0]
+UPPER = [30.0, 45.0, 25.0, 1.8, 1.8, 400.0, 8.0, 300.0, 16.0, 1300.0]
+X0 = [11.215, 19.623, -0.962, 0.782, 0.822, 200.0, 3.6, 0.0, 8.0, 800.0]
 #: CMA-ES searches a normalised space, so one sigma0 covers parameters whose natural scales differ
-#: by orders of magnitude (degrees against kilometres).
+#: by orders of magnitude (degrees against kilometres and seconds).
 SIGMA0 = 0.25
-SCALES = [4.0, 8.0, 8.0, 0.3, 0.3, 40.0]
+SCALES = [4.0, 8.0, 8.0, 0.3, 0.3, 40.0, 1.0, 60.0, 3.0, 150.0]
 
 
 def optimize_mission(
@@ -155,10 +146,17 @@ def optimize_mission(
 
         emit_event("attempt_started", {}, attempt_id=attempt_id)
 
+        coast_s2 = round(float(x[7]), 1)
+        use_coast = coast_s2 >= 5.0
         plan = {
             "launch_t_unix": 1794372400,
             "pitch_program": [round(float(v), 3) for v in x[:5]],
             "parking_alt_km": round(float(x[5]), 1),
+            "max_g_limit": round(float(x[6]), 3),
+            "coast_s2_s": coast_s2 if use_coast else 0.0,
+            "s2_burn1_frac": 0.65 if use_coast else 1.0,
+            "phasing_revs": max(1, int(round(float(x[8])))),
+            "final_tof_s": round(float(x[9]), 1),
             "burns": [],
             "waypoints": [],
         }
@@ -169,6 +167,8 @@ def optimize_mission(
                 "note": "CMA-ES sample from the current search distribution",
                 "key_numbers": {
                     "parking_alt_km": plan["parking_alt_km"],
+                    "max_g_limit": plan["max_g_limit"],
+                    "phasing_revs": plan["phasing_revs"],
                     "generation": dist["generation"],
                     "sigma": round(float(dist["sigma"]), 6),
                     "cov_condition": round(float(dist["cov_condition"]), 4),
@@ -177,10 +177,10 @@ def optimize_mission(
             attempt_id=attempt_id,
             kind="note",
             summary=(
-                f"CMA-ES gen {dist['generation']} (sigma {dist['sigma']:.4g}, covariance "
-                f"condition {dist['cov_condition']:.4g}) sampled pitch program "
-                f"{plan['pitch_program']} parking {plan['parking_alt_km']}km "
-                f"(search only: no agent reasoning)"
+                f"CMA-ES gen {dist['generation']} (sigma {dist['sigma']:.4g}, cov_cond "
+                f"{dist['cov_condition']:.4g}) sampled pitch {plan['pitch_program']} "
+                f"parking {plan['parking_alt_km']}km g_cap {plan['max_g_limit']}g "
+                f"revs {plan['phasing_revs']} (search only: no agent reasoning)"
             ),
         )
 
