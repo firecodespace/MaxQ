@@ -292,6 +292,16 @@ def _check_attempt(obj: dict) -> list[str]:
         )
     if obj["feasible"] and obj["status"] != "finished":
         errs.append(f"feasible: true is only allowed for status 'finished', got {obj['status']!r}")
+    # The split must add up. Two numbers that are supposed to decompose a third and quietly do
+    # not is the kind of error that reads as a physics result.
+    m = obj.get("metrics") or {}
+    asc, orb, tot = m.get("prop_ascent_kg"), m.get("prop_on_orbit_kg"), m.get("prop_used_kg")
+    if asc is not None and orb is not None and tot is not None:
+        if abs((asc + orb) - tot) > max(1.0, 1e-6 * abs(tot)):
+            errs.append(
+                f"metrics: prop_ascent_kg + prop_on_orbit_kg = {asc + orb:,.1f} kg but "
+                f"prop_used_kg is {tot:,.1f} kg"
+            )
     prev_end = None
     for i, ph in enumerate(obj["phases"]):
         if ph["t1_s"] < ph["t0_s"]:
@@ -353,8 +363,20 @@ def _check_mission_request(obj: dict) -> list[str]:
     errs = []
     if obj["profile"] == "crew_iss" and obj["payload"]["crew"] < 1:
         errs.append("payload.crew: a crew_iss mission needs at least 1 crew")
-    if obj["objective"]["w_fuel"] == 0 and obj["objective"]["w_time"] == 0:
-        errs.append("objective: w_fuel and w_time are both 0, so every feasible attempt would tie")
+    o = obj["objective"]
+    if o["w_fuel"] == 0 and o["w_time"] == 0 and not o.get("w_prop_orbit"):
+        errs.append(
+            "objective: w_fuel, w_time and w_prop_orbit are all 0, so every feasible attempt "
+            "would tie"
+        )
+    # A weight with no reference scale is a dial wired to nothing: on-orbit propellant falls
+    # back to the ascent-scale reference, where it contributes ~1% of what it should.
+    if o.get("w_prop_orbit") and not o.get("prop_orbit_ref_kg"):
+        errs.append(
+            "objective: w_prop_orbit is set but prop_orbit_ref_kg is not, so on-orbit "
+            "propellant would be normalized by the ascent-scale fuel_ref_kg and the weight "
+            "would do almost nothing"
+        )
     return errs
 
 

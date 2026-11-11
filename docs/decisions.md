@@ -126,3 +126,24 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   barely varies with the plan. Until throttling and a real approach exist (WP2-03, Shiva), a better
   optimiser cannot show a better result because there is almost nothing to optimise - by yash /
   claude-code - status: OPEN (needs Shiva)
+- Split `prop_used_kg` into `prop_ascent_kg` + `prop_on_orbit_kg` in metrics, and gave the objective
+  a separate `w_prop_orbit` / `prop_orbit_ref_kg` term. WHY: the summed number divided by one
+  ascent-scale reference sat at 1.0 +/- 0.01, so the fuel term's derivative vanished and the search
+  optimised time only. MEASURED on cargo_iss / falcon9_block5, sweeping phasing revs 1..20: ascent
+  propellant is constant at 477,998.2 kg while on-orbit propellant moves 1,104 -> 11,666 kg, a 10.6x
+  swing that was 2.2% of the summed figure. Fuel-term leverage over those same plans went from
+  0.0216 to 0.1140 (5.3x). HONEST CAVEAT: with the default weights (w_fuel 1.0, w_prop_orbit 1.0,
+  w_time 0.5) the time term still has 5.1x the leverage of the fuel term, so time continues to
+  dominate the trade. That ratio is a mission-design preference, not a bug, and it now has a dial;
+  choosing it is Yash's. `prop_orbit_ref_kg` defaults to the upper stage's propellant load (a cited
+  vehicle number) filled in by MissionEnv, because a scale is a property of the vehicle while a
+  weight is a preference and stays in the mission_request. Attempts recorded before the split have
+  no `prop_on_orbit_kg` and are scored with the original formula, so recorded sessions replay
+  unchanged - by claude-code on Yash's instruction while Shiva is offline - reversible: yes -
+  status: FINAL (verifier_version ver-f0ab2e4fa0c1 -> ver-35cac73cafe9)
+- Re-ran scripts/validate_rocket_library.py after merging Shiva's pushed physics: antares_230plus
+  9,200 kg vs 8,000 published (+15.0%), atlas_v_401 7,350 vs 9,800 (-25.0%), falcon9_block5 25,365
+  vs 22,800 (+11.2%), all PASS at the global +/-35%. These reproduce Shiva's reported figures
+  exactly, from a clean checkout - his report was accurate. sim_version ascent-dbc9a3aede21. NOTE:
+  three vehicles passing at +/-35% is not the same as a usable reference; per-vehicle justified
+  tolerances are the next item - by claude-code - reversible: n/a (measurement) - status: FINAL

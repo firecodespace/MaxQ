@@ -46,11 +46,11 @@
   "confidence": "approximate",
   "notes": "Not crew rated in this configuration: the crewed Atlas V is the N22 (two solid boosters, dual-engine Centaur), which the two-serial-stage simulator cannot represent, so it is not in the library. The Centaur'sarea uses the core diameter (3.81 m), not its own 3.05 m, because it flies inside the fairing. The 4 m fairing mass is not in either source. The published 9,800 kg is to 200 km circular at 28.7 deg (ULA), whichis the same reference orbit the validation uses. Source status: 'Active, retiring'. KNOWN MODEL LIMITATION, measured not assumed: the ascent simulator reaches only 4,410 kg here, 55 % below the published 9,800 kg, and that is the simulator's fault rather than the data's. Centaur has a thrust-to-weight of 0.31 at staging and would burn for 928 s continuously in this model, because the model has no coast and no second burn. The real flight coasts and relights; burning a 0.31 g stage straight through instead pours the margin into gravity losses. The other two vehicles, whose upper stages sit at 0.84 and 1.41, come out within tolerance. Expect this to improve when WP2-02's MissionEnv replaces the single continuous burn with discrete burns and coasts. Modelling conventions (assumptions, not data): first-stage thrust and Isp are the mean of the published sea-level and vacuum values because the simulator has one of each per stage; cd = 0.3 is assumed; area is the circle of the published core diameter; fairing mass and jettison are not modelled.",
   "sim_validation": {
-    "payload_to_leo_kg_sim": 4410.0,
-    "error_pct": -55.0,
+    "payload_to_leo_kg_sim": 7350.0,
+    "error_pct": -25.0,
     "tolerance_pct": 35.0,
-    "pass": false,
-    "sim_version": "ascent-48604317e4d6",
-    "note": "Heaviest payload reaching perigee >= 160 km, due east from ccsfs_slc41 (resolved to +/- 153 kg; pitch program [12.017, 17.457, 13.247, 0.414, 1.15] found by CMA-ES seed 7). Orbit reached: 175 x 225 km, max q 99.8 kPa. Published figure: 9800 kg."
+    "pass": true,
+    "sim_version": "ascent-dbc9a3aede21",
+    "note": "Heaviest payload reaching perigee >= 160 km, due east from ccsfs_slc41 (resolved to +/- 153 kg; pitch program [7.54, 22.055, 23.604, 0.37, 1.142] found by CMA-ES seed 7). Orbit reached: 162 x 216 km, max q 129.6 kPa. Published figure: 9800 kg."
   }
 }

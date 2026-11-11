@@ -58,11 +58,11 @@
   "confidence": "approximate",
   "notes": "Crew-capable class: SpaceX describes Falcon 9 as transporting people, and it launches Crew Dragon. Conflicts between sources: second-stage thrust is 981 kN on spacex.com and in the stage table but 934 kN inthe Wikipedia infobox (981 kN used, manufacturer value). The stage masses sum to 517,870 kg against a published lift-off mass of 549,054 kg; the difference (about 31 t) is consistent with payload plus fairingbut is not itemised by any source. The published 22,800 kg is the expendable figure to a 28.5 deg orbit; no altitude is stated. No source publishes a max-q limit. Modelling conventions (assumptions, not data): first-stage thrust and Isp are the mean of the published sea-level and vacuum values because the simulator has one of each per stage; cd = 0.3 is assumed; area is the circle of the published core diameter; fairing mass and jettison are not modelled.",
   "sim_validation": {
-    "payload_to_leo_kg_sim": 26790.0,
-    "error_pct": 17.5,
+    "payload_to_leo_kg_sim": 25365.0,
+    "error_pct": 11.2,
     "tolerance_pct": 35.0,
     "pass": true,
-    "sim_version": "ascent-48604317e4d6",
-    "note": "Heaviest payload reaching perigee >= 160 km, due east from ccsfs_slc40 (resolved to +/- 712 kg; pitch program [6.683, 15.138, 7.468, 0.99, 0.604] found by CMA-ES seed 7). Orbit reached: 166 x 196 km, max q 37.0 kPa. Published figure: 22800 kg."
+    "sim_version": "ascent-dbc9a3aede21",
+    "note": "Heaviest payload reaching perigee >= 160 km, due east from ccsfs_slc40 (resolved to +/- 712 kg; pitch program [4.667, 20.719, 5.228, 0.621, 0.56] found by CMA-ES seed 7). Orbit reached: 165 x 170 km, max q 54.5 kPa. Published figure: 22800 kg."
   }
 }

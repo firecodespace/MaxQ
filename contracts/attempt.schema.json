@@ -225,6 +225,20 @@
           "type": "number",
           "minimum": 0
         },
+        "prop_ascent_kg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Propellant burned from lift-off to orbital insertion. Near-fixed once the vehicle and pitch programme are chosen."
+        },
+        "prop_on_orbit_kg": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "description": "Propellant burned after insertion: phasing plus approach. This is the part the mission plan controls. prop_used_kg remains the sum of the two. Absent on attempts recorded before the split; those files are evidence and are not rewritten."
+        },
         "total_dv_mps": {
           "type": "number",
           "minimum": 0

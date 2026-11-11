@@ -233,3 +233,39 @@ def test_session_nothing_after_mission_finished(tmp_path):
     ev.append({"schema_version": 1, "t_wall": 9.0, "type": "benchmark_update", "data": {}})
     with pytest.raises(ContractError, match="after mission_finished"):
         validate_session_file(_write_session(tmp_path, ev))
+
+
+def test_an_on_orbit_weight_without_a_reference_scale_is_rejected():
+    """A dial wired to nothing. On-orbit propellant would be divided by the ascent-scale
+    reference, where it is ~1% of the scale, so the weight would do almost nothing and the
+    mission would look as though it were trading fuel against time when it was not."""
+    bad = copy.deepcopy(_load("mission_request_dummy.json"))
+    bad["objective"]["w_prop_orbit"] = 1.0
+    bad["objective"].pop("prop_orbit_ref_kg", None)
+    with pytest.raises(ContractError, match="prop_orbit_ref_kg"):
+        validate("mission_request", bad)
+
+
+def test_an_on_orbit_weight_with_its_reference_is_accepted():
+    good = copy.deepcopy(_load("mission_request_dummy.json"))
+    good["objective"]["w_prop_orbit"] = 1.0
+    good["objective"]["prop_orbit_ref_kg"] = 92670.0
+    validate("mission_request", good)
+
+
+def test_the_propellant_split_must_add_up():
+    """Two numbers meant to decompose a third that quietly do not would read as physics."""
+    bad = copy.deepcopy(_load("attempt_dummy.json"))
+    bad["metrics"]["prop_ascent_kg"] = 400000.0
+    bad["metrics"]["prop_on_orbit_kg"] = 5000.0
+    bad["metrics"]["prop_used_kg"] = 480000.0  # not the sum of the two
+    with pytest.raises(ContractError, match=r"prop_ascent_kg \+ prop_on_orbit_kg"):
+        validate("attempt", bad)
+
+
+def test_a_consistent_propellant_split_is_accepted():
+    good = copy.deepcopy(_load("attempt_dummy.json"))
+    good["metrics"]["prop_ascent_kg"] = 477998.2
+    good["metrics"]["prop_on_orbit_kg"] = 4558.6
+    good["metrics"]["prop_used_kg"] = 482556.8
+    validate("attempt", good)

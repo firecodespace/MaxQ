@@ -98,6 +98,11 @@
           "type": "number",
           "minimum": 0
         },
+        "w_prop_orbit": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Weight on ON-ORBIT propellant (phasing + approach), normalized by prop_orbit_ref_kg. Separate from w_fuel because ascent propellant is near-fixed once the vehicle is chosen while on-orbit propellant is what the plan actually spends. Optional; absent means 1.0."
+        },
         "w_time": {
           "type": "number",
           "minimum": 0
@@ -105,6 +110,11 @@
         "fuel_ref_kg": {
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "prop_orbit_ref_kg": {
+          "type": "number",
+          "exclusiveMinimum": 0.0,
+          "description": "Reference scale for on-orbit propellant, in kg. Conventionally the upper stage's propellant load, so the term reads as a fraction of the on-orbit tank. Optional; absent falls back to fuel_ref_kg, which makes the term negligible -- set it for any mission where the on-orbit trade matters."
         },
         "time_ref_s": {
           "type": "number",

@@ -324,6 +324,32 @@ class MissionEnv:
         state["prop_approach"] = prop_approach
         state["approach_telemetry"] = approach["approach_telemetry"]
 
+    def _objective(self) -> dict[str, Any]:
+        """The mission's objective, with the on-orbit reference scale filled in if absent.
+
+        The weights are a preference and belong to whoever wrote the mission_request; the
+        environment never changes them. `prop_orbit_ref_kg` is not a preference, it is a
+        scale, and it is a property of the vehicle flying: the upper stage's propellant
+        load, so the on-orbit term reads as a fraction of the on-orbit tank. Left unset it
+        falls back to the ascent-scale `fuel_ref_kg` inside the verifier, where on-orbit
+        propellant is ~1% of the reference and the weight does nothing -- which is the bug
+        the split exists to fix, so filling it here is the point.
+        """
+        obj = dict(
+            self.request.get(
+                "objective",
+                {
+                    "w_fuel": 1.0,
+                    "w_time": 0.5,
+                    "fuel_ref_kg": 500000.0,
+                    "time_ref_s": 86400.0,
+                },
+            )
+        )
+        if not obj.get("prop_orbit_ref_kg"):
+            obj["prop_orbit_ref_kg"] = float(self.rocket.stages[-1].prop_kg)
+        return obj
+
     def _finalize(
         self,
         state: dict[str, Any],
@@ -455,6 +481,14 @@ class MissionEnv:
             ],
             "metrics": {
                 "prop_used_kg": round(total_prop_used, 1),
+                # Reported separately because they differ by three orders of magnitude and
+                # the plan controls them very differently. Ascent propellant is near-fixed
+                # once the vehicle and pitch programme are chosen; on-orbit propellant is
+                # what the phasing and approach decisions actually spend. Summed into one
+                # number the on-orbit trade is invisible to the objective -- see
+                # verifier/core.py `_compute_cost`.
+                "prop_ascent_kg": round(prop_ascent, 1),
+                "prop_on_orbit_kg": round(prop_phasing + prop_approach, 1),
                 "total_dv_mps": round(total_dv, 1),
                 "time_to_dock_s": round(t_dock_end, 1),
                 "perigee_km": round(sim_res.perigee_km, 2),
@@ -472,15 +506,7 @@ class MissionEnv:
             "trajectory_ref": f"data/attempts/{attempt_id}.traj.json",
             "wall_s": round(time.perf_counter() - wall_start, 4),
             "status": "finished",
-            "objective": self.request.get(
-                "objective",
-                {
-                    "w_fuel": 1.0,
-                    "w_time": 0.5,
-                    "fuel_ref_kg": 500000.0,
-                    "time_ref_s": 86400.0,
-                },
-            ),
+            "objective": self._objective(),
             "config": {
                 "max_q_limit_kpa": max_q_limit,
                 "plane_error_deg": 0.0,

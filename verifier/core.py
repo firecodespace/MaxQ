@@ -340,18 +340,36 @@ def _compute_cost(
 ) -> float:
     """Compute cost per §5.2.  Infeasible always beats feasible.
 
-    cost = Σ_violated (1000 + 1000 · normalized_violation)      # infeasible
-         + w_fuel · (prop_used_kg / fuel_ref_kg)
-         + w_time · (time_to_dock_s / time_ref_s)               # feasible only
+    cost = Σ_violated (1000 + 1000 · normalized_violation)        # infeasible
+         + w_fuel       · (prop_ascent_kg   / fuel_ref_kg)
+         + w_prop_orbit · (prop_on_orbit_kg / prop_orbit_ref_kg)
+         + w_time       · (time_to_dock_s   / time_ref_s)         # feasible only
+
+    Ascent and on-orbit propellant are separate terms because they differ by three
+    orders of magnitude. Summed and divided by one ascent-scale reference, the fuel
+    term sat at 1.0 ± 0.01 and its derivative vanished: measured on cargo_iss /
+    falcon9_block5, sweeping phasing revs 1→20 holds ascent propellant at exactly
+    477,998.2 kg while on-orbit propellant moves 1,104 → 11,666 kg, a 10.6x swing
+    that was 2.2% of the summed number. The fuel signal was always there; the
+    normalization buried it.
+
+    What the terms are worth relative to each other is a mission-design judgement and
+    stays in the mission_request, not here. The verifier applies the stated objective.
+
+    An attempt whose metrics predate the split (no `prop_on_orbit_kg`) is scored with
+    the original single summed fuel term, so recorded sessions replay unchanged.
     """
     obj = attempt.get("objective", {})
     w_fuel: float = float(obj.get("w_fuel", 1.0))
     w_time: float = float(obj.get("w_time", 0.5))
+    w_prop_orbit: float = float(obj.get("w_prop_orbit", 1.0))
     fuel_ref_kg: float = float(obj.get("fuel_ref_kg", 1.0)) or 1.0
     time_ref_s: float = float(obj.get("time_ref_s", 1.0)) or 1.0
 
     metrics = attempt.get("metrics", {})
     prop_used_kg: float = float(metrics.get("prop_used_kg") or 0.0)
+    prop_ascent_kg = metrics.get("prop_ascent_kg")
+    prop_on_orbit_kg = metrics.get("prop_on_orbit_kg")
     time_to_dock_s: float | None = metrics.get("time_to_dock_s")
 
     # Penalty for each violated constraint.
@@ -371,7 +389,18 @@ def _compute_cost(
         return round(penalty, 6)
 
     # Feasible: fuel + time cost (penalty is 0 when feasible).
-    cost = w_fuel * (prop_used_kg / fuel_ref_kg)
+    if prop_on_orbit_kg is None:
+        # Pre-split attempt: score it exactly as the verifier that recorded it did.
+        cost = w_fuel * (prop_used_kg / fuel_ref_kg)
+    else:
+        ascent_kg = float(prop_ascent_kg if prop_ascent_kg is not None else prop_used_kg)
+        # Default reference: the upper stage's propellant load, so the term reads as a
+        # fraction of the on-orbit tank. A mission may state its own.
+        orbit_ref_kg = float(obj.get("prop_orbit_ref_kg") or 0.0)
+        if orbit_ref_kg <= 0.0:
+            orbit_ref_kg = fuel_ref_kg
+        cost = w_fuel * (ascent_kg / fuel_ref_kg)
+        cost += w_prop_orbit * (float(prop_on_orbit_kg) / orbit_ref_kg)
     if time_to_dock_s is not None:
         cost += w_time * (time_to_dock_s / time_ref_s)
     return round(cost, 6)

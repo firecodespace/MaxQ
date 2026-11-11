@@ -354,3 +354,85 @@ def test_feasibility_is_exactly_the_evaluated_constraints():
         r = verify(att)
         expected = all(c["pass"] for c in r["constraint_report"] if c["evaluated"])
         assert r["feasible"] is expected
+
+
+# ---------------------------------------------------------------------------
+# Ascent vs on-orbit propellant: the fuel term has to be able to move
+
+
+def _objective(**kw) -> dict:
+    o = {
+        "w_fuel": 1.0,
+        "w_prop_orbit": 1.0,
+        "w_time": 0.5,
+        "fuel_ref_kg": 488370.0,
+        "prop_orbit_ref_kg": 92670.0,
+        "time_ref_s": 86400.0,
+    }
+    o.update(kw)
+    return o
+
+
+def _attempt_with(ascent_kg: float, on_orbit_kg: float, dock_s: float) -> dict:
+    att = _feasible_attempt()
+    att["objective"] = _objective()
+    att["metrics"].update(
+        prop_ascent_kg=ascent_kg,
+        prop_on_orbit_kg=on_orbit_kg,
+        prop_used_kg=ascent_kg + on_orbit_kg,
+        time_to_dock_s=dock_s,
+    )
+    return att
+
+
+def test_the_split_fuel_term_responds_where_the_summed_term_could_not():
+    """The regression this split exists to prevent.
+
+    Measured on cargo_iss / falcon9_block5: sweeping phasing revs 1 -> 12 holds ascent
+    propellant at 477,998 kg and moves on-orbit propellant 11,666 -> 1,104 kg, a 10.6x
+    swing. Divided by one ascent-scale reference that was a 2% wiggle, so the optimiser
+    could not see it. Separated, the same two plans differ by an order of magnitude more.
+    """
+    costly = _attempt_with(477998.2, 11666.1, 15546.0)
+    thrifty = _attempt_with(477998.2, 1103.9, 15546.0)  # same dock time, less on-orbit fuel
+
+    split_gap = verify(costly)["cost"] - verify(thrifty)["cost"]
+
+    # Same two attempts scored the old way: one summed fuel term, no on-orbit reference.
+    for a in (costly, thrifty):
+        a["objective"] = _objective(w_prop_orbit=0.0)
+        a["metrics"].pop("prop_on_orbit_kg")
+    summed_gap = verify(costly)["cost"] - verify(thrifty)["cost"]
+
+    assert split_gap > 0.1, f"burning 10x the on-orbit propellant cost only {split_gap:.5f}"
+    assert split_gap > 4.0 * summed_gap, (
+        f"the split barely helped: {summed_gap:.5f} -> {split_gap:.5f}"
+    )
+
+
+def test_spending_more_on_orbit_propellant_always_costs_more():
+    """Monotonic in the thing being minimised, with everything else held fixed."""
+    costs = [verify(_attempt_with(477998.2, kg, 20000.0))["cost"]
+             for kg in (1000.0, 4000.0, 8000.0, 12000.0)]
+    assert costs == sorted(costs), f"not monotonic in on-orbit propellant: {costs}"
+
+
+def test_an_attempt_recorded_before_the_split_scores_exactly_as_it_did():
+    """Recorded sessions are evidence. Replaying one must not silently restate its cost."""
+    att = _feasible_attempt()
+    att["objective"] = _objective()
+    att["metrics"].update(prop_used_kg=482556.8, time_to_dock_s=54507.0)
+    att["metrics"].pop("prop_ascent_kg", None)
+    att["metrics"].pop("prop_on_orbit_kg", None)
+
+    expected = 1.0 * (482556.8 / 488370.0) + 0.5 * (54507.0 / 86400.0)
+    assert verify(att)["cost"] == round(expected, 6)  # the verifier rounds to 6 dp
+
+
+def test_a_missing_on_orbit_reference_does_not_crash_the_verifier():
+    """It degrades to the ascent-scale reference. contracts/validate.py rejects the
+    mission_request that would cause it, but the verifier must not be the thing that fails."""
+    att = _attempt_with(477998.2, 4558.6, 54507.0)
+    att["objective"] = _objective(prop_orbit_ref_kg=None)
+    r = verify(att)
+    assert isinstance(r["cost"], float) and r["cost"] > 0.0
