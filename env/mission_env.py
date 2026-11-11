@@ -252,7 +252,7 @@ class MissionEnv:
             "id": attempt_id,
             "mission_id": self.request.get("id", "msn_default"),
             "agent": agent_info
-            or {"id": "cma-es-optimizer", "model": None, "version": "0.1.0"},
+            or {"id": "unknown-caller", "model": None, "version": "0.0.0"},
             "sim_version": SIM_VERSION,
             "verifier_version": "ver-placeholder",
             "seed": self.seed,

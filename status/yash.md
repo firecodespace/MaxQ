@@ -41,7 +41,7 @@
 **Found while integrating (reported to Shiva with `scripts/probe_feasibility.py`)**
 - crew_iss cannot be feasible at any payload: no throttling, so peak g is 4.38-4.64 against a 4.0 g
   limit. cargo_iss is feasible (cost 1.084), so the chain itself is sound.
-- `optimize/cma_optimizer.py` clips the pitch program to the archetype bounds, which alone keeps C01
+- the placeholder search (now `optimize/fixed_sigma_es.py`) clips the pitch program to the archetype bounds, which alone keeps C01
   unreachable for real vehicles.
 
 **Next**

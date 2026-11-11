@@ -34,7 +34,7 @@ Sprint: 2026-11-10, 00:30 -> 07:30 IST. Tiers: P0 deploy by 04:30, P1 freeze 06:
 | WP2-02 | MissionEnv core (plan + step mode) | Shiva | - | A | done (Shiva M1); plan mode, ASCENT->PARKING->PHASING | - |
 | WP2-03 | Phasing and rendezvous physics (HCW) | Shiva | - | A/B | not started | WP2-02 |
 | WP2-04 | Verifier and cost (gated) | Shiva | - | A | done (Shiva M1); C01-C10, verifier_version hash | - |
-| WP2-05 | Baseline optimizer, attempt log, best-known runner | Shiva | - | A | not started | WP2-02, WP2-04 |
+| WP2-05 | Baseline optimizer, attempt log, best-known runner | Shiva | claude-code | A | partial: placeholder search shipped as `fixed_sigma_es` (was mislabelled CMA-ES); real CMA-ES in `cma_optimizer`; best-known runner still missing | WP2-02, WP2-04 |
 | WP2-06 | API + session streaming + replay recording | Yash | claude-code | A | done: FastAPI, WS live stream, replay, budgets enforced; 14 tests | - |
 | WP2-07 | UI: mission wizard | Yash | - | A | not started | WP2-01 |
 | WP2-08 | UI: mission control panels | Yash | - | A | not started | - |

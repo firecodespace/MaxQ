@@ -145,3 +145,9 @@ Integrity rules for work where AI sits inside the loop. They apply to every agen
 8. **Show decision traces, not raw hidden reasoning.** The trace holds the agent's stated plan, tool calls, key numbers, and decisions. Don't present model free-text as fact.
 9. **Budgets.** Every agent run has `max_attempts` and `max_wall_s`. Enforce them in code.
 10. **Models and licenses.** Use open-weight models only after checking the license and recording it in `docs/decisions.md` (🔴 for the first choice). Keep secrets in env vars.
+11. **Names must match implementations.** A file, class, agent id, status note, or UI label that
+    names a technique must be running that technique. If it is not, rename it rather than planning
+    to implement it later.
+12. **Label the unfinished.** Anything placeholder or unimplemented says so — in code, in contracts,
+    and in the UI — using the word `placeholder`. A metric with no real source is `null`, never
+    `0`. Zero is a measurement; null is the absence of one, and a zeroed gap reads as a result.

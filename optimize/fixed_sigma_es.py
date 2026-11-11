@@ -1,4 +1,15 @@
-"""CMA-ES Baseline Optimizer over plan parameters.
+"""Placeholder baseline search over ascent plan parameters: a fixed-sigma evolution strategy.
+
+This is NOT CMA-ES, and the file is named for what it does. The loop samples a candidate from a
+Gaussian around a running mean, flies it through MissionEnv, and on an improvement moves the mean
+20% toward the winner. `sigma` is a constant for the whole run and there is no covariance matrix, so
+nothing about the search distribution adapts to the landscape. Real CMA-ES lives in
+`optimize/cma_optimizer.py`; this module is kept as the non-adaptive baseline that the comparison
+test in `tests/optimize/test_cma_optimizer.py` measures against.
+
+Scope, stated plainly: this searches six ASCENT parameters. It does not plan a mission. Phasing is
+a fixed coast and there is no approach or docking phase (WP2-03), so `time_to_dock_s` is the end of
+phasing, not a docking time.
 
 Emits contract-valid attempt.json files and session.jsonl streaming logs.
 """
@@ -16,6 +27,9 @@ from env.mission_env import MissionEnv
 
 ROOT = Path(__file__).resolve().parents[1]
 
+AGENT_ID = "search-fixed-sigma-es"
+AGENT_VERSION = "0.1.0"
+
 
 def optimize_mission(
     mission_request: dict[str, Any],
@@ -24,7 +38,7 @@ def optimize_mission(
     session_log_path: Path | str | None = None,
     save_attempts: bool = True,
 ) -> dict[str, Any]:
-    """Execute CMA-ES optimization for a mission request.
+    """Run the placeholder fixed-sigma search for a mission request.
 
     Parameters
     ----------
@@ -83,8 +97,10 @@ def optimize_mission(
 
     # 1. Mission Started
     emit_event("mission_started", {
-        "agent": "optimizer-cma",
+        "agent": AGENT_ID,
         "mode": "live",
+        "search": "placeholder",
+        "search_label": "fixed-sigma evolution strategy (non-adaptive)",
         "max_attempts": max_attempts,
     })
 
@@ -130,18 +146,21 @@ def optimize_mission(
         emit_event(
             "agent_step",
             data={
-                "tool": "propose_plan",
+                "note": "placeholder search: Gaussian sample around the running mean",
                 "key_numbers": {"parking_alt_km": plan["parking_alt_km"]},
             },
             attempt_id=attempt_id,
-            kind="plan",
-            summary=f"Propose pitch program {plan['pitch_program']} parking {plan['parking_alt_km']}km",
+            kind="note",
+            summary=(
+                f"Sampled pitch program {plan['pitch_program']} parking "
+                f"{plan['parking_alt_km']}km (no agent reasoning: placeholder search)"
+            ),
         )
 
         attempt, traj = env.evaluate_plan(
             plan=plan,
             attempt_id=attempt_id,
-            agent_info={"id": "optimizer-cma", "model": None, "version": "0.1.0"},
+            agent_info={"id": AGENT_ID, "model": None, "version": AGENT_VERSION},
         )
 
         cost = attempt["cost"]
@@ -164,7 +183,9 @@ def optimize_mission(
             emit_event("benchmark_update", {
                 "best_cost": cost,
                 "best_attempt_id": attempt_id,
-                "best_known_gap_pct": 0.0,
+                # No best-known benchmark exists yet (WP2-12). A missing measurement is null, not
+                # 0.0 -- 0.0 reads as "exactly matches best known", which is a claim we cannot make.
+                "best_known_gap_pct": None,
             })
 
         if save_attempts:

@@ -791,6 +791,11 @@ async function wizRefreshAttempts() {
     el("div", { class: `tile${best != null ? " hot" : ""}` },
       el("span", { class: "v mono", text: best != null ? best.toFixed(3) : "–" }),
       el("span", { class: "k", text: "Best cost" })),
+    // There is no best-known benchmark yet (WP2-12), so this tile says so rather than showing a
+    // 0% gap, which would read as "already matches the best known solution".
+    el("div", { class: "tile", title: "No best-known benchmark has been computed yet (WP2-12)." },
+      el("span", { class: "v mono muted", text: "n/a" }),
+      el("span", { class: "k", text: "Gap to best known" })),
   );
 }
 
@@ -809,6 +814,15 @@ function wizOnLaunched(request, run) {
   runSocket = api.stream(request.id, {
     onEvent: (ev) => {
       RUN.events++;
+      if (ev.type === "mission_started") {
+        // The badge reports what the run itself declared, not what the UI assumes it ran.
+        const d = ev.data || {};
+        const b = $("wiz-search-badge");
+        const placeholder = d.search === "placeholder";
+        b.textContent = placeholder ? "search: placeholder" : `search: ${d.search || "unknown"}`;
+        b.className = `badge ${placeholder ? "ph" : "real"}`;
+        if (d.search_label) b.title = `${d.search_label} (agent: ${d.agent || "unknown"})`;
+      }
       if (ev.type === "attempt_finished") wizRefreshAttempts();
       if (ev.type === "mission_finished") {
         RUN.finished = true;
@@ -843,6 +857,10 @@ function wizFidelityNote() {
     "Ascent: a 2D point-mass model. It has no throttling, so peak acceleration is set by the vehicle, " +
       "which is why crew missions cannot pass their 4 g limit yet.",
     "Feasibility and cost are decided by the verifier after an attempt is flown, never by this wizard.",
+    "Search: a placeholder. It samples six ascent parameters from a fixed-width Gaussian around a " +
+      "running mean. It is not CMA-ES, it has no memory between runs, and there is no agent " +
+      "reasoning behind the attempts. There is also no best-known benchmark yet, so the cost has " +
+      "nothing to be compared against.",
   ];
   $("wiz-fidelity").replaceChildren(...lines.map((t) => el("p", { text: t, style: "margin:0 0 6px" })));
 }

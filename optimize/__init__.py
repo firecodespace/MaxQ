@@ -1,9 +1,13 @@
-"""MaxQ Phase 2 — Baseline Optimizer Package.
+"""MaxQ Phase 2 — plan-parameter search.
 
-Runs CMA-ES search over plan parameters with MissionEnv in the loop,
-streams contract-valid session.jsonl events, and exports attempt files.
+`fixed_sigma_es` is the placeholder baseline: a non-adaptive Gaussian search, named for what it
+actually does. It is exported as `optimize_mission` until the real CMA-ES search replaces it, so
+that callers do not have to care which one is current.
+
+Nothing here plans a mission. It searches six ascent parameters with MissionEnv in the loop,
+streams contract-valid session.jsonl events, and writes attempt files.
 """
 
-from optimize.cma_optimizer import optimize_mission
+from optimize.fixed_sigma_es import optimize_mission
 
 __all__ = ["optimize_mission"]

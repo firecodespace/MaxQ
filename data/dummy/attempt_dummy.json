@@ -4,7 +4,7 @@
   "id": "att_000123",
   "mission_id": "msn_crew_iss_0001",
   "agent": {
-    "id": "optimizer-cma",
+    "id": "search-fixed-sigma-es",
     "model": null,
     "version": "0.1.0"
   },
@@ -130,7 +130,7 @@
   ],
   "feasible": true,
   "cost": 1.23,
-  "best_known_gap_pct": 4.2,
+  "best_known_gap_pct": null,
   "trajectory_ref": "data/dummy/mission_trajectory_dummy.json",
   "wall_s": 1.8,
   "status": "finished"

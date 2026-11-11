@@ -171,7 +171,8 @@ Full detail: `docs/reviews/shiva-wp10-11-14.md` (Round 2). **Accepted:** regener
 ## Phase 2: Milestone M1 Foundation (WP2-04, WP2-02, WP2-05, WP2-03) — 04:15 IST
 - **WP2-04 (Verifier & Cost):** Shipped `verifier/` with `VERIFIER_VERSION` SHA-256 hash covering code and limits. Evaluates constraints C01–C10 strictly per §5.1; unevaluated constraints (weather C05, approach C09/C10) report honestly as `pass=False` with `note="not evaluated - required input not available"` and do not block feasibility when absent. Infeasible attempts always lose to feasible ones. 15/15 acceptance tests passing in `tests/verifier/test_verifier.py`.
 - **WP2-02 (MissionEnv):** Shipped `env/` with `SIM_VERSION` hash. Implemented Plan mode executing ASCENT -> PARKING -> PHASING wrapping `ascent.sim`. Emits contract-valid `attempt` and `mission_trajectory` outputs. Tested deterministic behavior (`test_env_deterministic`).
-- **WP2-05 (Baseline Optimizer):** Shipped `optimize/cma_optimizer.py` running CMA-ES parameter search with MissionEnv in the loop. Streams contract-valid `session.jsonl` events and writes attempt files. 1/1 test passing in `tests/optimize/test_optimizer.py`.
+- **WP2-05 (Baseline Optimizer):** Shipped ~~`optimize/cma_optimizer.py` running CMA-ES parameter search~~ with MissionEnv in the loop. Streams contract-valid `session.jsonl` events and writes attempt files. 1/1 test passing in ~~`tests/optimize/test_optimizer.py`~~.
+  - **CORRECTION 2026-11-12 (Yash, claude-code):** it was not CMA-ES. The module imported only numpy and ran a fixed-sigma Gaussian search around a running mean, with no covariance and no step-size adaptation. Renamed to `optimize/fixed_sigma_es.py` / `tests/optimize/test_fixed_sigma_es.py`, agent id `search-fixed-sigma-es`. Real CMA-ES now lives in `optimize/cma_optimizer.py`. No judgement on the work -- the search harness, event stream and attempt contract were all sound; only the name was wrong.
 - **WP2-03 (Phasing & Rendezvous Physics):** Shipped `rendezvous/phasing.py` (Hohmann transfer, 200 km -> 410 km yields 121.36 m/s, strictly inside 119–124 m/s target) and `rendezvous/hcw.py` (Hill-Clohessy-Wiltshire state transition matrix in LVLH, validated against numerical two-body Keplerian propagation within <0.001% error). 2/2 tests passing in `tests/rendezvous/test_phasing.py`.
 - **Suite Status:** All 20 Phase 2 unit tests passing; all 59 repository contracts valid; ruff checks clean across all 4 new packages.
 
@@ -182,7 +183,7 @@ came out of it that are in YOUR lane, both reproducible with `python scripts/pro
 (read-only, writes nothing).
 
 **1. The optimizer's pitch bounds are too narrow for real vehicles, so C01 never passes.**
-`optimize/cma_optimizer.py` clips the candidate to `p_meco [5, 40]` and `p_final [-5, 5]`. Those are
+`optimize/fixed_sigma_es.py` (then named `cma_optimizer.py`) clips the candidate to `p_meco [5, 40]` and `p_final [-5, 5]`. Those are
 `ascent/optimize.py`'s bounds, fitted around the three fictional archetypes. Real vehicles carry far
 more delta-v (Falcon 9 ~13.6 km/s ideal at this payload against the archetypes' ~11.3), and inside
 those bounds every candidate flies too steep: four attempts through the API all came back with

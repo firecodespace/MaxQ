@@ -79,8 +79,8 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   optimizer to stop and hope it checked. The store terminates the process instead, and
   `test_wall_clock_budget_terminates_the_run` holds it to a 1 s budget. Each run writes into
   `data/sessions/<run_id>/`, so runs cannot overwrite each other and tests can use a temp root. The
-  one seam into Shiva's lane is rebinding `optimize.cma_optimizer.ROOT` per run; nothing in
-  `optimize/` is edited - by yash / claude-code - reversible: yes - status: FINAL
+  one seam into Shiva's lane is rebinding the search module's `ROOT` per run (as of
+  2026-11-12 `optimize.fixed_sigma_es.ROOT`) - by yash / claude-code - reversible: yes - status: FINAL
 - WP2-06 new pinned dependencies (Yellow): fastapi, uvicorn, starlette, websockets, httpx. Local
   development tool only: CORS is open and there is no authentication, so it must not be exposed to
   the internet as it stands. The static site keeps working with no backend at all through the replay
@@ -89,7 +89,8 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   `crew_iss` is INFEASIBLE at any payload because `ascent/sim.py` burns each stage to depletion at
   constant thrust, so peak acceleration (4.38-4.64 g measured at 12-20 t) sits above the 4.0 g crew
   limit and no pitch program moves it. `cargo_iss` at the 6 g limit is feasible, cost 1.084. Also,
-  `optimize/cma_optimizer.py` clips the pitch program to the archetype bounds, which alone makes C01
+  the placeholder search (now `optimize/fixed_sigma_es.py`) clips the pitch program to the
+  archetype bounds, which alone makes C01
   unreachable for real vehicles. Reproduce: `python scripts/probe_feasibility.py` - by yash /
   claude-code - status: OPEN (needs Shiva: throttling, and wider optimizer bounds)
 

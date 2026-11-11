@@ -8,7 +8,7 @@ safe to run against the committed data at any time.
 
 Why it exists: wiring the API to the optimizer (WP2-06) produced four infeasible attempts in a row,
 and "the optimizer is not converging" and "no feasible plan exists" look identical from outside. This
-searches the pitch program directly, over WIDER bounds than optimize/cma_optimizer.py uses, and
+searches the pitch program directly, over WIDER bounds than optimize/fixed_sigma_es.py uses, and
 reports which constraints are still blocking. That distinguishes the two.
 
 Owner: Yash (lane: scripts/, server/). Findings recorded in status/shiva.md and docs/decisions.md.
@@ -27,7 +27,7 @@ sys.path.insert(0, str(REPO_ROOT))
 
 from env import MissionEnv  # noqa: E402
 
-# optimize/cma_optimizer.py clips the pitch program to p_meco [5, 40] and p_final [-5, 5]. Those are
+# optimize/fixed_sigma_es.py clips the pitch program to p_meco [5, 40] and p_final [-5, 5]. Those are
 # ascent/optimize.py's archetype bounds; WP2-01 found real vehicles need far more room, so the probe
 # searches wide on purpose. If a plan is feasible here but not there, the bounds are the problem.
 LOWER = [4.0, 0.0, -25.0, 0.3, 0.3]
