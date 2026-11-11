@@ -51,6 +51,16 @@ def _library(folder: str) -> list[dict[str, Any]]:
     return out
 
 
+def _notifier_from_env():
+    """A SlackNotifier when a webhook is configured, otherwise None. Never raises."""
+    try:
+        from notify import SlackNotifier
+
+        return SlackNotifier.from_env() if SlackNotifier.is_configured() else None
+    except Exception:  # noqa: BLE001 - the API must start with or without Slack
+        return None
+
+
 def create_app(root: Path | str | None = None, *, store: MissionStore | None = None) -> FastAPI:
     @asynccontextmanager
     async def lifespan(a: FastAPI):
@@ -77,7 +87,10 @@ def create_app(root: Path | str | None = None, *, store: MissionStore | None = N
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    app.state.store = store or MissionStore(root)
+    # Slack notifications are opt-in by configuration alone: with MAXQ_SLACK_WEBHOOK unset the
+    # notifier is None and the server behaves exactly as before. Tests pass their own store, so
+    # this never constructs a notifier under pytest.
+    app.state.store = store or MissionStore(root, notifier=_notifier_from_env())
 
     def S() -> MissionStore:
         return app.state.store

@@ -1,0 +1,21 @@
+#!/bin/sh
+# Post each commit to Slack. Install:
+#   cp scripts/hooks/post-commit "$(git rev-parse --git-common-dir)/hooks/post-commit"
+#   chmod +x "$(git rev-parse --git-common-dir)/hooks/post-commit"
+#
+# Does nothing when MAXQ_SLACK_WEBHOOK is unset, and never blocks a commit: a hook that can fail
+# a commit because a chat service is down is worse than no hook.
+#
+# Owner: Yash (lane: scripts/).
+
+[ -n "$MAXQ_SLACK_WEBHOOK" ] || exit 0
+
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+py="$root/.venv/Scripts/python.exe"
+[ -x "$py" ] || py="$root/.venv/bin/python"
+[ -x "$py" ] || py=python3
+command -v "$py" >/dev/null 2>&1 || py=python
+command -v "$py" >/dev/null 2>&1 || exit 0
+
+"$py" "$root/scripts/notify_slack.py" commit >/dev/null 2>&1 &
+exit 0

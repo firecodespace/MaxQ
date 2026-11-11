@@ -6,7 +6,7 @@
 
 PY ?= $(if $(wildcard .venv/Scripts/python.exe),.venv/Scripts/python.exe,$(if $(wildcard .venv/bin/python),.venv/bin/python,python))
 
-.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export contracts env bench agent server rockets
+.PHONY: setup doctor test test-all lint data data-offline windows risk cluster residuals ascent manifest web web-export contracts env bench agent server rockets slack-test
 
 setup:  ## create .venv (if missing) and install pinned requirements
 	@test -d .venv || python -m venv .venv
@@ -71,6 +71,9 @@ bench:  ## WP2-05/12: best-known runner and benchmark suite
 
 agent:  ## WP2-11: run the agent on a mission_request
 	@echo "not implemented yet (WP2-11, Yash): agent/" && exit 1
+
+slack-test:  ## Print the Slack payload for the current commit without sending it (no setup needed)
+	$(PY) scripts/notify_slack.py commit --dry-run
 
 server:  ## WP2-06: mission API + live streaming + replay at http://127.0.0.1:8000 (docs at /docs)
 	$(PY) -m uvicorn server.app:app --host 127.0.0.1 --port 8000 --reload

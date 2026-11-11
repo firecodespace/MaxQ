@@ -24,6 +24,7 @@ from pathlib import Path
 from typing import Any
 
 from contracts.validate import ContractError, validate
+from server.session import read_events
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TERMINATE_GRACE_S = 5.0
@@ -89,12 +90,16 @@ class MissionStore:
     disk, which is what the replay path and the benchmark runner read.
     """
 
-    def __init__(self, root: Path | str | None = None):
+    def __init__(self, root: Path | str | None = None, *, notifier: Any = None):
         self.root = Path(root or REPO_ROOT)
         self.sessions_dir = self.root / "data" / "sessions"
         self.sessions_dir.mkdir(parents=True, exist_ok=True)
         self.missions: dict[str, Mission] = {}
         self.runs: dict[str, Run] = {}
+        # Slack is optional and never load-bearing: with no webhook configured this stays None and
+        # nothing about a run changes. Injectable so tests can assert on it without a network.
+        self._notifier = notifier
+        self._notified: set[str] = set()
 
     # ---------------------------------------------------------------- missions
 
@@ -173,6 +178,7 @@ class MissionStore:
         run.finished_at = time.time()
         run.status = "finished" if code == 0 else "failed"
         run.stop_reason = run.stop_reason or ("completed" if code == 0 else f"exit code {code}")
+        self._notify_finished(run)
         return run
 
     def abort(self, run: Run, *, reason: str = "aborted") -> Run:
@@ -186,7 +192,53 @@ class MissionStore:
         run.finished_at = time.time()
         run.status = "aborted"
         run.stop_reason = reason
+        self._notify_finished(run)
         return run
+
+    def _notify_finished(self, run: Run) -> None:
+        """Post a finished run to Slack, at most once, and never at the run's expense.
+
+        poll_run is called from several request paths, so this guards on run id rather than
+        trusting it to fire once. Every failure mode -- no webhook, no network, a malformed
+        session file -- is swallowed: a notification must not be able to change whether a run is
+        reported as finished.
+        """
+        if run.id in self._notified:
+            return
+        self._notified.add(run.id)
+        if self._notifier is None:
+            return
+        try:
+            from notify import messages
+
+            events = read_events(run.session_path) if run.session_path.exists() else []
+            started = next(
+                (e.get("data", {}) for e in events if e.get("type") == "mission_started"), {}
+            )
+            finished = [e["data"] for e in events if e.get("type") == "attempt_finished"]
+            feasible = [a for a in finished if a.get("feasible")]
+            gaps = [
+                e["data"].get("best_known_gap_pct")
+                for e in events
+                if e.get("type") == "benchmark_update"
+            ]
+            self._notifier.post_or_log(
+                messages.run_finished(
+                    mission_id=run.mission_id,
+                    run={
+                        "status": run.status,
+                        "stop_reason": run.stop_reason,
+                        "elapsed_s": run.elapsed_s,
+                    },
+                    attempts=len(finished),
+                    feasible=len(feasible),
+                    best_cost=min((a["cost"] for a in feasible), default=None),
+                    best_known_gap_pct=gaps[-1] if gaps else None,
+                    search_label=started.get("search_label") or started.get("search"),
+                )
+            )
+        except Exception:  # noqa: BLE001 - notification is never allowed to break a run
+            pass
 
     def get_run(self, run_id: str) -> Run | None:
         run = self.runs.get(run_id)
