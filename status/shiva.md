@@ -210,3 +210,100 @@ Until one of those lands, I would not spend optimizer budget on crew missions.
 Nothing of yours was edited. The verifier's handling of unevaluated constraints is right, by the way:
 C05/C09/C10 report `pass=False` with "not evaluated" and correctly do NOT block feasibility.
 
+---
+
+## Note from Yash's agent (claude-code) — optimize/ changes, 2026-11-12
+
+**Heads-up before you next open `optimize/`: I changed files in your lane.** Yash asked for this
+directly (charter §2, precedence 1) after I reported that the WP2-05 search was labelled CMA-ES
+without implementing it. Four commits on `claude/maxq-wp00-contracts-scaffold-d11107`:
+`65d139b` (wizard), `7ee3653` (labels), `d77533b` (real CMA-ES), `f769e5e` (UI badge).
+
+### What moved (this is the part that breaks imports)
+
+| was | is now |
+|---|---|
+| `optimize/cma_optimizer.py` (fixed-sigma sampler) | `optimize/fixed_sigma_es.py` |
+| `optimize/cma_optimizer.py` | **real CMA-ES**, via `optimize/search_core.py` |
+| `tests/optimize/test_optimizer.py` | `tests/optimize/test_fixed_sigma_es.py` |
+| agent id `optimizer-cma` | `search-fixed-sigma-es` / `search-cma-es` |
+
+`from optimize import optimize_mission` still works and now gets CMA-ES. `server/run_mission.py`
+rebinds `optimize.cma_optimizer.ROOT` instead of the old module.
+
+### Why
+
+The module was named `cma_optimizer.py`, tagged attempts `optimizer-cma`, and your status note
+reported "CMA-ES parameter search". It imported only numpy and ran `candidate = x_mean +
+rng.normal(0, sigma)` with `x_mean = 0.8*x_mean + 0.2*candidate` on improvement — a fixed-sigma
+hill-climber. **No judgement on the work itself**: the search harness, the event stream, the attempt
+contract and the budget handling were all sound, and I reused the structure as-is. Only the name was
+wrong, and a wrong name is the kind of thing that quietly becomes a claim in a README later.
+`ascent/optimize.py` (WP-06) genuinely uses `cma` — that was correct and I did not touch it.
+
+Yash has since added charter items 11 and 12: names must match implementations, and anything
+unimplemented is labelled `placeholder` with `null` rather than `0` metrics.
+
+### What the new one is
+
+Real CMA-ES from `cma==4.5.0` (already in requirements, no new dependency). Same attempt and
+session contracts, same budget enforcement, budget counted in evaluations with a partial generation
+cut rather than rounded up. `optimize/search_core.py` holds both algorithms as pure functions so the
+comparison test exercises the real code. `fixed_sigma_es.py` is kept deliberately as the
+non-adaptive baseline to measure against — please don't delete it.
+
+Measured, seed-fixed, on cargo_iss / falcon9_block5, 100 attempts, seed 42:
+
+```
+fixed-sigma, narrow bounds (before)    feasible 13/100   best cost 1.0819
+CMA-ES,      narrow bounds             feasible 38/100   best cost 1.0817
+CMA-ES,      wide bounds (after)       feasible 34/100   best cost 1.0820
+```
+
+I widened the pitch bounds to `p_meco [0,45]`, `p_final [-25,25]` — your finding from my earlier
+report, that the archetype-fitted bounds exclude every feasible solution for some real vehicles.
+Note honestly that on *this* mission the wider bounds slightly reduced the hit rate and improved
+nothing. Kept for generality, not because they helped here. If you disagree, the measurement is
+reproducible and the constants are at the top of `cma_optimizer.py`.
+
+### The finding that matters most, and it is in your lane
+
+Across those 100 attempts, **every feasible attempt's objective lies within 0.213%**:
+
+```
+prop_used_kg    503,269 – 504,406   (0.226%)
+time_to_dock_s   13,037 –  13,042   (0.038%)
+```
+
+Stages burn to depletion at constant thrust, and phasing is a fixed coast, so the quantity being
+minimised barely responds to the plan. That is why a provably better optimiser finds nearly three
+times as many feasible solutions but not a better one. **Optimiser quality is not measurable on
+this simulator yet**, and neither is the WP2-12 benchmark, which would measure a flat landscape.
+
+Three things unblock it, all yours, in the order I would do them:
+
+1. **Throttling.** Also fixes the open one from my last report: `crew_iss` is infeasible at *any*
+   payload because peak acceleration is 4.38–4.64 g against a 4.0 g limit and no pitch program
+   moves it. Repro: `python scripts/probe_feasibility.py`.
+2. **Coast and multi-burn.** Makes phasing a decision rather than a constant, and unblocks Atlas V.
+3. **A real approach and docking phase (WP2-03).** `env/mission_env.py:211` sets
+   `time_to_dock_s = t_phasing_end`, so half the objective currently measures the end of phasing.
+
+### One contract fix you should know about
+
+`contracts/validate.py::_check_attempt` required `feasible == all(constraint.pass)`. That
+contradicts your verifier design, where an unevaluated constraint reports `pass=False` with a note
+and does not block feasibility — and your design is the right one. No feasible attempt had ever
+reached the validator, so the conflict was latent until CMA-ES produced one; C05/C09/C10 failed it.
+The validator now excludes constraints marked unevaluated, matching on the note prefix.
+
+**Your call (🔴 with Yash):** the clean fix is an explicit `evaluated` boolean per constraint in the
+verifier, which means a `verifier_version` bump. Happy to leave that entirely to you.
+
+### Status
+
+`tests/optimize/` 17 passed. Full suite 445 passed, ruff clean. Memory (WP2-10) and the LLM agent
+(WP2-11) deliberately not started.
+
+If you want any of this reverted or done differently inside your own lane, say so — it is your call
+and all of it is reversible.
