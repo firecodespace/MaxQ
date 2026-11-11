@@ -857,10 +857,11 @@ function wizFidelityNote() {
     "Ascent: a 2D point-mass model. It has no throttling, so peak acceleration is set by the vehicle, " +
       "which is why crew missions cannot pass their 4 g limit yet.",
     "Feasibility and cost are decided by the verifier after an attempt is flown, never by this wizard.",
-    "Search: a placeholder. It samples six ascent parameters from a fixed-width Gaussian around a " +
-      "running mean. It is not CMA-ES, it has no memory between runs, and there is no agent " +
-      "reasoning behind the attempts. There is also no best-known benchmark yet, so the cost has " +
-      "nothing to be compared against.",
+    "Search: CMA-ES over six ascent parameters. It is a search, not an agent and not a mission " +
+      "planner: it has no memory between runs and no reasoning behind the attempts. There is no " +
+      "best-known benchmark yet, so the cost has nothing to be compared against. Across 100 " +
+      "attempts every feasible one lands within 0.2% of the others, because stages burn to " +
+      "depletion and phasing is a fixed coast, so there is very little here to optimise.",
   ];
   $("wiz-fidelity").replaceChildren(...lines.map((t) => el("p", { text: t, style: "margin:0 0 6px" })));
 }
