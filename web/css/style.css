@@ -399,3 +399,96 @@ td.no { color: var(--bad); }
 /* The two left-hand columns hold a canvas that must fill them, so they size their own rows instead
    of scrolling; only the panel columns beside them scroll. */
 .viewgrid > .mission-main, .viewgrid > .sky-main { overflow: hidden; align-content: stretch; }
+
+/* ================================================================== mission wizard (WP2-07) */
+.planview { grid-template-columns: minmax(0, 1fr) 380px; }
+.wizard-col { overflow: hidden; align-content: stretch; }
+.wizard-panel { display: grid; grid-template-rows: auto auto minmax(0, 1fr) auto; min-height: 0; height: 100%; }
+.wiz-scroll { overflow-y: auto; min-height: 0; padding-right: 4px; }
+
+.wiz-rail { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 10px; }
+.wiz-rail .wstep {
+  display: inline-flex; align-items: center; gap: 7px; padding: 4px 11px; min-height: 28px;
+  font-size: 11.5px; color: var(--muted); background: transparent;
+}
+.wiz-rail .wstep i {
+  display: inline-grid; place-items: center; width: 17px; height: 17px; border-radius: 50%;
+  background: var(--panel3); color: var(--muted); font-style: normal; font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.wiz-rail .wstep.done i { background: var(--accent); color: #04070e; }
+.wiz-rail .wstep.now { border-color: var(--accent); color: var(--white); background: rgba(77, 159, 255, .12); }
+.wiz-rail .wstep.now i { background: var(--accent); color: #04070e; }
+
+.wiz-step { display: grid; gap: 10px; align-content: start; }
+.wiz-step h3 { margin: 0; font-size: 15px; color: var(--white); }
+
+.wiz-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.wiz-cards.wide { grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); }
+.wcard {
+  display: grid; gap: 3px; text-align: left; padding: 10px 11px; min-height: 0; align-content: start;
+}
+.wcard b { font-size: 13px; color: var(--text); font-weight: 600; }
+.wcard[aria-pressed="true"] { border-color: var(--accent); background: rgba(77, 159, 255, .1); }
+.wcard[aria-pressed="true"] b { color: var(--white); }
+.wcard.off { opacity: .55; }
+.wcard .wtag {
+  justify-self: start; font-size: 9.5px; letter-spacing: .07em; color: var(--muted);
+  border: 1px solid var(--line); border-radius: 999px; padding: 0 6px;
+}
+.wcard .wsrc { font-size: 10.5px; color: var(--faint); margin-top: 2px; }
+.wcard .wsrc a { color: var(--sky); text-decoration: none; }
+.wcard .wsrc a:hover { text-decoration: underline; }
+
+.wiz-field { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; }
+.wiz-field.wide { display: grid; grid-template-columns: auto 1fr; }
+.wiz-field span { min-width: 104px; }
+.wiz-field input, .wiz-field select { font-variant-numeric: tabular-nums; }
+.wiz-field input[type="number"] { width: 112px; }
+.wiz-field em { font-style: normal; color: var(--faint); font-size: 11px; }
+
+.wiz-why { font-size: 11px; color: var(--muted); flex: 1 1 auto; }
+.wiz-why.bad { color: var(--bad); }
+.wiz-warn { color: var(--warn); }
+.wiz-ok { color: var(--ok); }
+
+.wiz-flag {
+  border: 1px solid var(--line); border-left-width: 3px; border-radius: var(--radius-sm);
+  padding: 8px 10px; font-size: 11.5px; color: var(--muted); line-height: 1.5;
+  background: var(--panel2);
+}
+.wiz-flag b { color: var(--text); }
+.wiz-flag.bad { border-left-color: var(--bad); }
+.wiz-flag.warn { border-left-color: var(--warn); }
+
+.wiz-checks { display: grid; gap: 4px; }
+.wcheck {
+  display: grid; grid-template-columns: 34px 1fr auto; gap: 2px 9px; align-items: baseline;
+  border: 1px solid var(--line); border-left-width: 3px; border-radius: var(--radius-sm);
+  padding: 6px 9px; background: var(--panel2);
+}
+.wcheck .wid { font-family: var(--mono); font-size: 10.5px; color: var(--faint); }
+.wcheck .wname { font-size: 12px; color: var(--text); }
+.wcheck .wstat { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; }
+.wcheck .wdetail { grid-column: 2 / -1; margin-top: 0; }
+.wcheck.go { border-left-color: var(--ok); }
+.wcheck.go .wstat { color: var(--ok); }
+.wcheck.warn { border-left-color: var(--warn); }
+.wcheck.warn .wstat { color: var(--warn); }
+.wcheck.no-go { border-left-color: var(--bad); }
+.wcheck.no-go .wstat { color: var(--bad); }
+.wcheck.unknown { border-left-color: var(--faint); }
+.wcheck.unknown .wstat { color: var(--faint); }
+
+.wiz-review { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 12px; }
+.wiz-review dt { color: var(--muted); }
+.wiz-review dd { margin: 0; color: var(--text); }
+
+.wiz-foot {
+  display: flex; align-items: center; gap: 10px; padding-top: 10px; margin-top: 8px;
+  border-top: 1px solid var(--line);
+}
+
+@media (max-width: 1240px) { .planview { grid-template-columns: minmax(0, 1fr) 330px; } }
+@media (max-width: 1080px) { .wizard-col { overflow: visible; } .wizard-panel { height: auto; } .wiz-scroll { overflow: visible; } }
+

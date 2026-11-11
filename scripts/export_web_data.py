@@ -161,6 +161,27 @@ def export_catalog(out: Path, keep_all: bool) -> dict:
     return {k: v for k, v in payload.items() if k != "objects"}
 
 
+def export_library(out: Path) -> dict:
+    """Copy the Phase 2 vehicle and pad library into the static site.
+
+    The mission wizard (WP2-07) needs real vehicles, their pads and each vehicle's MEASURED
+    sim-vs-published error. With the local API running it reads them from /api/library; without one
+    -- the public deploy -- it reads these files instead, so the wizard still shows real data and
+    only the Launch button is unavailable. Writing them here is what keeps those two paths honest:
+    both serve the same bytes.
+    """
+    lib = {}
+    for folder, kind in (("rockets", "vehicle"), ("pads", "pad")):
+        items = []
+        for src in sorted((REPO_ROOT / "data" / folder).glob("*.json")):
+            obj = json.loads(src.read_text(encoding="utf-8"))
+            validate(kind, obj)
+            items.append(obj)
+        (out / f"{folder}.json").write_text(json.dumps(items, separators=(",", ":")), encoding="utf-8")
+        lib[folder] = len(items)
+    return lib
+
+
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     ap.add_argument("--out", type=Path, default=DEFAULT_OUT)
@@ -178,16 +199,18 @@ def main(argv: list[str] | None = None) -> int:
         if entry["kind"] == "rocket" and not entry["dummy"]:
             entry.update(_vehicle_meta(entry, args.out))
     files.sort(key=lambda f: (f["kind"], f["dummy"], f["name"]))
+    lib = export_library(args.out)
     cat = export_catalog(args.out, args.all)
     manifest = {
         "files": files,
         "catalog": {"name": "catalog_web.json", **cat},
+        "library": {"rockets": "rockets.json", "pads": "pads.json", **lib},
     }
     (args.out / "manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
     dummy = sum(f["dummy"] for f in files)
     print(
-        f"exported {len(files)} json files ({dummy} dummy), catalog {cat['shown_objects']}/{cat['total_objects']} "
-        f"objects ({cat['catalog_mode']}) -> {args.out}"
+        f"exported {len(files)} json files ({dummy} dummy), {lib['rockets']} vehicles + {lib['pads']} pads, "
+        f"catalog {cat['shown_objects']}/{cat['total_objects']} objects ({cat['catalog_mode']}) -> {args.out}"
     )
     return 0
 

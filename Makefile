@@ -52,8 +52,8 @@ manifest:  ## WP-10: manifest scheduler benchmark (Shiva)
 web-export:  ## WP-03: validate + export data for the static site -> web/public/data/
 	$(PY) scripts/export_web_data.py
 
-web: web-export  ## WP-03: export data, then serve web/ at http://localhost:8765
-	$(PY) -m http.server 8765 --directory web
+web: web-export  ## WP-03: export data, then serve web/ at http://localhost:8765 (no-store, so edits show up)
+	$(PY) scripts/devserver.py --port 8765
 
 # ---------------------------------------------------------------- Phase 2 (HANDOFF_PHASE2.md)
 contracts:  ## validate every contract file (dummy, results, rockets, pads, attempts, sessions)

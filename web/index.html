@@ -32,10 +32,48 @@
   <div id="banners" class="banners" role="status"></div>
 
   <nav class="viewtabs" role="tablist" aria-label="Views">
-    <button type="button" role="tab" id="tab-sim" data-view="sim" aria-selected="true">Simulator</button>
+    <button type="button" role="tab" id="tab-plan" data-view="plan" aria-selected="true">Plan</button>
+    <button type="button" role="tab" id="tab-sim" data-view="sim" aria-selected="false">Simulator</button>
     <button type="button" role="tab" id="tab-mission" data-view="mission" aria-selected="false">Mission</button>
     <button type="button" role="tab" id="tab-sky" data-view="sky" aria-selected="false">Sky</button>
   </nav>
+
+
+  <!-- ============================================================ mission wizard (WP2-07) -->
+  <main class="viewgrid planview" id="view-plan">
+    <section class="col wizard-col">
+      <section class="panel wizard-panel" aria-label="Mission wizard">
+        <div class="panel-head">
+          <h2>Plan a mission</h2>
+          <span id="wiz-mode" class="badge"></span>
+        </div>
+        <nav id="wiz-rail" class="wiz-rail" aria-label="Wizard steps"></nav>
+        <div id="wizard" class="wiz-scroll">
+          <div id="wiz-body"></div>
+        </div>
+        <div id="wiz-foot" class="wiz-foot"></div>
+      </section>
+    </section>
+
+    <aside class="col">
+      <section class="panel" id="wiz-run-panel" aria-label="Run">
+        <div class="panel-head"><h2>Run</h2><span id="wiz-run-badge" class="badge"></span></div>
+        <div id="wiz-run" class="note">Nothing launched yet. Finish the wizard and press Launch.</div>
+        <div class="tiles" id="wiz-run-tiles" hidden></div>
+        <div class="tablewrap" id="wiz-attempts-wrap" hidden>
+          <table id="wiz-attempts">
+            <thead><tr><th>Attempt</th><th>Feasible</th><th>Cost</th><th>Blocking</th></tr></thead>
+            <tbody id="wiz-attempts-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Fidelity">
+        <div class="panel-head"><h2>What is real here</h2></div>
+        <div class="note" id="wiz-fidelity"></div>
+      </section>
+    </aside>
+  </main>
 
   <!-- ============================================================ 3D simulator -->
   <main class="viewgrid simview" id="view-sim">

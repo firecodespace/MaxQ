@@ -14,13 +14,22 @@ export function fmtRel(targetMs, nowMs) {
   return `T${sign}${days ? days + "d" : ""}${h}h${String(m).padStart(2, "0")}m`;
 }
 
+/** HTML attributes whose mere PRESENCE is what counts, whatever their value. */
+const BOOLEAN_ATTRS = new Set(["disabled", "hidden", "checked", "selected", "readonly", "required", "open"]);
+
 export function el(tag, attrs = {}, ...children) {
   const n = document.createElement(tag);
   for (const [k, v] of Object.entries(attrs)) {
     if (k === "class") n.className = v;
     else if (k === "text") n.textContent = v;
     else if (k.startsWith("on")) n.addEventListener(k.slice(2), v);
-    else n.setAttribute(k, v);
+    else if (BOOLEAN_ATTRS.has(k)) {
+      // setAttribute("disabled", false) yields disabled="false", and the attribute being THERE is
+      // what disables the element: a button built with {disabled: false} comes out dead. These have
+      // to be set and removed, not assigned.
+      if (v) n.setAttribute(k, "");
+      else n.removeAttribute(k);
+    } else if (v != null) n.setAttribute(k, v);
   }
   for (const c of children) n.append(c);
   return n;

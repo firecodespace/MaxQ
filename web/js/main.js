@@ -5,6 +5,9 @@ import { Plot } from "./plots.js";
 import { SkyView } from "./sky.js";
 import { drawKpChart, loadSpaceWeather, renderKp } from "./spaceweather.js";
 import { MissionPanel } from "./panel.js";
+import { MaxQApi } from "./api.js";
+import { Wizard } from "./wizard.js";
+import { currentKp } from "./spaceweather.js";
 
 // ---------------------------------------------------------------------------------------------- state
 const clock = { baseSim: Date.now(), baseReal: performance.now(), warp: 1, paused: false, locked: false };
@@ -739,11 +742,140 @@ function simFrameInner(now) {
   }
 }
 
+
+// ================================================================================================
+// Mission wizard (WP2-07)
+//
+// Six steps, all fed by real data: the cited vehicle and pad library, real plane-crossing windows,
+// and live NOAA Kp. With the local API running a mission can be created and launched and its
+// attempts stream in here; without one the wizard still shows everything and only Launch is
+// unavailable, with the reason on the button. The full mission-control panels are WP2-08; what is
+// here is the minimum needed to see that a launch really happened.
+// ================================================================================================
+
+const api = new MaxQApi();
+let wizard = null;
+let runSocket = null;
+const RUN = { missionId: null, attempts: new Map(), events: 0, finished: false };
+
+function wizRunRow(a) {
+  const tr = el("tr", { "data-id": a.id });
+  tr.append(
+    el("td", { text: a.id.replace(/^att_.*?_(\d+)$/, "#$1") }),
+    el("td", { text: a.feasible ? "yes" : "no", class: a.feasible ? "ok" : "no" }),
+    el("td", { text: Number(a.cost).toFixed(a.feasible ? 3 : 0) }),
+    el("td", { text: (a.failed_constraints || []).join(" ") || "–" }),
+  );
+  return tr;
+}
+
+async function wizRefreshAttempts() {
+  if (!RUN.missionId) return;
+  let list = [];
+  try {
+    list = await api.attempts(RUN.missionId);
+  } catch (_) {
+    return; // the run may not have written anything yet
+  }
+  const body = $("wiz-attempts-body");
+  body.replaceChildren(...list.map(wizRunRow));
+  $("wiz-attempts-wrap").hidden = list.length === 0;
+
+  const feasible = list.filter((a) => a.feasible);
+  const best = feasible.length ? Math.min(...feasible.map((a) => a.cost)) : null;
+  const tiles = $("wiz-run-tiles");
+  tiles.hidden = false;
+  tiles.replaceChildren(
+    el("div", { class: "tile" }, el("span", { class: "v mono", text: String(list.length) }), el("span", { class: "k", text: "Attempts" })),
+    el("div", { class: "tile" }, el("span", { class: "v mono", text: String(feasible.length) }), el("span", { class: "k", text: "Feasible" })),
+    el("div", { class: `tile${best != null ? " hot" : ""}` },
+      el("span", { class: "v mono", text: best != null ? best.toFixed(3) : "–" }),
+      el("span", { class: "k", text: "Best cost" })),
+  );
+}
+
+function wizOnLaunched(request, run) {
+  RUN.missionId = request.id;
+  RUN.attempts.clear();
+  RUN.events = 0;
+  RUN.finished = false;
+  showView("plan");
+
+  $("wiz-run-badge").textContent = "LIVE";
+  $("wiz-run-badge").className = "badge sim";
+  $("wiz-run").textContent = `${request.id} · ${request.profile} · ${request.rocket_id} from ${request.pad_id}.`;
+
+  runSocket?.close();
+  runSocket = api.stream(request.id, {
+    onEvent: (ev) => {
+      RUN.events++;
+      if (ev.type === "attempt_finished") wizRefreshAttempts();
+      if (ev.type === "mission_finished") {
+        RUN.finished = true;
+        const d = ev.data || {};
+        $("wiz-run-badge").textContent = d.stop_reason === "error" ? "FAILED" : "DONE";
+        $("wiz-run-badge").className = `badge ${d.stop_reason === "error" ? "dummy" : "real"}`;
+        $("wiz-run").textContent =
+          `${request.id} finished: ${d.attempts ?? "?"} attempts, ${d.feasible_attempts ?? 0} feasible` +
+          (d.stop_reason ? ` (${d.stop_reason})` : "") + ".";
+        wizRefreshAttempts();
+      }
+    },
+    onClose: () => {
+      if (!RUN.finished) {
+        // The socket closed before mission_finished: say so rather than leaving it looking live.
+        $("wiz-run-badge").textContent = "STOPPED";
+        $("wiz-run-badge").className = "badge dummy";
+        wizRefreshAttempts();
+      }
+      runSocket = null;
+    },
+  });
+}
+
+function wizFidelityNote() {
+  const lines = [
+    "Vehicles and pads: real, from cited sources, each with the measured gap between the simulated " +
+      "payload to LEO and the published figure.",
+    "Launch windows: real plane crossings computed from the live ISS element set. Azimuth is the " +
+      "inertial azimuth of the target plane.",
+    "Space weather: live planetary Kp from NOAA SWPC. Context only; nothing in the simulation uses it.",
+    "Ascent: a 2D point-mass model. It has no throttling, so peak acceleration is set by the vehicle, " +
+      "which is why crew missions cannot pass their 4 g limit yet.",
+    "Feasibility and cost are decided by the verifier after an attempt is flown, never by this wizard.",
+  ];
+  $("wiz-fidelity").replaceChildren(...lines.map((t) => el("p", { text: t, style: "margin:0 0 6px" })));
+}
+
+async function initWizard() {
+  const mode = await api.probe();
+  const badge = $("wiz-mode");
+  badge.textContent = mode === "live" ? "API CONNECTED" : "NO BACKEND";
+  badge.className = `badge ${mode === "live" ? "real" : "ph"}`;
+  badge.title = mode === "live"
+    ? `${api.versions.sim_version} · ${api.versions.verifier_version}`
+    : `${api.reason}. Start it with \`make server\`.`;
+
+  wizard = new Wizard({
+    api,
+    getManifest: () => S.manifest,
+    getKp: () => {
+      const pts = window.__kpPoints;
+      const now = pts ? currentKp(pts) : null;
+      return now ? now.kp : null;
+    },
+    onLaunched: wizOnLaunched,
+  });
+  await wizard.load();
+  wizFidelityNote();
+}
+
 // ---------------------------------------------------------------------------------------------- views (tabs)
 let sky = null;
 const nameIndex = new Map();
 function showView(view) {
   for (const b of document.querySelectorAll(".viewtabs button")) b.setAttribute("aria-selected", String(b.dataset.view === view));
+  $("view-plan").hidden = view !== "plan";
   $("view-sim").hidden = view !== "sim";
   $("view-mission").hidden = view !== "mission";
   $("view-sky").hidden = view !== "sky";
@@ -806,6 +938,15 @@ async function boot() {
   } else {
     banner("Live satellite catalog (catalog_web.json) not available; the map shows windows and replay only.", "warn");
     $("catalog-note").textContent = "No satellite catalog loaded.";
+  }
+
+  // The wizard needs the manifest (for windows in static mode) and the Kp feed, both of which are
+  // set up above. It must never take the page down with it, so it gets its own guard.
+  try {
+    await initWizard();
+  } catch (e) {
+    console.error(e);
+    banner("The mission wizard could not start: " + e.message, "warn");
   }
 
   // 3D simulator last: it is the heaviest import, and everything above has to work without it.

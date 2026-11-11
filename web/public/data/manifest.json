@@ -497,5 +497,9 @@
     "shown_objects": 6819,
     "omm_only_objects": 328,
     "latest_tle_epoch_utc": "2026-11-10T22:53:33.336384Z"
+  },
+  "library": {
+    "rockets": 3,
+    "pads": 4
   }
 }
