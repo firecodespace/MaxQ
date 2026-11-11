@@ -191,3 +191,22 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   because an agent that could read best-known could tune to it. The honest statement is "the agent's
   only interface cannot do it", not "the process cannot do it" - Python written inside agent/ could
   import anything - by claude-code - reversible: n/a - status: FINAL
+- WP2-15 (Tier C) PART DONE: the analytic orbit-raising physics and the MissionEnv path for
+  geo_comm / meo_gps. Before this, MissionEnv flew EVERY profile down the rendezvous path, so a GEO
+  delivery was scored on a phase angle to a satellite the payload was never going to meet.
+  mission/transfer.py is closed-form two-body: Hohmann apogee raise plus a combined
+  circularise-and-plane-change burn at apogee. MEASURED against published figures - derived GEO
+  altitude 35,786.0 km (published 35,786), GPS 20,183.6 km (published ~20,180), Cape-to-GEO perigee
+  kick 2,454.6 m/s (textbook ~2,440) and apogee kick 1,837.9 m/s (textbook ~1,800). The combined
+  burn saves 1,156 m/s over circularising then rotating - a quarter of the post-insertion budget,
+  not a refinement. CONTRACT CHANGE: attempt.schema.json and mission_trajectory.schema.json phase
+  enums gain `transfer` and `circularise`; existing files are unaffected (an enum gained members).
+  C09/C10 correctly report `evaluated: false` on a transfer mission, which the `evaluated` flag
+  landed earlier makes expressible - by claude-code - reversible: yes - status: FINAL
+- WP2-15 NOT DONE, and not pretended otherwise: the GEO launch WINDOW timing is still the
+  placeholder the window data's own `_note` describes - one nominal due-east opportunity per day at
+  local hour 0. Real GTO windows need the perigee-argument and node alignment that puts apogee over
+  the target longitude, which is separate work from the burn physics. mission/transfer.py takes
+  whatever plane error the window data gives it and computes the burn honestly; it does not claim
+  the timing is real. So "replace GEO placeholder windows with real ones" remains open
+  - by claude-code - status: OPEN (Tier C, nobody is blocked on it)

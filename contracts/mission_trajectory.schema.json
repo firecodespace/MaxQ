@@ -52,8 +52,11 @@
           "parking",
           "phasing",
           "approach",
-          "dock"
-        ]
+          "dock",
+          "transfer",
+          "circularise"
+        ],
+        "description": "Mission phases. ascent/parking are common to every profile. phasing/approach/dock are the RENDEZVOUS path (crew_iss, cargo_iss). transfer/circularise are the ORBIT-RAISING path (geo_comm, meo_gps), where there is nothing to catch up with and nothing to dock to: the vehicle raises apogee and then circularises, combining the plane change into that burn. A single attempt follows one path or the other, never both."
       }
     },
     "lat_deg": {

@@ -19,6 +19,11 @@ from typing import Any
 from ascent.geo import G0, MU_EARTH, R_EARTH
 from ascent.rockets import Rocket, Stage, get_rocket
 from ascent.sim import DEFAULT_PITCH_PARAMS, simulate_ascent
+from mission.transfer import (
+    is_transfer_profile,
+    plan_transfer,
+    target_for_profile,
+)
 from rendezvous.hcw import simulate_approach
 from rendezvous.phasing import solve_phasing_orbit
 from verifier.core import verify
@@ -324,6 +329,76 @@ class MissionEnv:
         state["prop_approach"] = prop_approach
         state["approach_telemetry"] = approach["approach_telemetry"]
 
+    def _run_transfer_step(self, state: dict[str, Any], plan: dict[str, Any]) -> None:
+        """Raise the orbit to the target radius and circularise, plane change folded in.
+
+        Fills the same state keys the rendezvous path fills, so `_finalize` needs one branch
+        rather than two code paths: `phasing_dv` carries the perigee kick, `approach_dv` the
+        combined apogee burn. `_finalize` renames them to `transfer` and `circularise` in the
+        recorded phases, which is what they are.
+
+        `approach_telemetry` is deliberately left as None. There is no approach corridor and
+        no docking on a GEO delivery, so C09 and C10 must report `evaluated: false` -- which
+        is a different statement from passing them, and the verifier now says which.
+        """
+        target = target_for_profile(self.profile)
+        park_alt_km = max(120.0, float(state["target_parking_alt_km"]))
+        plane_change_deg = abs(float(target["incl_deg"]) - float(self.pad_data.get("lat_deg", 28.5)))
+
+        tx = plan_transfer(park_alt_km, float(target["alt_km"]), plane_change_deg)
+
+        curr_mass = state["mass_list"][-1]
+        isp_upper = self.rocket.stages[-1].isp_s
+        prop_1 = curr_mass * (1.0 - math.exp(-tx["dv1_mps"] / (isp_upper * G0)))
+        mass_after_1 = curr_mass - prop_1
+        prop_2 = mass_after_1 * (1.0 - math.exp(-tx["dv2_mps"] / (isp_upper * G0)))
+
+        t0 = state["t_parking_end"]
+        t_apogee = t0 + tx["coast_s"]
+        # A short finite window for the apogee burn, so the circularise phase has a duration
+        # rather than being instantaneous in the recorded timeline.
+        t_end = t_apogee + max(60.0, float(plan.get("final_tof_s", 600.0)))
+
+        curr_lat = state["lat_list"][-1]
+        curr_lon = state["lon_list"][-1]
+        samples = [
+            (t0 + f * (t_apogee - t0), park_alt_km + f * (float(target["alt_km"]) - park_alt_km),
+             curr_mass - prop_1 * f, "transfer")
+            for f in (0.25, 0.5, 0.75, 1.0)
+        ] + [
+            (t_apogee + f * (t_end - t_apogee), float(target["alt_km"]),
+             mass_after_1 - prop_2 * f, "circularise")
+            for f in (0.5, 1.0)
+        ]
+        for t_s, alt_km, mass, phase in samples:
+            state["t_s_list"].append(round(t_s, 2))
+            state["phase_list"].append(phase)
+            curr_lon = (curr_lon + 30.0 + 180.0) % 360.0 - 180.0
+            state["lat_list"].append(curr_lat)
+            state["lon_list"].append(curr_lon)
+            state["alt_list"].append(round(alt_km * 1000.0, 1))
+            state["speed_list"].append(
+                round(tx["v_target_mps"] if phase == "circularise" else tx["v_apogee_mps"], 2)
+            )
+            state["mass_list"].append(round(mass, 1))
+            state["q_list"].append(0.0)
+            state["accel_list"].append(0.0)
+            state["rel_pos_list"].append(None)
+            state["rel_vel_list"].append(None)
+
+        state["phasing_dv"] = tx["dv1_mps"]
+        state["approach_dv"] = tx["dv2_mps"]
+        state["prop_phasing"] = prop_1
+        state["prop_approach"] = prop_2
+        state["t_phasing_end"] = t_apogee
+        state["t_dock_end"] = t_end
+        state["hold_1km_tof_s"] = 0.0
+        state["phasing_revs"] = 0
+        state["phase_angle_deg"] = 0.0
+        state["approach_telemetry"] = None
+        state["final_tof_s"] = round(t_end - t_apogee, 1)
+        state["transfer"] = tx
+
     def _objective(self) -> dict[str, Any]:
         """The mission's objective, with the on-orbit reference scale filled in if absent.
 
@@ -362,6 +437,16 @@ class MissionEnv:
         t_parking_end = state["t_parking_end"]
         t_phasing_end = state["t_phasing_end"]
         t_dock_end = state["t_dock_end"]
+
+        # A rendezvous mission phases then approaches and docks; an orbit-raising mission
+        # transfers then circularises. The two burns occupy the same slots in `state`, so the
+        # names are chosen here rather than duplicating the whole record-building block.
+        transferring = is_transfer_profile(self.profile)
+        phase_1_name = "transfer" if transferring else "phasing"
+        phase_2_name = "circularise" if transferring else "approach"
+        # LVLH is a frame relative to a target being approached. There is no such target on a
+        # transfer, so those burns are recorded in the inertial frame.
+        burn_frame = "ECI" if transferring else "LVLH"
 
         prop_ascent = state["prop_ascent_used"]
         prop_phasing = state["prop_phasing"]
@@ -420,22 +505,28 @@ class MissionEnv:
             "final_tof_s": state["final_tof_s"],
             "burns": [
                 {
-                    "phase": "phasing",
+                    "phase": phase_1_name,
                     "t_s": round(t_parking_end, 1),
                     "dv_mps": [round(state["phasing_dv"], 2), 0.0, 0.0],
-                    "frame": "LVLH",
+                    "frame": burn_frame,
                 },
                 {
-                    "phase": "approach",
+                    "phase": phase_2_name,
                     "t_s": round(t_phasing_end, 1),
                     "dv_mps": [0.0, round(state["approach_dv"], 2), 0.0],
-                    "frame": "LVLH",
+                    "frame": burn_frame,
                 },
             ],
-            "waypoints": [
-                {"name": "hold_1km", "range_m": 1000.0},
-                {"name": "hold_200m", "range_m": 200.0},
-            ],
+            # A GEO or GPS delivery has no hold points: there is nothing to hold off from.
+            # An empty list is the honest record, not two waypoints nobody flew.
+            "waypoints": (
+                []
+                if transferring
+                else [
+                    {"name": "hold_1km", "range_m": 1000.0},
+                    {"name": "hold_200m", "range_m": 200.0},
+                ]
+            ),
         }
         if state["max_g_limit"] is not None:
             plan_record["max_g_limit"] = state["max_g_limit"]
@@ -465,14 +556,14 @@ class MissionEnv:
                     "dv_mps": 0.0,
                 },
                 {
-                    "name": "phasing",
+                    "name": phase_1_name,
                     "t0_s": round(t_parking_end, 1),
                     "t1_s": round(t_phasing_end, 1),
                     "prop_kg": round(prop_phasing, 1),
                     "dv_mps": round(state["phasing_dv"], 1),
                 },
                 {
-                    "name": "approach",
+                    "name": phase_2_name,
                     "t0_s": round(t_phasing_end, 1),
                     "t1_s": round(t_dock_end, 1),
                     "prop_kg": round(prop_approach, 1),
@@ -536,8 +627,14 @@ class MissionEnv:
         wall_start = time.perf_counter()
         state = self._run_ascent_step(plan)
         self._run_parking_step(state, plan)
-        self._run_phasing_step(state, plan)
-        self._run_approach_step(state, plan)
+        if is_transfer_profile(self.profile):
+            # geo_comm / meo_gps: nothing to catch up with and nothing to dock to. Flying
+            # these down the rendezvous path produced numbers about physics that was not
+            # happening -- a phase angle to a satellite the payload is not going to meet.
+            self._run_transfer_step(state, plan)
+        else:
+            self._run_phasing_step(state, plan)
+            self._run_approach_step(state, plan)
         return self._finalize(state, attempt_id, agent_info, wall_start)
 
     def reset(self, seed: int | None = None) -> dict[str, Any]:
