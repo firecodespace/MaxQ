@@ -388,3 +388,159 @@ merge. Either merge mine first and rebase yours, or review both together.
 
 Nothing here needs a reply in prose — the measurements are reproducible, and anything you disagree
 with, re-run and show me the number.
+
+---
+
+## Review 2 — 2026-11-12, on the WP2 physics + Antigravity queue report
+
+By claude-code, for Shiva and Antigravity. Same rule as last time: I checked rather than took the
+report at face value, and where I was wrong before I say so.
+
+### 0. First, the blocker: none of this is pushed
+
+Everything below is read off the **pushed** state. Checked with
+`git fetch --all --prune`, then `git log` / `git cat-file` / `git grep` against the remote refs:
+
+| ref | tip | state |
+|---|---|---|
+| `origin/main` | `2bb637b` | — |
+| `origin/shiva/WP2-physics-and-runner` | `f05c50b` | does **not** contain `2bb637b`; the merge is not there |
+| `origin/yash/antigravity-wp2-queue` | `2bb637b` | identical to main; **nothing on top of it** |
+
+`b4a8e92`, `b388311` and `2d65ea1` do not exist on the remote (`git cat-file -t` → missing). Nor do
+any of the new files, on any pushed branch:
+
+```
+scripts/compare_guard.py                         nowhere
+web/js/mission-logic.js                          nowhere
+web/js/mission.js                                nowhere
+data/reference/iss_rendezvous_profiles.json      nowhere
+tests/web/mission.test.mjs                       nowhere
+tests/scripts/test_compare_guard.py              nowhere
+```
+
+The report says so itself ("local commits only; not pushed"), so this is not a contradiction — but
+it does mean **no number in it is reproducible by anyone else yet**, and `AGENTS.md` §5 asks for
+results someone else can re-run. Push both branches before anything else. Until then nobody can
+review, merge, or build on it, and a week of work lives on one machine.
+
+Everything below is therefore read off `f05c50b` (the pushed physics) plus the report's own numbers,
+checked for internal consistency.
+
+### 1. The direction is right, and two specific calls were right
+
+**Dropping the `env/` propagator workaround was correct.** Keeping ascent physics in
+`ascent/sim.py` is what makes `sim_version()` mean "the ascent model changed". Moving the
+propagator out to preserve a hash would have made the hash lie, which is the opposite of what it
+is for.
+
+**`s1_burn_frac` is the right lever.** Burning stage 1 to depletion was the reason fuel was flat.
+Dropping unburned stage-1 propellant with the dry mass at staging is the honest way to model it.
+
+**`solve_phasing_orbit` is real physics, and I was partly wrong about dock time.** I expected
+`time_to_dock_s` to be an echo of a chosen parameter — pick `phasing_revs`, multiply by the orbital
+period, done. It isn't. `n_revs` sets `t_phase`, `t_phase` sets the phasing ellipse's semi-major
+axis via Kepler, and the ellipse costs `dv_phase = 2·|v_phase_at_r1 − v_circ1|`. Fewer revs force a
+larger period change and cost propellant; the periapsis floor at 155 km is a genuine constraint that
+forces extra target wraps instead of letting the ellipse dip into the atmosphere. The time/fuel
+tradeoff is really there. My earlier item 5 framing was too suspicious; withdraw that part.
+
+### 2. The fuel half of the objective still cannot be optimised — and here is why
+
+This is the one substantive finding, and it is an **objective** problem, not a physics one.
+
+`env/mission_env.py:343`:
+
+```python
+total_prop_used = prop_ascent + prop_phasing + prop_approach
+```
+
+`prop_phasing` and `prop_approach` are computed with the rocket equation on the remaining mass at
+upper-stage Isp — tens to hundreds of kg. `prop_ascent` is hundreds of **tonnes**. Summing them into
+one `prop_used_kg` buries the on-orbit tradeoff by roughly three orders of magnitude.
+
+The report's own numbers show it, and they are mutually consistent, which is a good sign:
+
+- `prop_used_kg` spread **0.741 %**
+- `time_to_dock_s` spread **22.932 %**
+- `cost` spread **4.819 %**
+
+`verifier/core.py:347-364` gives `cost = 1.0·(prop/fuel_ref) + 0.5·(time/time_ref)`. On a cost of
+1.2435 the half-weighted time term is ≈0.24 absolute; 22.9 % of 0.24 is ≈0.055, which is ≈4.4 % of
+the cost. That accounts for essentially all of the measured 4.819 %. So **the term carrying twice
+the weight supplies almost none of the variance.** The search is optimising time and leaving fuel
+alone, which is the exact thing "minimum fuel and time" is supposed to do.
+
+`s1_burn_frac` moved prop spread 0.211 % → 0.741 %. That is a 3.5× improvement on a number that
+needs to be 30× bigger to matter. The lever is correct and nowhere near sufficient.
+
+**What would fix it:** report `prop_ascent_kg` and `prop_on_orbit_kg` as separate fields in
+`metrics`, and let the objective weight them separately — on-orbit propellant is the part a mission
+plan actually controls, and the thing a flight dynamics team would optimise. Ascent propellant is
+near-fixed once the vehicle is chosen; it belongs in the cost as a vehicle-selection term, not as
+the quantity the per-mission search is minimising.
+
+That touches `contracts/attempt.schema.json` and `verifier/` → 🔴 **Yash's call**, and a
+`verifier_version` bump. Flagging it, not doing it.
+
+### 3. Atlas V at −25.0 % marked PASS is accurate, and the tolerance is the weak link
+
+`scripts/validate_rocket_library.py` uses a single global `TOLERANCE_PCT`, currently **35.0**. So
+−25.0 % genuinely passes, and −55 % → −25 % is a real improvement. No tolerance was fudged; I
+checked, because three errors quoted as +15.0, −25.0 and +11.2 looked suspiciously round.
+
+But a ±35 % payload tolerance means the simulator may claim a vehicle lifts a third more or less
+than it does. That cannot support a best-known benchmark: WP2-12 would freeze a reference built on a
+model with a third of slack. Before the benchmark is frozen, `tolerance_pct` should be **per vehicle
+and justified in that vehicle's `notes`**, and tighter than 35 % for anything used as a reference.
+Not urgent this week; a blocker for WP2-12.
+
+### 4. A1's conclusion is defensible, and weaker than it reads
+
+The three cited profiles span **3.15 h (Soyuz MS-26) to 28.11 h (Crew-8)**. 13.6 h sits inside that,
+so my earlier "real Dragon profiles are roughly 6 hours" was too narrow — Crew-8 shows the real
+envelope is much wider, and 13.6 h is not an obvious error. Good result; it closes the item.
+
+What it does not do is validate the number. An envelope from 3 h to 28 h falsifies a factor-of-10
+mistake, not a factor-of-2 one. The honest claim is "13.6 h is within the range of real ISS
+rendezvous profiles", not "13.6 h is validated". Please make sure `antigravity.md` says the former.
+
+Separately, A1's footnote — that `MissionEnv` reaches 13.6 h through `X0`'s `phasing_revs = 8`
+rather than through `windows.json`'s `phase_angle_deg` — reads as an aside and is more interesting
+than that. `phase_angle_deg` *is* consumed (`rendezvous/phasing.py:86`), so the aside is not a bug
+report; but it is worth one line in the write-up saying so explicitly, because as phrased it implies
+the window data is ignored, and it isn't.
+
+### 5. Stale `sim_validation` blocks: fixed, and keep it that way
+
+All three vehicles re-validated at `sim_version = ascent-c3da9cfa39cc`. That was the problem last
+review (three blocks, two different stale hashes). The habit that keeps it fixed:
+**`scripts/validate_rocket_library.py` runs last**, after the final `ascent/sim.py` edit of the
+session, immediately before committing. Any sim edit after it invalidates it again.
+
+### 6. What needs aligning, in order
+
+1. **Push both branches.** Nothing else can start. (Shiva — today)
+2. **Split `prop_used_kg` into ascent vs on-orbit** in `metrics`, and reweight the objective.
+   Contract + `verifier_version` change → 🔴 Yash. This is the thing standing between the search
+   and actually minimising fuel.
+3. **The explicit `evaluated` boolean per constraint** in `verifier/` was already pending with Yash;
+   it is now blocking two lanes, not one — A2 renders "not evaluated" and A3's guard both depend on
+   it, and `contracts/validate.py` is matching on a note prefix in the meantime. Worth raising its
+   priority. 🔴 Yash.
+4. **Per-vehicle justified `tolerance_pct`**, before WP2-12 freezes a benchmark on ±35 %.
+5. **`main.js` wiring for `initMission()`** — I am finished in `web/js/main.js` and my work is
+   committed on `main`. Antigravity does not need to wait for me; whoever lands the branch can wire
+   it, or leave it and I will.
+6. **Agreed on all three 🔴 items** in the report's closing section (verifier `evaluated` + version
+   bump, freezing the WP2-12 suite and split, open-weight model choice). Nothing to add.
+
+### 7. Merge order
+
+Now that `main` is at `2bb637b` and `origin/yash/antigravity-wp2-queue` is cut from it, the
+antigravity work merges cleanly on its own. The physics branch at `f05c50b` predates `2bb637b`, so
+its local merge commit `b388311` is the one that matters — push it and the order stops being a
+question. Physics first, then antigravity, is the order I would take: the antigravity queue reads
+`env/` and `verifier/` output shapes, and it is better to have those settled under it.
+
+Nothing here needs a reply in prose. Push the branches and the numbers speak for themselves.
