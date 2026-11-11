@@ -6,11 +6,12 @@ runtime (charter addition 1).  Any change bumps verifier_version.
 Design rules
 ------------
 * Deterministic: same input → same output, always.
-* Honest: constraints whose required inputs are absent are reported as
-  NOT_EVALUATED (pass=False, value=None, note says "not evaluated").
+* Honest: constraints whose required inputs are absent are reported with
+  `evaluated: false` (and pass=False, value=None, plus a note saying so).
   They are NEVER counted as passed.
-* The feasibility flag is exactly the conjunction of all evaluated pass flags
-  (unevaluated constraints are treated as failing).
+* The feasibility flag is exactly the conjunction of the pass flags of the
+  constraints with `evaluated: true`. An absent input is not a violation, so it
+  does not block feasibility; it is also never presented as a pass.
 * Cost: infeasible attempts always cost more than any feasible attempt.
 
 Usage
@@ -61,8 +62,16 @@ def _cr(
     passed: bool,
     margin: float | None,
     note: str | None = None,
+    evaluated: bool = True,
 ) -> dict[str, Any]:
-    """Build one constraint_report entry."""
+    """Build one constraint_report entry.
+
+    `evaluated` says whether this constraint was actually judged. It is a field rather
+    than something a reader infers from `value is None` plus a note prefix, because
+    "we checked and it failed" and "we could not check" are different facts and every
+    consumer -- the UI, the contract validator, the comparison guard -- needs to tell
+    them apart without parsing prose.
+    """
     rec: dict[str, Any] = {
         "id": cid,
         "name": name,
@@ -71,6 +80,7 @@ def _cr(
         "op": op,
         "pass": passed,
         "margin": margin,
+        "evaluated": evaluated,
     }
     if note:
         rec["note"] = note
@@ -78,8 +88,10 @@ def _cr(
 
 
 def _not_evaluated(cid: str, name: str) -> dict[str, Any]:
-    """A constraint that cannot be evaluated — always fails (not passed)."""
-    return _cr(cid, name, None, None, ">=", False, None, _NOT_EVALUATED_NOTE)
+    """A constraint whose required input is absent: not judged, and never reported as passed."""
+    return _cr(
+        cid, name, None, None, ">=", False, None, _NOT_EVALUATED_NOTE, evaluated=False
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -399,19 +411,10 @@ def verify(
         report.append(cr)
 
     # Feasibility: ALL *evaluated* constraints must pass.
-    # Unevaluated constraints (note contains "not evaluated", value=None) do NOT
-    # block feasibility — they are absent, not failed.  The charter says these
-    # must report honestly as "not evaluated, never as passed"; they also must not
-    # count as failures when inputs are genuinely absent.
-    # An evaluated constraint that fails DOES block feasibility.
-    def _is_not_evaluated(cr: dict) -> bool:
-        return cr["value"] is None and "not evaluated" in (cr.get("note") or "").lower()
-
-    feasible = all(
-        cr["pass"]
-        for cr in report
-        if not _is_not_evaluated(cr)
-    )
+    # An unevaluated constraint does not block feasibility — its input is absent, which
+    # is not the same as the constraint being violated. It is still never reported as
+    # passed. An evaluated constraint that fails DOES block feasibility.
+    feasible = all(cr["pass"] for cr in report if cr["evaluated"])
 
     cost = _compute_cost(attempt, report, feasible)
 

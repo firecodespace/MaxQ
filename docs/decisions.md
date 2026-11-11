@@ -114,7 +114,12 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   validator now excludes constraints the verifier marked unevaluated. Matching on the note prefix is
   not elegant - the clean fix is an explicit `evaluated` boolean per constraint, which means editing
   `verifier/` and bumping `verifier_version` - by yash / claude-code - reversible: yes -
-  status: OPEN (needs Yash: 🔴 verifier change for an explicit `evaluated` field)
+  status: CLOSED 2026-11-12. Yash approved taking over Shiva's lane while he is offline, so the
+  clean fix landed: every constraint_report entry now carries `evaluated: bool`, feasibility is
+  `all(c.pass for c in report if c.evaluated)`, and verifier_version moved to ver-4b49566ae7b5.
+  The note-prefix match survives in contracts/validate.py as a read-only fallback for attempts
+  recorded before the flag existed - those files are evidence and are not rewritten. `evaluated` is
+  deliberately NOT in attempt.schema.json's `required` list for the same reason.
 - MEASUREMENT, not a decision: across 100 CMA-ES attempts on cargo_iss, every feasible attempt's
   objective lies within 0.213% (prop_used 503,269-504,406 kg; time_to_dock 13,037-13,042 s). Stages
   burn to depletion at constant thrust and phasing is a fixed coast, so the quantity being minimised

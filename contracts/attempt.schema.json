@@ -285,6 +285,10 @@
           "pass": {
             "type": "boolean"
           },
+          "evaluated": {
+            "type": "boolean",
+            "description": "Whether this constraint was actually judged. false means the required input was absent, which is not a violation and does not block feasibility -- but is never presented as a pass. Absent entirely means an attempt recorded by a verifier older than the version that introduced the flag; such files are evidence and are not rewritten."
+          },
           "margin": {
             "type": [
               "number",

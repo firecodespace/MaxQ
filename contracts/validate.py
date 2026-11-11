@@ -253,16 +253,19 @@ def _check_catalog(obj: dict) -> list[str]:
     return errs
 
 
-#: How the verifier marks a constraint it could not check. Matching on the note is not elegant; the
-#: clean fix is an explicit `evaluated` boolean on each constraint, which means editing `verifier/`
-#: and bumping `verifier_version` (Red -- needs Yash). Recorded in docs/decisions.md.
+#: Legacy only. The verifier now states `evaluated` explicitly on every constraint. Attempts
+#: recorded before that flag existed marked an unchecked constraint by this note prefix alone, and
+#: those files are evidence -- they are read, never rewritten -- so the prefix match stays as a
+#: fallback for them and for nothing else. New output must carry the boolean.
 _UNEVALUATED_NOTE = "not evaluated"
 
 
 def _is_unevaluated(constraint: dict) -> bool:
     """True when the verifier reported this constraint as not checked rather than as failed."""
-    if constraint.get("evaluated") is False:
-        return True
+    evaluated = constraint.get("evaluated")
+    if evaluated is not None:
+        return evaluated is False
+    # Pre-`evaluated` attempt file: fall back to how those recordings marked it.
     note = constraint.get("note") or ""
     return not constraint["pass"] and note.strip().lower().startswith(_UNEVALUATED_NOTE)
 

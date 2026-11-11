@@ -303,3 +303,54 @@ def test_constraint_report_has_all_ten_constraints():
     expected = [f"C{i:02d}" for i in range(1, 11)]
     assert ids == expected
 
+
+
+# ---------------------------------------------------------------------------
+# `evaluated`: "we could not check" is a different fact from "it failed"
+
+
+def test_every_constraint_states_whether_it_was_evaluated():
+    """A consumer must not have to parse prose to find out what was judged."""
+    r = verify(_feasible_attempt())
+    for cr in r["constraint_report"]:
+        assert "evaluated" in cr, f"{cr['id']}: no `evaluated` flag"
+        assert isinstance(cr["evaluated"], bool)
+
+
+def test_an_unevaluated_constraint_is_marked_unevaluated_and_never_passed():
+    """C05 has no weather input in this attempt, so it is unchecked -- not violated."""
+    r = verify(_feasible_attempt())
+    c05 = next(c for c in r["constraint_report"] if c["id"] == "C05")
+    assert c05["evaluated"] is False
+    assert c05["pass"] is False, "an unchecked constraint must never be reported as passed"
+    assert c05["value"] is None
+    assert "not evaluated" in (c05.get("note") or "").lower()
+
+
+def test_an_unevaluated_constraint_does_not_block_feasibility():
+    """Otherwise no attempt could ever be feasible without a weather feed."""
+    r = verify(_feasible_attempt())
+    unevaluated = [c["id"] for c in r["constraint_report"] if not c["evaluated"]]
+    assert unevaluated, "this test is meaningless if everything was evaluated"
+    assert r["feasible"] is True, (
+        f"feasible went false purely because {unevaluated} could not be checked"
+    )
+
+
+def test_an_evaluated_failure_still_blocks_feasibility():
+    """The flag must not become a way to wave a real violation through."""
+    att = _feasible_attempt()
+    att["metrics"]["max_accel_g"] = 99.0
+    r = verify(att)
+    c03 = next(c for c in r["constraint_report"] if c["id"] == "C03")
+    assert c03["evaluated"] is True
+    assert c03["pass"] is False
+    assert r["feasible"] is False
+
+
+def test_feasibility_is_exactly_the_evaluated_constraints():
+    """The documented rule, asserted rather than trusted."""
+    for att in (_feasible_attempt(), _infeasible_attempt()):
+        r = verify(att)
+        expected = all(c["pass"] for c in r["constraint_report"] if c["evaluated"])
+        assert r["feasible"] is expected
