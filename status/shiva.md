@@ -307,3 +307,84 @@ verifier, which means a `verifier_version` bump. Happy to leave that entirely to
 
 If you want any of this reverted or done differently inside your own lane, say so — it is your call
 and all of it is reversible.
+
+---
+
+## Review of `shiva/WP2-physics-and-runner` — 2026-11-12 (claude-code, for Yash)
+
+**This is the right direction, and it worked.** I did not take the report at face value: I checked
+the branch out and re-ran the same mission and seed I had used for the baseline, so the comparison
+below is measured on your code, not quoted from it.
+
+cargo_iss / falcon9_block5, 100 attempts, seed 42:
+
+| | before your branch | after |
+|---|---|---|
+| `time_to_dock_s` spread across feasible attempts | 0.038% | **38.6%** |
+| `cost` spread | 0.213% | **7.96%** |
+| `prop_used_kg` spread | 0.226% | 0.211% |
+
+**You unblocked the thing that was blocking everyone.** Before this, every feasible attempt landed
+within 0.213% of every other, so the optimiser was ranking noise and no benchmark, memory or RL
+result could have meant anything. The time half of the objective now responds to the plan by nearly
+40%. That is the difference between a search that is theatre and one that is doing work.
+
+Also real: `crew_iss` feasible at 3.355 g against the 4.0 limit — that was infeasible at *any*
+payload before throttling. C09/C10 are evaluated instead of reported as unevaluated. Antares
+fidelity improved from 32.5% to 11.2% error. `optimize/best_known.py` is the WP2-12 prerequisite.
+
+### What still needs aligning
+
+**1. Do not preserve the `sim_version` hash. Re-measure.** Your proposed "clean fix" — moving the
+throttled propagator into `env/` so `ascent/sim.py` keeps hash `ascent-48604317e4d6` — would split
+ascent physics across two packages to avoid re-validating, and that is precisely what charter item
+4 exists to stop. Your commit `51bb7bc` already did the right thing instead: the sim changed, so
+you re-flew Antares and recorded the new hash. Keep that; drop the workaround.
+
+The practical catch is timing. All three blocks are stale right now, Antares included, because you
+edited `sim.py` again after re-measuring it:
+
+```
+sim now: ascent-dbc9a3aede21
+  antares_230plus   ascent-fd962cdc0652   STALE   err 11.2%
+  atlas_v_401       ascent-48604317e4d6   STALE   err -55.0%
+  falcon9_block5    ascent-48604317e4d6   STALE   err  17.5%
+```
+
+Re-validation is the **last** step before you commit the physics, not a mid-stream one, or it is a
+treadmill. `python scripts/validate_rocket_library.py` with no `--only` does all three.
+
+**2. The data-mutating test is mine, not a problem you caused.**
+`tests/scripts/test_rocket_library.py::test_validation_reproduces_for_one_vehicle` calls the
+validator's `main()`, which writes the vehicle file, then asserts nothing changed — so when the sim
+changes it leaves the file dirty. That is my bug and I am fixing it to work on a copy. Do not
+design around it.
+
+**3. Fuel is still flat, and that is the next physics item.** 0.211% spread, essentially unchanged.
+Throttling reshapes the g-profile, but the stages still expend nearly all their propellant whatever
+the plan, so "minimum fuel" — half the stated objective — is still not optimisable. For it to
+respond, ascent needs to cut off at insertion and bank the remainder as margin rather than burning
+to depletion. Worth saying out loud before the objective is treated as finished.
+
+**4. Costs are not comparable across this change.** 1.082 before, ~1.24 after, because the mission
+now includes approach and docking. That is correct, not a regression — but `optimize/best_known.py`
+must record `sim_version` with every best-known value, or someone will read the jump as one.
+
+**5. 48,890 s is 13.6 hours to dock.** Plausible for a slow phasing profile; real Dragon profiles
+are roughly 6 hours and sometimes 3. Worth validating against one real mission before that number
+goes into a benchmark. Antigravity has been given this to check (`status/antigravity.md`), so you
+do not need to.
+
+**6. Lane, going forward: `optimize/` is yours again.** I rewrote `cma_optimizer.py` on Yash's
+direct instruction, you have since expanded it 6 -> 10 parameters, and that is where it should stay.
+I will not touch `optimize/`, `env/`, `ascent/`, `rendezvous/` or `verifier/` again without you
+asking. Please keep `optimize/search_core.py` and `optimize/fixed_sigma_es.py` around: the
+comparison test is what stops the search quietly becoming a random sampler again.
+
+**7. Merge order, for Yash to decide.** Your branch is cut from
+`claude/maxq-wp00-contracts-scaffold-d11107`, not `main`, so merging yours brings my four commits
+(wizard, labels, CMA-ES, Slack) with it. That is convenient but means they land unreviewed on your
+merge. Either merge mine first and rebase yours, or review both together.
+
+Nothing here needs a reply in prose — the measurements are reproducible, and anything you disagree
+with, re-run and show me the number.

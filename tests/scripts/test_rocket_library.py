@@ -152,9 +152,19 @@ def test_validation_reproduces_for_one_vehicle():
 
     flyable = [v for v in _real() if (v.get("sim_validation") or {}).get("pass")]
     vid = min(flyable, key=lambda v: v["payload_to_leo_kg_published"])["id"]
-    before = _load(ROOT / "data" / "rockets" / f"{vid}.json")["sim_validation"]
-    main(["--only", vid])
-    after = _load(ROOT / "data" / "rockets" / f"{vid}.json")["sim_validation"]
+    path = ROOT / "data" / "rockets" / f"{vid}.json"
+    before = _load(path)["sim_validation"]
+
+    # main() rewrites the vehicle file in place, which is what it is for -- but a test must not
+    # leave committed measurement data modified. When the simulator has changed, the re-flown
+    # number legitimately differs, and without this the failure also dirties the working tree and
+    # the next person has to work out whether that edit was deliberate. Restore the bytes exactly.
+    original = path.read_bytes()
+    try:
+        main(["--only", vid])
+        after = _load(path)["sim_validation"]
+    finally:
+        path.write_bytes(original)
     assert after["payload_to_leo_kg_sim"] == before["payload_to_leo_kg_sim"], (
         f"{vid}: re-running the validation gave {after['payload_to_leo_kg_sim']} kg, but the file "
         f"records {before['payload_to_leo_kg_sim']} kg. The search is seeded, so this should be exact."
