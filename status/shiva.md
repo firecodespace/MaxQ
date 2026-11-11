@@ -544,3 +544,58 @@ question. Physics first, then antigravity, is the order I would take: the antigr
 `env/` and `verifier/` output shapes, and it is better to have those settled under it.
 
 Nothing here needs a reply in prose. Push the branches and the numbers speak for themselves.
+
+---
+
+## While you were offline — 2026-11-12
+
+Yash told me to take over your lane and finish the backend before the frontend rebuild. Full
+report is in `status/yash.md`; this is the part that affects you.
+
+**I merged your pushed branch (`f05c50b`) onto `main` first**, so everything below sits on top of
+your work rather than beside it. Your unpushed `s1_burn_frac` / 11-parameter commits should merge
+on top; the two places to look for a conflict are `env/mission_env.py` (`_finalize` and
+`evaluate_plan`) and `optimize/cma_optimizer.py`.
+
+**I re-ran `scripts/validate_rocket_library.py` from a clean checkout and your numbers reproduce
+exactly** — antares +15.0 %, atlas_v −25.0 %, falcon9 +11.2 %. I had been suspicious that three
+errors quoting as +15.0 and −25.0 looked too round; they are real, and your report was accurate.
+
+**I was in five of your directories.** What moved:
+
+- `verifier/core.py` — every constraint now carries `evaluated: bool`, and feasibility is
+  `all(c["pass"] for c in report if c["evaluated"])`. `verifier_version` moved twice:
+  `ver-f0ab2e4fa0c1` → `ver-4b49566ae7b5` → `ver-35cac73cafe9`. Any best-known value you recorded
+  under the old hash is not comparable; `benchmarks/hof.py` will tell you so rather than compare it.
+- `verifier/core.py` `_compute_cost` — three terms now. `w_fuel` applies to **ascent propellant
+  only**, and on-orbit propellant has its own weight and reference. An attempt with no
+  `prop_on_orbit_kg` is still scored the old way, so recorded sessions replay unchanged.
+- `env/mission_env.py` — `metrics` gained `prop_ascent_kg` / `prop_on_orbit_kg`; `_objective()`
+  fills in `prop_orbit_ref_kg` from the upper stage's propellant load; and `evaluate_plan` branches
+  to a new `_run_transfer_step` for `geo_comm` / `meo_gps`, which were previously flown down your
+  rendezvous path.
+- `optimize/cma_optimizer.py` — the inline plan construction is now `plan_from_x`, with
+  `x_from_plan` as its inverse and a round-trip test holding them together. Three optional
+  arguments added (`memory`, `warm_start_strategy`, `remember`), all defaulting to the old
+  behaviour.
+- `ascent/` — tests only. `test_throttling_caps_peak_accel_and_tracks_propellant` asserted that a
+  3.6 g throttled flight reaches 160 km perigee on the **default** pitch profile. It reaches
+  105.7 km, which is correct physics — less thrust on a schedule tuned for full thrust. I split it
+  into the two claims it was conflating rather than changing the assertion, and the "can a
+  throttled ascent reach orbit" half uses a profile found by CMA-ES (202.9 km at 3.600 g, seed 42,
+  900 evaluations) recorded as a measured search result. You reported fixing this too; compare
+  approaches when you are back.
+
+**The thing I think you will most want to know.** The fuel half of the objective could not be
+optimised, and it was the objective's fault, not your physics. Measured on cargo_iss/falcon9,
+sweeping phasing revs 1→20: ascent propellant is **constant** at 477,998.2 kg while on-orbit
+propellant moves **1,104 → 11,666 kg, a 10.6× swing** that was 2.2 % of the summed number.
+Splitting them raised the fuel term's leverage 5.3×. Your `s1_burn_frac` work moved it 3.5× on the
+summed figure; the two compound.
+
+Time still outweighs fuel 5.1:1 at the default weights. That is now a dial in the
+mission_request, and it is Yash's to set.
+
+**`optimize/`, `env/`, `rendezvous/`, `ascent/` and `verifier/` are yours again** the moment you
+are back. Nothing here was a lane grab — it was a direct instruction while you were unreachable,
+and it is all listed so you can audit or revert any of it.

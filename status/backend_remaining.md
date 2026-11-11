@@ -1,5 +1,12 @@
 # Backend: what is done, what is left
 
+> **CLOSED 2026-11-12.** All seven items below were completed the same day; see the
+> "Backend completion" section of  for the report, measurements and commits.
+> Two things remain and both are decisions, not work: the open-weight **model choice** for the
+> LLM planner (🔴 Yash) and the **fuel/time weight ratio** (🟡 Yash). The GEO launch
+> *window timing* and Tier C (WP2-13 fine-tuning, WP2-14 RL) are deliberately left open.
+> This file is kept as the audit of what the gap was.
+
 Written 2026-11-12 by claude-code, while Shiva is offline and Yash asked for the backend to be
 finished before the frontend rebuild. Audited against the tree, not against the handoff's claims:
 every "done" below was checked by running something, and the command is named.
