@@ -37,6 +37,8 @@ from typing import Any
 from benchmarks import hof, lower_bound, protocol, suite
 from contracts.validate import validate
 from env.mission_env import MissionEnv
+from memory import features as memory_features
+from memory.store import Store
 from optimize.cma_optimizer import optimize_mission
 from verifier import VERIFIER_VERSION
 
@@ -46,10 +48,53 @@ RESULTS_DIR = ROOT / "benchmarks" / "results"
 
 #: Why each system cannot run yet. A system absent from this map is runnable.
 NOT_RUNNABLE: dict[str, str] = {
-    "cma_memory": "WP2-10 experience memory does not exist yet, so there is nothing to warm-start from",
     "llm_base": "no open-weight model has been chosen; model and licence selection is Yash's (RED)",
     "llm_ft": "needs llm_base plus WP2-13 fine-tuning, neither of which exists",
 }
+
+#: Where `memory-build` writes the experience memory `cma_memory` warm-starts from. One file
+#: per source split, named for it, so a memory can never be mistaken for one built elsewhere.
+MEMORY_DIR = ROOT / "data" / "memory"
+
+
+def memory_path(source_split: str) -> Path:
+    return MEMORY_DIR / f"benchmark_{source_split}.jsonl"
+
+
+class LeakageError(RuntimeError):
+    """Raised when a run would be measured on missions its memory was built from."""
+
+
+def _load_memory(source_split: str, eval_split: str) -> Store:
+    """Load the memory built from `source_split`, refusing if it leaks into `eval_split`.
+
+    The check is not "are the split names different" -- it looks at the missions actually in
+    the file and refuses if ANY of them is in the split being measured. A memory holding the
+    answer to a test mission makes `cma_memory` look good for the one reason that does not
+    generalise, and the comparison against `cma_cold` would be worthless.
+    """
+    path = memory_path(source_split)
+    if not path.exists():
+        raise SystemExit(
+            f"no memory at {path}. Build it first: "
+            f"python -m benchmarks.runner memory-build --split {source_split}"
+        )
+    store = Store(path)
+    evaluated = set(protocol.splits()[eval_split])
+    leaked = sorted(
+        {
+            r["payload"]["mission_id"]
+            for r in store._records
+            if r["payload"]["mission_id"] in evaluated
+        }
+    )
+    if leaked:
+        raise LeakageError(
+            f"the memory built from {source_split!r} contains {len(leaked)} mission(s) that "
+            f"are in the {eval_split!r} split being measured: {leaked}. Measuring "
+            f"cma_memory on missions it has memorised is not a result."
+        )
+    return store
 
 
 def sim_version() -> str:
@@ -69,6 +114,8 @@ def run_system(
     budget: int | None = None,
     seeds: tuple[int, ...] | None = None,
     progress: bool = True,
+    memory_source_split: str = "train",
+    warm_start_strategy: str = "centre",
 ) -> dict[str, Any]:
     """Run one system across one split and return its per-mission results.
 
@@ -91,6 +138,17 @@ def run_system(
     budget = budget or suite.BUDGET_MAX_ATTEMPTS
     seeds = seeds or protocol.SYSTEM_SEEDS
     mission_ids = protocol.splits()[split]
+
+    store = None
+    if system == "cma_memory":
+        store = _load_memory(memory_source_split, split)
+        if progress:
+            st = store.stats()
+            print(
+                f"  memory from {memory_source_split}: {st['records']} records "
+                f"({st['feasible']} feasible), strategy {warm_start_strategy}",
+                flush=True,
+            )
     out: dict[str, Any] = {}
     t_start = time.perf_counter()
 
@@ -106,6 +164,11 @@ def run_system(
                 seed=int(seed),
                 session_log_path=None,
                 save_attempts=False,
+                memory=store,
+                warm_start_strategy=warm_start_strategy,
+                # Never write back during a measurement: a run that feeds the memory it read
+                # from makes two runs of the same configuration non-independent.
+                remember=False,
             )
             per_seed.append(
                 {
@@ -145,6 +208,17 @@ def run_system(
         "verifier_version": VERIFIER_VERSION,
         "protocol_hash": protocol.protocol_hash(),
         "wall_s": round(time.perf_counter() - t_start, 1),
+        "memory": (
+            None
+            if store is None
+            else {
+                "source_split": memory_source_split,
+                "strategy": warm_start_strategy,
+                "vector_spec": memory_features.VECTOR_SPEC,
+                "spec_hash": memory_features.spec_hash(),
+                **store.stats(),
+            }
+        ),
         "missions": out,
     }
 
@@ -211,6 +285,57 @@ def run_best_known(split: str, *, budget: int | None = None, progress: bool = Tr
         "no_feasible_solution": infeasible,
         "sim_version": sv,
         "verifier_version": vv,
+    }
+
+
+# ---------------------------------------------------------------------------
+# Building the experience memory cma_memory reads
+
+
+def build_memory(source_split: str = "train", *, budget: int | None = None,
+                 progress: bool = True) -> dict[str, Any]:
+    """Run the cold search over one split and store every attempt as experience.
+
+    Built from ONE split so the memory's provenance is unambiguous, and from `train` by
+    default so that measuring `cma_memory` on `val` or `test` is a question about
+    generalisation rather than recall. `_load_memory` enforces that at run time by checking
+    the missions in the file, not the split's name.
+
+    Every attempt is stored, not just the feasible ones: HANDOFF section 9 wants memory to
+    steer away from known-bad regions, and that needs the failures.
+    """
+    budget = budget or suite.BUDGET_MAX_ATTEMPTS
+    path = memory_path(source_split)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    if path.exists():
+        path.unlink()  # rebuild from scratch; a half-updated memory has no provenance
+    store = Store(path)
+
+    for i, mid in enumerate(protocol.splits()[source_split], 1):
+        for seed in protocol.SYSTEM_SEEDS:
+            req = dict(suite.mission_by_id(mid))
+            req["seed"] = int(seed)
+            optimize_mission(
+                mission_request=req, max_attempts=budget, seed=int(seed),
+                session_log_path=None, save_attempts=False,
+                memory=store, warm_start_strategy="cold", remember=True,
+            )
+        if progress:
+            st = store.stats()
+            print(
+                f"  [{i}/{len(protocol.splits()[source_split])}] {mid}: memory now "
+                f"{st['records']} records ({st['feasible']} feasible)",
+                flush=True,
+            )
+
+    stats = store.stats()
+    return {
+        "source_split": source_split,
+        "budget_per_seed": budget,
+        "seeds": list(protocol.SYSTEM_SEEDS),
+        "vector_spec": memory_features.VECTOR_SPEC,
+        "spec_hash": memory_features.spec_hash(),
+        **stats,
     }
 
 
@@ -353,11 +478,24 @@ def main(argv: list[str] | None = None) -> int:
     p_bk.add_argument("--split", default="train", choices=list(suite.SPLIT_NAMES))
     p_bk.add_argument("--budget", type=int, default=None)
 
+    p_mem = sub.add_parser(
+        "memory-build", help="run the cold search over a split and store it as experience"
+    )
+    p_mem.add_argument("--split", default="train", choices=list(suite.SPLIT_NAMES))
+    p_mem.add_argument("--budget", type=int, default=None)
+
     p_run = sub.add_parser("run", help="measure one system on one split")
     p_run.add_argument("system", choices=list(protocol.SYSTEMS))
     p_run.add_argument("--split", default="val", choices=list(suite.SPLIT_NAMES))
     p_run.add_argument("--budget", type=int, default=None)
     p_run.add_argument("--out", type=Path, default=None)
+    p_run.add_argument(
+        "--memory-from", default="train", choices=list(suite.SPLIT_NAMES),
+        help="which split's memory cma_memory warm-starts from (default train)",
+    )
+    p_run.add_argument(
+        "--warm-start", default="centre", choices=["cold", "centre", "bound", "examples"],
+    )
 
     args = ap.parse_args(argv)
 
@@ -404,9 +542,22 @@ def main(argv: list[str] | None = None) -> int:
         build_benchmark_file()
         return 0
 
+    if args.cmd == "memory-build":
+        print(f"building experience memory from split {args.split}")
+        rep = build_memory(args.split, budget=args.budget)
+        print(
+            f"{rep['records']} records ({rep['feasible']} feasible, "
+            f"{rep['infeasible']} infeasible) -> {rep['path']}"
+        )
+        print(f"vector_spec {rep['vector_spec']} {rep['spec_hash']}")
+        return 0
+
     if args.cmd == "run":
         print(f"{args.system} on split {args.split}")
-        rep = run_system(args.system, args.split, budget=args.budget)
+        rep = run_system(
+            args.system, args.split, budget=args.budget,
+            memory_source_split=args.memory_from, warm_start_strategy=args.warm_start,
+        )
         if rep["status"] == "not_run":
             print(f"not run: {rep['reason']}")
             return 0

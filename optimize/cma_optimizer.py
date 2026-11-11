@@ -23,13 +23,15 @@ from __future__ import annotations
 
 import json
 import time
+from collections.abc import Sequence
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
-from env.mission_env import MissionEnv
+from env.mission_env import SIM_VERSION, MissionEnv
 from optimize.search_core import cma_minimize
+from verifier import VERIFIER_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -46,6 +48,66 @@ X0 = [11.215, 19.623, -0.962, 0.782, 0.822, 200.0, 3.6, 0.0, 8.0, 800.0]
 SIGMA0 = 0.25
 SCALES = [4.0, 8.0, 8.0, 0.3, 0.3, 40.0, 1.0, 60.0, 3.0, 150.0]
 
+#: Names in the same order, for reports and traces.
+PARAM_NAMES = (
+    "pitch_t_start_s", "pitch_p_meco_deg", "pitch_p_final_deg", "pitch_alpha1",
+    "pitch_alpha2", "parking_alt_km", "max_g_limit", "coast_s2_s", "phasing_revs",
+    "final_tof_s",
+)
+
+
+def plan_from_x(x: Sequence[float]) -> dict[str, Any]:
+    """Turn a search vector into a mission plan.
+
+    The single place the mapping lives. `x_from_plan` is its inverse, and
+    `test_the_plan_mapping_round_trips` holds them together -- without that, warm-starting
+    from a stored plan would quietly reconstruct a different vector than the one that
+    produced it.
+    """
+    coast_s2 = round(float(x[7]), 1)
+    use_coast = coast_s2 >= 5.0
+    return {
+        "launch_t_unix": 1794372400,
+        "pitch_program": [round(float(v), 3) for v in x[:5]],
+        "parking_alt_km": round(float(x[5]), 1),
+        "max_g_limit": round(float(x[6]), 3),
+        "coast_s2_s": coast_s2 if use_coast else 0.0,
+        "s2_burn1_frac": 0.65 if use_coast else 1.0,
+        "phasing_revs": max(1, int(round(float(x[8])))),
+        "final_tof_s": round(float(x[9]), 1),
+        "burns": [],
+        "waypoints": [],
+    }
+
+
+def x_from_plan(plan: dict[str, Any]) -> np.ndarray | None:
+    """Recover the search vector from a plan, or None if the plan cannot supply all of it.
+
+    None rather than a partially filled vector: a starting point with three real numbers and
+    seven defaults looks like a considered one and is not.
+
+    `coast_s2_s` below the 5 s threshold is stored as exactly 0.0 by `plan_from_x`, so the
+    original sub-threshold value is not recoverable. 0.0 is the right reconstruction anyway --
+    it maps to the same plan, which is what a warm start needs.
+    """
+    try:
+        pitch = [float(v) for v in plan["pitch_program"]]
+        if len(pitch) != 5:
+            return None
+        return np.asarray(
+            [
+                *pitch,
+                float(plan["parking_alt_km"]),
+                float(plan["max_g_limit"]),
+                float(plan.get("coast_s2_s") or 0.0),
+                float(plan["phasing_revs"]),
+                float(plan["final_tof_s"]),
+            ],
+            dtype=np.float64,
+        )
+    except (KeyError, TypeError, ValueError):
+        return None
+
 
 def optimize_mission(
     mission_request: dict[str, Any],
@@ -53,6 +115,9 @@ def optimize_mission(
     seed: int = 42,
     session_log_path: Path | str | None = None,
     save_attempts: bool = True,
+    memory: Any = None,
+    warm_start_strategy: str = "centre",
+    remember: bool = False,
 ) -> dict[str, Any]:
     """Run CMA-ES over the ascent plan parameters for one mission request.
 
@@ -69,6 +134,17 @@ def optimize_mission(
         Where to stream session.jsonl. The live stream and the replay are these same bytes.
     save_attempts : bool
         Write attempt.json / .traj.json files under ROOT/data/attempts.
+    memory : memory.Store | None
+        Experience memory to warm-start from. None is a cold start, which is `cma_cold` in
+        the benchmark. The memory only moves where the search STARTS and, under the "bound"
+        strategy, how wide it looks; it cannot make an infeasible plan pass, because the
+        verifier judges every attempt from scratch (charter addition 3).
+    warm_start_strategy : str
+        One of memory.warm_start.STRATEGIES. Ignored when `memory` is None.
+    remember : bool
+        Store every attempt back into `memory` afterwards. Off by default: a run that writes
+        into the memory it read from makes two runs of the same configuration non-independent,
+        which would quietly invalidate a benchmark comparison.
 
     Returns
     -------
@@ -137,6 +213,11 @@ def optimize_mission(
         "best_cost": float("inf"),
         "feasible": 0,
         "last": None,
+        # Known before the first simulation, so the warm start can filter memory by them
+        # without spending an attempt on a probe.
+        "sim_version": SIM_VERSION,
+        "verifier_version": VERIFIER_VERSION,
+        "all_attempts": [],
     }
 
     def evaluate(x: np.ndarray) -> float:
@@ -146,20 +227,7 @@ def optimize_mission(
 
         emit_event("attempt_started", {}, attempt_id=attempt_id)
 
-        coast_s2 = round(float(x[7]), 1)
-        use_coast = coast_s2 >= 5.0
-        plan = {
-            "launch_t_unix": 1794372400,
-            "pitch_program": [round(float(v), 3) for v in x[:5]],
-            "parking_alt_km": round(float(x[5]), 1),
-            "max_g_limit": round(float(x[6]), 3),
-            "coast_s2_s": coast_s2 if use_coast else 0.0,
-            "s2_burn1_frac": 0.65 if use_coast else 1.0,
-            "phasing_revs": max(1, int(round(float(x[8])))),
-            "final_tof_s": round(float(x[9]), 1),
-            "burns": [],
-            "waypoints": [],
-        }
+        plan = plan_from_x(x)
 
         emit_event(
             "agent_step",
@@ -205,6 +273,7 @@ def optimize_mission(
         )
 
         state["last"] = attempt
+        state["all_attempts"].append(attempt)
         if cost < float(state["best_cost"]):
             state["best_cost"] = cost
             state["best_attempt"] = attempt
@@ -240,16 +309,57 @@ def optimize_mission(
         )
 
     scales = np.asarray(SCALES, dtype=float)
+    x0 = np.asarray(X0, dtype=float)
+    lower = np.asarray(LOWER, dtype=float)
+    upper = np.asarray(UPPER, dtype=float)
+
+    if memory is not None:
+        from memory.warm_start import warm_start as _warm_start
+
+        ws = _warm_start(
+            memory,
+            mission_request,
+            x_from_plan=x_from_plan,
+            x0=x0,
+            lower=lower,
+            upper=upper,
+            strategy=warm_start_strategy,
+            sim_version=state.get("sim_version"),
+            verifier_version=state.get("verifier_version"),
+        )
+        x0, lower, upper = ws["x0"], ws["lower"], ws["upper"]
+        # Emitted whether or not a neighbour was found: "memory had nothing for this mission"
+        # is a result the trace has to show, or a cold run and a warm one that found nothing
+        # look identical in the replay.
+        emit_event(
+            "agent_step",
+            data={
+                "note": ws["reason"],
+                "warm_start": {
+                    "strategy": ws["strategy"],
+                    "used": ws["used"],
+                    "neighbours": ws["neighbours"],
+                },
+            },
+            kind="note",
+            summary=f"warm start ({ws['strategy']}): {ws['reason']}",
+        )
+
     result = cma_minimize(
         f=lambda xn: evaluate(np.asarray(xn) * scales),
-        x0=np.asarray(X0, dtype=float) / scales,
+        x0=x0 / scales,
         sigma0=SIGMA0,
         budget=max_attempts,
         seed=seed,
-        lower=np.asarray(LOWER, dtype=float) / scales,
-        upper=np.asarray(UPPER, dtype=float) / scales,
+        lower=lower / scales,
+        upper=upper / scales,
         on_generation=on_generation,
     )
+
+    if memory is not None and remember:
+        for att in state.get("all_attempts", []):
+            memory.remember(mission_request, att, flush=False)
+        memory.flush()
 
     emit_event(
         "mission_finished",

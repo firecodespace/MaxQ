@@ -358,3 +358,71 @@ def test_the_benchmark_file_omits_best_known_measured_under_other_versions(tmp_p
         "a best-known cost from a different simulator was presented as current"
     )
     assert "omitted rather than silently compared" in doc["_note"]
+
+
+# ---------------------------------------------------------------------------
+# cma_memory and the leakage guard
+
+
+def test_cma_memory_is_runnable_now_that_wp2_10_exists():
+    assert "cma_memory" not in runner.NOT_RUNNABLE
+
+
+def test_memory_built_from_a_split_cannot_be_used_to_measure_that_split(tmp_path, monkeypatch):
+    """The whole value of cma_memory vs cma_cold is whether experience GENERALISES.
+
+    A memory holding the answer to a test mission makes cma_memory look good for the one
+    reason that does not generalise, and the comparison becomes worthless. The guard checks
+    the missions actually in the file, not whether two split names differ.
+    """
+    from memory.store import Store
+    from optimize.cma_optimizer import X0, plan_from_x
+
+    monkeypatch.setattr(runner, "MEMORY_DIR", tmp_path)
+    path = runner.memory_path("train")
+    store = Store(path)
+    test_mission = suite.mission_by_id(protocol.splits()["test"][0])
+    store.remember(
+        test_mission,
+        {
+            "id": "att_leak", "cost": 1.0, "feasible": True, "sim_version": "s",
+            "verifier_version": "v", "plan": plan_from_x(X0), "constraint_report": [],
+        },
+    )
+
+    with pytest.raises(runner.LeakageError, match="being measured"):
+        runner._load_memory("train", "test")
+
+    # The same file is fine for a split it does not touch.
+    assert runner._load_memory("train", "val") is not None
+
+
+def test_a_clean_train_memory_is_accepted_for_val_and_test(tmp_path, monkeypatch):
+    from memory.store import Store
+    from optimize.cma_optimizer import X0, plan_from_x
+
+    monkeypatch.setattr(runner, "MEMORY_DIR", tmp_path)
+    store = Store(runner.memory_path("train"))
+    for mid in protocol.splits()["train"][:2]:
+        store.remember(
+            suite.mission_by_id(mid),
+            {
+                "id": f"att_{mid}", "cost": 1.2, "feasible": True, "sim_version": "s",
+                "verifier_version": "v", "plan": plan_from_x(X0), "constraint_report": [],
+            },
+        )
+    for evaluated in ("val", "test"):
+        assert len(runner._load_memory("train", evaluated)) == 2
+
+
+def test_a_measurement_run_never_writes_back_into_its_memory():
+    """A run that feeds the memory it read from makes two runs of the same configuration
+    non-independent, which would quietly invalidate the comparison. Asserted on the source,
+    because the failure is silent and only shows up as a result that will not reproduce."""
+    import inspect
+
+    src = inspect.getsource(runner.run_system)
+    assert "remember=False" in src, (
+        "run_system must pass remember=False; a measurement that mutates its own memory is "
+        "not a measurement"
+    )

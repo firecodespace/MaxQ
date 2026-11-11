@@ -45,3 +45,4 @@ data/attempts/
 # Benchmark system results are measurements, written by benchmarks/runner.py per run.
 # benchmark.json and hof.json ARE committed -- they are the protocol and the reference.
 benchmarks/results/
+data/memory/

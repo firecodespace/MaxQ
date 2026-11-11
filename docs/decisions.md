@@ -147,3 +147,26 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   exactly, from a clean checkout - his report was accurate. sim_version ascent-dbc9a3aede21. NOTE:
   three vehicles passing at +/-35% is not the same as a usable reference; per-vehicle justified
   tolerances are the next item - by claude-code - reversible: n/a (measurement) - status: FINAL
+- WP2-10 experience memory uses brute-force EXACT cosine search over a JSONL file, not Qdrant,
+  which HANDOFF section 9 suggests. WHY: the corpus is at most a few thousand 14-dimensional
+  vectors (one split is 8 missions x 120 attempts x 3 seeds), so exact search is sub-millisecond
+  and an index would be slower; and approximate search can silently return a worse neighbour,
+  which is a confound inside the very thing being measured - whether a better neighbour makes the
+  search faster. The handoff itself notes exact search is available and that quantization is lossy.
+  `memory.Store` is the seam: a Qdrant backend drops in behind the same four methods. No untested
+  Qdrant code was shipped alongside, because untested code that claims to work is worse than code
+  that is absent. REVERSIBLE: yes, and it adds a pinned dependency, so the swap is Yash's call -
+  by claude-code on Yash's instruction while Shiva is offline - status: FINAL unless Yash wants
+  Qdrant, in which case say so and it gets installed, implemented and measured against this
+- `features-v1` OMITS three features HANDOFF section 9 lists: weather metrics and Kp (no data
+  source exists in the project at all - C05 reports "not evaluated" for the same reason) and
+  minimum miss distance (data/results/risk_*.json has min_miss_km for only 8 windows against one
+  trajectory family, so it is absent for most suite missions). Encoding an absent feature as 0
+  would be worse than omitting it: in a vector a 0 is not "unknown", it is a specific point in the
+  space that makes unrelated missions look similar. Adding any of them is a features-v2 change -
+  by claude-code - reversible: yes - status: FINAL (spec_hash sha256:c845009d1628d4...)
+- The launch window phase angle is encoded as (sin, cos), not as a linearly normalized number,
+  because it is circular: 359 deg and 1 deg are two degrees apart and a linear scale puts them at
+  opposite ends. MEASURED: the circular encoding puts them 0.035 apart while 10 deg and 190 deg
+  land 2.0 apart. Linearly they would have been the most distant pair available, i.e. retrieval
+  would have returned the least similar window as the most similar - by claude-code - status: FINAL
