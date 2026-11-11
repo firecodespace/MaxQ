@@ -40,11 +40,11 @@
   "confidence": "approximate",
   "notes": "Single source, so nothing here is cross-checked. Derived, not published: first-stage propellant = gross - empty (242,000 kg); second-stage dry = gross - propellant (2,100 kg); second-stage Isp = thrust x burn time/ (propellant x g0) = 311.6 s, which treats the quoted MAXIMUM thrust as constant and is therefore an upperestimate for a solid motor. The source gives one first-stage thrust figure (3,844 kN) without saying sea-level or vacuum, so it is used as is rather than averaged. The 8,000 kg figure has no stated orbit. The vehicle is retired; it is in the library as a real cargo-to-ISS launcher with a different pad and latitude from the other two. Modelling conventions (assumptions, not data): first-stage thrust and Isp are the mean of the published sea-level and vacuum values because the simulator has one of each per stage; cd = 0.3 is assumed; area is the circle of the published core diameter; fairing mass and jettison are not modelled.",
   "sim_validation": {
-    "payload_to_leo_kg_sim": 8900.0,
-    "error_pct": 11.2,
+    "payload_to_leo_kg_sim": 9200.0,
+    "error_pct": 15.0,
     "tolerance_pct": 35.0,
     "pass": true,
-    "sim_version": "ascent-fd962cdc0652",
-    "note": "Heaviest payload reaching perigee >= 160 km, due east from mars_lp0a (resolved to +/- 250 kg; pitch program [5.349, 6.742, -8.191, 0.835, 0.584] found by CMA-ES seed 7). Orbit reached: 164 x 173 km, max q 37.9 kPa. Published figure: 8000 kg."
+    "sim_version": "ascent-dbc9a3aede21",
+    "note": "Heaviest payload reaching perigee >= 160 km, due east from mars_lp0a (resolved to +/- 250 kg; pitch program [4.869, 9.904, -7.43, 0.736, 0.305] found by CMA-ES seed 7). Orbit reached: 160 x 164 km, max q 44.2 kPa. Published figure: 8000 kg."
   }
 }
