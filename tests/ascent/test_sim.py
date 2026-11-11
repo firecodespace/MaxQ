@@ -109,15 +109,51 @@ def test_all_archetypes_reach_parking_orbit(rocket_id):
 
 
 def test_throttling_caps_peak_accel_and_tracks_propellant():
-    """Throttling / max_g_limit keeps peak acceleration within cap without losing Stage-2 bookkeeping."""
+    """max_g_limit holds the cap without losing Stage-2 propellant bookkeeping.
+
+    Flown on the vehicle's DEFAULT pitch profile, which was tuned for an unthrottled
+    flight. Throttling that same profile does not reach orbit -- less thrust on the same
+    pitch schedule means less energy -- and that is correct physics, not a bug. Whether a
+    throttled flight can reach orbit at all is a different claim, tested separately in
+    `test_a_throttled_flight_can_still_reach_a_parking_orbit`.
+    """
     rocket = get_rocket("crewlift_kerolox_b")
     uncapped = simulate_ascent(rocket=rocket)
     capped = simulate_ascent(rocket=rocket, max_g_limit=3.6)
 
-    assert capped.max_accel_g <= 3.61
+    assert capped.max_accel_g <= 3.61, "the acceleration cap was not enforced"
+    assert uncapped.max_accel_g > capped.max_accel_g, "the cap changed nothing"
     assert uncapped.s1_prop_used_kg > 0.0
     assert capped.s2_prop_remaining_kg >= 0.0
-    assert capped.perigee_km >= 160.0
+    # Propellant is conserved: throttling redistributes the burn, it does not create mass.
+    assert capped.s1_prop_used_kg <= rocket.stages[0].prop_kg + 1.0
+
+
+# Found by running the project's own CMA-ES (optimize/search_core.cma_minimize) over the five
+# pitch parameters with max_g_limit=3.6, maximising perigee: seed 42, sigma0 0.25, budget 900
+# evaluations, bounds as in optimize/cma_optimizer.py. It is a measured search result, not a
+# hand-tuned guess, and it is here rather than in DEFAULT_PITCH_PARAMS because the defaults
+# belong to the unthrottled flight.
+THROTTLED_PITCH_CREWLIFT = [11.1375, 19.7368, -0.8886, 0.8025, 0.9883]
+
+
+def test_a_throttled_flight_can_still_reach_a_parking_orbit():
+    """A 3.6 g crew-rated ascent reaches a usable parking orbit, given a profile tuned for it.
+
+    This is the claim that matters for crewed missions: the acceleration limit costs
+    performance but is not disqualifying. If this ever fails, the throttling model has
+    become unflyable and no amount of searching will hide it.
+    """
+    rocket = get_rocket("crewlift_kerolox_b")
+    capped = simulate_ascent(
+        rocket=rocket, pitch_params=THROTTLED_PITCH_CREWLIFT, max_g_limit=3.6
+    )
+
+    assert capped.max_accel_g <= 3.61
+    assert capped.perigee_km >= 160.0, (
+        f"a throttled ascent reached only {capped.perigee_km:.1f} km perigee"
+    )
+    assert capped.s2_prop_remaining_kg >= 0.0, "reached orbit by spending propellant it lacked"
 
 
 def test_s2_coast_increases_insertion_time_deterministically():
