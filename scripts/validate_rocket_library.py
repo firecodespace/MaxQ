@@ -17,9 +17,22 @@ Method
 * The largest deliverable payload is found by bisection between 0 and 2.2x the published figure.
 
 Why the match cannot be close: the simulator is a 2D point mass with one thrust and one Isp per
-stage, an exponential atmosphere, no fairing jettison, no throttling and no coast phase. The
-tolerance per vehicle (default 30 %) says how far off that model is allowed to be before the vehicle
-is flagged, and the measured error says how far off it is.
+stage, an exponential atmosphere and no fairing jettison. (Throttling and a stage-2 coast DO exist
+now, but this measurement flies the default unthrottled single-burn path, so they do not help it.)
+
+Tolerance
+---------
+`DEFAULT_TOLERANCE_PCT` is a judgement about that model, not a measurement: with the omissions
+above, a payload figure within about a third of the published one is as close as a 2D point mass
+can be expected to come. A vehicle may state its own `sim_tolerance_pct`, and if it does, its
+`notes` must say why -- `test_a_custom_tolerance_is_justified` enforces that, so a tolerance can
+never be quietly widened around a vehicle that misses.
+
+A tolerance is NOT a quality claim. Three vehicles passing at +/-35 % does not make the library
+accurate enough to benchmark against; it means the model's error is recorded. What protects a
+benchmark is `sim_version` on every block (a sim edit invalidates the number and the suite says so)
+plus the measured error travelling with any result that uses the vehicle -- not a tighter number
+here. Tightening this constant would drop vehicles, not improve the model.
 
 Owner: Yash (lane: scripts/, data/rockets).
 """
@@ -57,7 +70,9 @@ SIM_FILES = ("ascent/sim.py", "ascent/atmosphere.py", "ascent/geo.py", "ascent/r
 # Read it as a bar that catches a broken model, a vehicle that cannot reach orbit, or a stale
 # record. It is not a claim that the simulator is accurate to 35 %: the honest number is the
 # per-vehicle error_pct, and anything quoting a payload should show it.
-TOLERANCE_PCT = 35.0
+#: Fidelity tolerance for a vehicle that does not state its own, in percent of the published
+#: payload figure. See the "Tolerance" section of the module docstring for what justifies it.
+DEFAULT_TOLERANCE_PCT = 35.0
 MIN_PERIGEE_KM = 160.0
 SEED = 7
 # Pitch program [t_start_s, p_meco_deg, p_final_deg, alpha1, alpha2], in degrees above the local
@@ -259,11 +274,12 @@ def main(argv: list[str] | None = None) -> int:
         t0 = time.time()
         out = max_payload(v, pad["lat_deg"], pad["lon_deg"], args.quick)
         published = v["payload_to_leo_kg_published"]
+        tolerance = float(v.get("sim_tolerance_pct") or DEFAULT_TOLERANCE_PCT)
         if out["best"] is None:
             block = {
                 "payload_to_leo_kg_sim": None,
                 "error_pct": None,
-                "tolerance_pct": TOLERANCE_PCT,
+                "tolerance_pct": tolerance,
                 "pass": False,
                 "sim_version": version,
                 "note": f"No pitch program reached a {MIN_PERIGEE_KM:.0f} km perigee at any of {out['tried']} "
@@ -275,11 +291,11 @@ def main(argv: list[str] | None = None) -> int:
         else:
             mass, pitch, res = out["best"]
             err = 100.0 * (mass - published) / published
-            ok = abs(err) <= TOLERANCE_PCT
+            ok = abs(err) <= tolerance
             block = {
                 "payload_to_leo_kg_sim": round(mass, 0),
                 "error_pct": round(err, 1),
-                "tolerance_pct": TOLERANCE_PCT,
+                "tolerance_pct": tolerance,
                 "pass": ok,
                 "sim_version": version,
                 "note": f"Heaviest payload reaching perigee >= {MIN_PERIGEE_KM:.0f} km, due east from {pad['id']} "
@@ -290,7 +306,7 @@ def main(argv: list[str] | None = None) -> int:
             }
             print(
                 f"{v['id']}: sim {mass:,.0f} kg vs published {published:,.0f} kg  ({err:+.1f} %)  "
-                f"{'PASS' if ok else 'MISS'} at +/-{TOLERANCE_PCT:.0f} %  ({time.time() - t0:.0f} s)"
+                f"{'PASS' if ok else 'MISS'} at +/-{tolerance:.0f} %  ({time.time() - t0:.0f} s)"
             )
             if not ok:
                 rc = 1

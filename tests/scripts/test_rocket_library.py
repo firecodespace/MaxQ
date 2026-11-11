@@ -169,3 +169,59 @@ def test_validation_reproduces_for_one_vehicle():
         f"{vid}: re-running the validation gave {after['payload_to_leo_kg_sim']} kg, but the file "
         f"records {before['payload_to_leo_kg_sim']} kg. The search is seeded, so this should be exact."
     )
+
+
+@pytest.mark.parametrize("v", _real(), ids=lambda v: v["id"])
+def test_a_custom_tolerance_is_justified(v):
+    """A vehicle may state its own fidelity tolerance, but it has to say why.
+
+    Without this, the field is a way to widen the band around any vehicle that misses --
+    exactly what `validate_rocket_library.py` says it will not do. The justification has to
+    be in the vehicle's own notes, where the next reader of the data will see it.
+    """
+    from scripts.validate_rocket_library import DEFAULT_TOLERANCE_PCT
+
+    stated = v.get("sim_tolerance_pct")
+    if stated is None:
+        block = v.get("sim_validation") or {}
+        if "tolerance_pct" in block:
+            assert block["tolerance_pct"] == DEFAULT_TOLERANCE_PCT, (
+                f"{v['id']}: recorded tolerance {block['tolerance_pct']} is not the library "
+                f"default {DEFAULT_TOLERANCE_PCT} and the vehicle states no sim_tolerance_pct"
+            )
+        return
+
+    notes = v["notes"].lower()
+    assert "tolerance" in notes, (
+        f"{v['id']}: states sim_tolerance_pct = {stated} but its notes never mention a "
+        f"tolerance. Say what about this vehicle justifies a band other than "
+        f"+/-{DEFAULT_TOLERANCE_PCT:.0f} %."
+    )
+    block = v.get("sim_validation") or {}
+    if block.get("tolerance_pct") is not None:
+        assert block["tolerance_pct"] == stated, (
+            f"{v['id']}: recorded against +/-{block['tolerance_pct']} % but the vehicle now "
+            f"states +/-{stated} %. Re-run scripts/validate_rocket_library.py."
+        )
+
+
+def test_the_default_tolerance_is_not_a_quality_claim():
+    """Guards the thing most likely to be misread.
+
+    Every real vehicle currently passes, which says the model's error is RECORDED, not that
+    the library is accurate. If someone tightens the default to make the numbers look better,
+    this test's message is the one they should read: tightening drops vehicles, it does not
+    improve the simulator.
+    """
+    from scripts.validate_rocket_library import DEFAULT_TOLERANCE_PCT
+
+    assert DEFAULT_TOLERANCE_PCT >= 20.0, (
+        "The default tolerance was tightened. That does not make the 2D point-mass model more "
+        "accurate -- it only drops vehicles from the library. If the model genuinely improved, "
+        "re-measure every vehicle, record the new errors, and update this bound deliberately."
+    )
+    worst = max(abs((v.get("sim_validation") or {}).get("error_pct") or 0.0) for v in _real())
+    assert worst > 5.0, (
+        f"The worst recorded error is only {worst:.1f} %, which would mean the simulator now "
+        f"matches published figures closely. Verify that before believing it."
+    )

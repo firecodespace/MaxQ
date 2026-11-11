@@ -102,6 +102,12 @@
         "null"
       ]
     },
+    "sim_tolerance_pct": {
+      "type": "number",
+      "exclusiveMinimum": 0.0,
+      "maximum": 100.0,
+      "description": "This vehicle's own fidelity tolerance for the sim-vs-published payload comparison, in percent. Optional; absent means the library default. A vehicle that states one MUST justify it in `notes` -- the point of the field is to record a considered judgement about this vehicle, never to widen a band around a vehicle that misses."
+    },
     "sources": {
       "type": "array",
       "items": {
