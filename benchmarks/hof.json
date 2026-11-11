@@ -1,0 +1,38 @@
+{
+  "_note": "Best-known results per benchmark mission. Written only by benchmarks/runner.py, after the verifier has passed the attempt. Every entry carries the protocol, simulator and verifier versions it was measured under; an entry whose versions do not match the current code is stale and is not comparable with a fresh result.",
+  "entries": {
+    "msn_bench_crew_f9_w0_light": {
+      "attempt_id": "att_msn_bench_crew_f9_w0_light_1468",
+      "budget_sims": 10500,
+      "cost": 1.16,
+      "metrics": {
+        "ascent_reserve_frac": 0.02,
+        "eccentricity": 0.00638,
+        "max_accel_g": 3.958,
+        "max_q_pa": 33726.0,
+        "orbital_reserve_frac": 0.13531,
+        "perigee_km": 315.24,
+        "plane_error_deg": 0.0,
+        "prop_ascent_kg": 478602.4,
+        "prop_on_orbit_kg": 8446.0,
+        "prop_used_kg": 487048.4,
+        "time_to_dock_s": 15355.0,
+        "total_dv_mps": 9383.4
+      },
+      "protocol_hash": "sha256:b85b5c0b890fabc4b9e29f9316d28f457c5ae20254154eaae83924bc3c6cea6d",
+      "seeds": [
+        11,
+        22,
+        33,
+        42,
+        77,
+        101,
+        202
+      ],
+      "sim_version": "env-1476561a5eda",
+      "superseded": null,
+      "verifier_version": "ver-35cac73cafe9"
+    }
+  },
+  "schema_version": 1
+}

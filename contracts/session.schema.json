@@ -71,9 +71,9 @@
       "then": {
         "required": [
           "kind",
-          "summary",
-          "attempt_id"
-        ]
+          "summary"
+        ],
+        "description": "An agent_step always says what kind of step it is and summarises it. attempt_id is OPTIONAL: a step may be about the mission rather than about one attempt. The agent tool layer (WP2-11) makes that unavoidable -- get_constraints and query_memory are called before any attempt exists, and a warm-start decision is taken between attempts. When attempt_id IS present, contracts/validate.py still requires it to name an attempt that has started and not finished."
       }
     },
     {

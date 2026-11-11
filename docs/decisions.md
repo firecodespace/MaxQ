@@ -170,3 +170,24 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   opposite ends. MEASURED: the circular encoding puts them 0.035 apart while 10 deg and 190 deg
   land 2.0 apart. Linearly they would have been the most distant pair available, i.e. retrieval
   would have returned the least similar window as the most similar - by claude-code - status: FINAL
+- CONTRACT CHANGE (Yash's lane, done on his instruction to complete the backend while Shiva is
+  offline): `session.schema.json` no longer requires `attempt_id` on an `agent_step`. WHY: WP2-11's
+  tool layer makes mission-level steps unavoidable - `get_constraints` and `query_memory` are
+  called before any attempt exists, and a warm-start decision is taken between attempts. The old
+  rule made a contract-valid agent trace impossible. `kind` and `summary` are still required, and
+  contracts/validate.py still refuses an `attempt_id` that does not name a running attempt, so the
+  weakening is exactly "a step may be about the mission" and nothing more. Existing session files
+  are unaffected: they all carry attempt_id - by claude-code - reversible: yes - status: FINAL
+- WP2-11 ships the tool layer and the deterministic `OptimizerAgent` only. The LLM planner is NOT
+  built: choosing an open-weight model and checking its licence is RED and Yash's. `agent/tools.py`
+  declares TOOL_SCHEMAS in the shape a tool-use API wants, so the prompt side is already pinned to
+  the implementation and cannot drift from it when a model is picked - by claude-code - status: OPEN
+  (needs Yash: model + licence choice. On a 6 GB RTX 4050 that realistically means a quantised 7-8B
+  class model, but the choice is not mine to make)
+- The agent read-only boundary is enforced on the TOOL LAYER's surface, not by sandboxing the
+  interpreter, and `test_agent_cannot_write_verifier` says so: no tool takes a path, a filename, a
+  module or anything evaluable; the single filesystem write resolves its path and refuses anything
+  outside data/attempts/; and the agent package is asserted never to import from benchmarks/ at all,
+  because an agent that could read best-known could tune to it. The honest statement is "the agent's
+  only interface cannot do it", not "the process cannot do it" - Python written inside agent/ could
+  import anything - by claude-code - reversible: n/a - status: FINAL
