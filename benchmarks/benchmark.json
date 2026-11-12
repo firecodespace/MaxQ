@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "_note": "Suite suite_v1, 24 missions, splits partitioned by launch window so no window appears in two splits. best_known holds only the 4 mission(s) measured under the live sim_version env-1476561a5eda and verifier_version ver-35cac73cafe9; 0 recorded under earlier versions are omitted rather than silently compared. lower_bound is analytic and loose -- a floor, not a target. Missions absent from best_known have no known feasible solution yet.",
+  "suite_id": "suite_v1",
+  "protocol_hash": "sha256:b85b5c0b890fabc4b9e29f9316d28f457c5ae20254154eaae83924bc3c6cea6d",
+  "splits": {
+    "train": [
+      "msn_bench_crew_f9_w0_light",
+      "msn_bench_crew_f9_w0_heavy",
+      "msn_bench_cargo_f9_w3_light",
+      "msn_bench_cargo_f9_w3_heavy",
+      "msn_bench_cargo_an_w6_light",
+      "msn_bench_cargo_an_w6_heavy",
+      "msn_bench_cargo_av_w9_light",
+      "msn_bench_cargo_av_w9_heavy"
+    ],
+    "val": [
+      "msn_bench_crew_f9_w1_light",
+      "msn_bench_crew_f9_w1_heavy",
+      "msn_bench_cargo_f9_w4_light",
+      "msn_bench_cargo_f9_w4_heavy",
+      "msn_bench_cargo_an_w7_light",
+      "msn_bench_cargo_an_w7_heavy",
+      "msn_bench_cargo_av_w10_light",
+      "msn_bench_cargo_av_w10_heavy"
+    ],
+    "test": [
+      "msn_bench_crew_f9_w2_light",
+      "msn_bench_crew_f9_w2_heavy",
+      "msn_bench_cargo_f9_w5_light",
+      "msn_bench_cargo_f9_w5_heavy",
+      "msn_bench_cargo_an_w8_light",
+      "msn_bench_cargo_an_w8_heavy",
+      "msn_bench_cargo_av_w11_light",
+      "msn_bench_cargo_av_w11_heavy"
+    ]
+  },
+  "best_known": {
+    "msn_bench_cargo_an_w6_light": {
+      "cost": 1.22161,
+      "attempt_id": "att_msn_bench_cargo_an_w6_light_1466",
+      "budget_sims": 10500,
+      "seeds": [
+        11,
+        22,
+        33,
+        42,
+        77,
+        101,
+        202
+      ]
+    },
+    "msn_bench_cargo_av_w9_light": {
+      "cost": 1.21992,
+      "attempt_id": "att_msn_bench_cargo_av_w9_light_1458",
+      "budget_sims": 10500,
+      "seeds": [
+        11,
+        22,
+        33,
+        42,
+        77,
+        101,
+        202
+      ]
+    },
+    "msn_bench_cargo_f9_w3_light": {
+      "cost": 1.159957,
+      "attempt_id": "att_msn_bench_cargo_f9_w3_light_1168",
+      "budget_sims": 10500,
+      "seeds": [
+        11,
+        22,
+        33,
+        42,
+        77,
+        101,
+        202
+      ]
+    },
+    "msn_bench_crew_f9_w0_light": {
+      "cost": 1.16,
+      "attempt_id": "att_msn_bench_crew_f9_w0_light_1468",
+      "budget_sims": 10500,
+      "seeds": [
+        11,
+        22,
+        33,
+        42,
+        77,
+        101,
+        202
+      ]
+    }
+  },
+  "lower_bound": {
+    "msn_bench_crew_f9_w0_light": {
+      "dv_mps": 7497.29,
+      "prop_kg": 61595.438
+    },
+    "msn_bench_crew_f9_w0_heavy": {
+      "dv_mps": 7497.29,
+      "prop_kg": 123190.876
+    },
+    "msn_bench_crew_f9_w1_light": {
+      "dv_mps": 7497.29,
+      "prop_kg": 61595.438
+    },
+    "msn_bench_crew_f9_w1_heavy": {
+      "dv_mps": 7497.29,
+      "prop_kg": 123190.876
+    },
+    "msn_bench_crew_f9_w2_light": {
+      "dv_mps": 7497.29,
+      "prop_kg": 61595.438
+    },
+    "msn_bench_crew_f9_w2_heavy": {
+      "dv_mps": 7497.29,
+      "prop_kg": 123190.876
+    },
+    "msn_bench_cargo_f9_w3_light": {
+      "dv_mps": 7497.11,
+      "prop_kg": 61591.777
+    },
+    "msn_bench_cargo_f9_w3_heavy": {
+      "dv_mps": 7497.11,
+      "prop_kg": 123183.554
+    },
+    "msn_bench_cargo_f9_w4_light": {
+      "dv_mps": 7497.11,
+      "prop_kg": 61591.777
+    },
+    "msn_bench_cargo_f9_w4_heavy": {
+      "dv_mps": 7497.11,
+      "prop_kg": 123183.554
+    },
+    "msn_bench_cargo_f9_w5_light": {
+      "dv_mps": 7497.11,
+      "prop_kg": 61591.777
+    },
+    "msn_bench_cargo_f9_w5_heavy": {
+      "dv_mps": 7497.11,
+      "prop_kg": 123183.554
+    },
+    "msn_bench_cargo_an_w6_light": {
+      "dv_mps": 7538.322,
+      "prop_kg": 25891.968
+    },
+    "msn_bench_cargo_an_w6_heavy": {
+      "dv_mps": 7538.322,
+      "prop_kg": 51783.936
+    },
+    "msn_bench_cargo_an_w7_light": {
+      "dv_mps": 7538.322,
+      "prop_kg": 25891.968
+    },
+    "msn_bench_cargo_an_w7_heavy": {
+      "dv_mps": 7538.322,
+      "prop_kg": 51783.936
+    },
+    "msn_bench_cargo_an_w8_light": {
+      "dv_mps": 7538.322,
+      "prop_kg": 25891.968
+    },
+    "msn_bench_cargo_an_w8_heavy": {
+      "dv_mps": 7538.322,
+      "prop_kg": 51783.936
+    },
+    "msn_bench_cargo_av_w9_light": {
+      "dv_mps": 7497.193,
+      "prop_kg": 14877.842
+    },
+    "msn_bench_cargo_av_w9_heavy": {
+      "dv_mps": 7497.193,
+      "prop_kg": 29755.685
+    },
+    "msn_bench_cargo_av_w10_light": {
+      "dv_mps": 7497.193,
+      "prop_kg": 14877.842
+    },
+    "msn_bench_cargo_av_w10_heavy": {
+      "dv_mps": 7497.193,
+      "prop_kg": 29755.685
+    },
+    "msn_bench_cargo_av_w11_light": {
+      "dv_mps": 7497.193,
+      "prop_kg": 14877.842
+    },
+    "msn_bench_cargo_av_w11_heavy": {
+      "dv_mps": 7497.193,
+      "prop_kg": 29755.685
+    }
+  },
+  "systems": {
+    "cma_cold": {
+      "status": "runnable"
+    },
+    "cma_memory": {
+      "status": "not_run",
+      "reason": "WP2-10 experience memory does not exist yet, so there is nothing to warm-start from"
+    },
+    "llm_base": {
+      "status": "not_run",
+      "reason": "no open-weight model has been chosen; model and licence selection is Yash's (RED)"
+    },
+    "llm_ft": {
+      "status": "not_run",
+      "reason": "needs llm_base plus WP2-13 fine-tuning, neither of which exists"
+    }
+  }
+}

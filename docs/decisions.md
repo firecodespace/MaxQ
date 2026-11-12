@@ -210,3 +210,25 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   whatever plane error the window data gives it and computes the burn honestly; it does not claim
   the timing is real. So "replace GEO placeholder windows with real ones" remains open
   - by claude-code - status: OPEN (Tier C, nobody is blocked on it)
+- MEASUREMENT, not a decision: the WP2-12 best-known search on the train split (1,500 evaluations
+  x 7 seeds = 10,500 simulations per mission) found a feasible solution for all four LIGHT missions
+  and for NONE of the four HEAVY ones. Best-known costs: crew_f9_w0_light 1.160000,
+  cargo_f9_w3_light 1.159957, cargo_an_w6_light 1.221610, cargo_av_w9_light 1.219920, all under
+  sim_version ascent-dbc9a3aede21 / verifier_version ver-35cac73cafe9. Against the analytic floor
+  those sit 697%, 699%, 937% and 1655% high, which is expected - the floor assumes a lossless
+  ascent and a massless structure.
+  WHY the heavy ones fail, diagnosed rather than assumed: C07 ascent propellant reserve, and it is
+  a NEAR MISS. On cargo_f9_w3_heavy a 400-evaluation search reaches perigee 160.1 km at
+  eccentricity 0.0032 with 85.2% orbital reserve, and fails only on ascent reserve 1.697% against
+  the 2% minimum. The cause is systematic, not vehicle-specific: the heavy fraction is 0.70 of
+  payload-to-LEO, and payload-to-LEO is validated to a 200 km PARKING orbit, while these missions
+  climb to 410 km and must keep propellant for phasing, approach and docking. 70% of payload-to-LEO
+  is therefore not deliverable to the ISS with a 2% ascent reserve.
+  CONSEQUENCE for the benchmark: four of eight train missions have no known feasible solution, so
+  they cannot discriminate between systems - every system will fail all four identically. They do
+  still feed "success rate within budget", which is one of the handoff's four metrics.
+  NOT CHANGED, because changing it is RED: lowering PAYLOAD_FRACTIONS["heavy"] would alter the
+  protocol hash and invalidate the 10,500-simulation-per-mission best-known values just measured.
+  Recommendation for Yash: lower the heavy fraction to a value measured as deliverable rather than
+  guessed, then re-run best-known (~2.8 h per split). The ceiling is just under 0.70 and can be
+  measured properly on request - by claude-code - status: OPEN (needs Yash: RED protocol decision)
