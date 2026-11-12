@@ -232,3 +232,33 @@ Format: `- HH:MM - <decision> - by <name/agent> - rationale: <short> - reversibl
   Recommendation for Yash: lower the heavy fraction to a value measured as deliverable rather than
   guessed, then re-run best-known (~2.8 h per split). The ceiling is just under 0.70 and can be
   measured properly on request - by claude-code - status: OPEN (needs Yash: RED protocol decision)
+- MEASUREMENT, not a decision: `cma_cold` vs `cma_memory` on the held-out **val** split, 120
+  evaluations x 3 seeds per mission, memory built from the train split only (2,880 records, 198 of
+  them feasible), warm-start strategy "centre". The leakage guard confirmed no val mission was in
+  the memory.
+
+  | mission           | cold     | memory   | delta   | cold feas | mem feas |
+  |-------------------|----------|----------|---------|-----------|----------|
+  | crew_f9_w1_light  | 1.246698 | 1.219338 | -2.19 % | 3/3       | 3/3      |
+  | cargo_f9_w4_light | 1.219227 | 1.196581 | -1.86 % | 3/3       | 3/3      |
+  | cargo_an_w7_light | 1.347990 | 1.377327 | +2.18 % | 1/3       | 1/3      |
+  | cargo_av_w10_light| 1.348214 | 1.280469 | -5.02 % | 1/3       | **3/3**  |
+
+  Feasible seed-runs 8/24 cold against 10/24 with memory; the whole gain is on cargo_av_w10_light,
+  the atlas_v mission and the hardest vehicle, going 1/3 -> 3/3. Cost better on 3 of 4, worse on 1,
+  mean -1.72 %. Wall time essentially identical (793 s vs 760 s), so the warm start is not buying
+  speed, it is buying a better starting point.
+
+  WHAT THIS DOES AND DOES NOT ESTABLISH. It establishes that memory does not HURT, that the
+  leakage guard works, and that warm-starting found the feasible region on a mission where the cold
+  search mostly missed it - which is the effect warm-starting is supposed to have. It does NOT
+  establish that memory helps: n = 4 solvable missions at 3 seeds, one of the four went the wrong
+  way by a similar margin to the wins, and no statistical claim is warranted from that. "Memory
+  helps" stays unproven; "memory is implemented and behaves as designed" is what the data supports.
+
+  The small sample is a direct consequence of the heavy-fraction problem recorded above: four of
+  eight val missions have no feasible solution for any system, so only four can discriminate.
+  Fixing the heavy fraction would double the usable sample, which is a second reason to do it.
+
+  Gaps to best-known are null for val, correctly: best-known has only been measured on train.
+  - by claude-code - reversible: n/a (measurement) - status: FINAL
